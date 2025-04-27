@@ -9,6 +9,8 @@ import json
 from datetime import datetime
 import os
 import random
+from sklearn.linear_model import Ridge
+from matplotlib import colors
 
 # Enhanced GridWorld environment with shaped obstacles
 class GridWorldEnv:
@@ -149,19 +151,37 @@ class GridWorldEnv:
             return True
         return False
     
-    def generate_perturbation(self):
+    def generate_perturbation(self, strategy="randomly"):
         """Generate a perturbation by randomly removing some obstacle shapes"""
         # Create a copy of the current obstacles for reverting later
         original_obstacles = self.obstacles.copy()
-        
-        # Randomly select shapes to remove (approximately 30% of shapes)
-        num_to_remove = max(1, self.num_obstacles // 3)
-        shapes_to_remove = random.sample(list(self.obstacle_shapes.keys()), 
-                                        min(num_to_remove, len(self.obstacle_shapes)))
-        
-        # Remove selected shapes
-        for shape_id in shapes_to_remove:
-            self.remove_obstacle_shape(shape_id)
+
+        # Perturbation strategy: randomly, each_obstacle_once, full_perturbation
+        #perturbation_strategies = ["randomly", "each_obstacle_once", "full_perturbation"]
+        #strategy = perturbation_strategies[1]
+
+        if strategy == "randomly":         
+            # Randomly select shapes to remove (approximately 30% of shapes)
+            num_to_remove = max(1, self.num_obstacles // 3)
+            shapes_to_remove = random.sample(list(self.obstacle_shapes.keys()), 
+                                            min(num_to_remove, len(self.obstacle_shapes)))
+            
+            # Remove selected shapes
+            for shape_id in shapes_to_remove:
+                self.remove_obstacle_shape(shape_id)
+
+        elif strategy == "each_obstacle_once":
+            # Remove each obstacle shape once
+            shapes_to_remove = list()
+            for shape_id in range(0, self.num_obstacles):
+                shapes_to_remove.append(shape_id)
+                self.remove_obstacle_shape(shape_id)
+
+        elif strategy == "full_perturbation":
+            # Remove all obstacles
+            shapes_to_remove = list(self.obstacle_shapes.keys())
+            for shape_id in shapes_to_remove:
+                self.remove_obstacle_shape(shape_id)
             
         return original_obstacles, shapes_to_remove
     
@@ -187,7 +207,7 @@ class PathPlanningApp:
         
         # Environment settings
         self.grid_size = 10
-        self.num_obstacles = 15
+        self.num_obstacles = 8
         self.env = None
         self.algorithm_steps = []
         self.current_step = 0
@@ -234,6 +254,9 @@ class PathPlanningApp:
         self.start_button = ttk.Button(control_frame, text="Start Planning", 
                                        command=self.start_planning, state=tk.DISABLED)
         self.start_button.grid(row=0, column=5, padx=5, pady=5)
+
+        explain_button = tk.Button(control_frame, text="Explain", command=self.explain)
+        explain_button.grid(row=7, column=0, pady=5)
         
         # Second row - Status and info
         ttk.Label(control_frame, text="Status:").grid(row=1, column=0, pady=5, sticky="w")
@@ -479,7 +502,7 @@ class PathPlanningApp:
         self.start_button.config(state=tk.DISABLED)
         
         # Start the algorithm and record start time
-        self.start_time = time.time()
+        #self.start_time = time.time() # now implemented inside a run_astar_visualization function
         
         if algorithm == "A*":
             self.run_astar_visualization()
@@ -487,8 +510,9 @@ class PathPlanningApp:
         # Note: We'll update execution time when the algorithm actually completes
         # in the process_step function when animation_running becomes False
 
-
     def run_astar_visualization(self):
+        self.start_time = time.time()
+
         # Prepare for recording steps
         self.algorithm_steps = []
         state = self.env.get_state()
@@ -955,7 +979,90 @@ class PathPlanningApp:
         plt.tight_layout()
         plt.savefig(save_path, dpi=150)
         plt.close(fig)
+
+    # explain function
+    def explain(self):
+        importance = lime_explanation(self, num_samples=100)  # Call our perturbation-explanation function!
+
+        # Visualization
+        obstacle_keys = list(self.env.obstacle_shapes.keys())
+        grid = np.zeros((self.grid_size, self.grid_size))
+
+        for idx, shape_id in enumerate(obstacle_keys):
+            for (x, y) in self.env.obstacle_shapes[shape_id]:
+                if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
+                    grid[y, x] = importance[idx]
+
+        cmap = plt.cm.coolwarm
+        norm = colors.TwoSlopeNorm(vmin=min(importance), vcenter=0, vmax=max(importance))
+
+        plt.figure(figsize=(6,6))
+        plt.imshow(grid, cmap=cmap, norm=norm)
+        plt.colorbar(label='Obstacle Importance')
+        plt.title('Obstacle Importance for Path Planning')
+        plt.axis('off')
+        plt.show()
+
+# LIME
+def lime_explanation(app, num_samples=100):
+    # app.env is your environment
     
+    # app.env.obstacle_shapes is a dictionary of obstacle shapes
+    obstacle_keys = list(app.env.obstacle_shapes.keys())
+    # print(f"Obstacle keys: {obstacle_keys}")    
+    # Number of obstacles
+    num_obstacles = len(obstacle_keys)
+    # print(f"Number of obstacles: {num_obstacles}")
+    
+    X = []  # Perturbations (binary mask per sample)
+    y = []  # Success/failure or path cost per sample
+
+    for _ in range(num_samples):
+        # Perturb environment
+        original_obstacles, shapes_removed = app.env.generate_perturbation("each_obstacle_once")
+
+        # Build binary vector for this perturbation
+        perturbation = [1] * num_obstacles
+        for rid in shapes_removed:
+            perturbation[rid] = 0
+
+        # Run planner
+        app.run_astar_visualization()
+        
+        # Wait until finished (important!)
+        while app.animation_running:
+            app.root.update()
+
+        # Measure output: success/failure or cost
+        success = False
+        cost = None
+        for step in app.algorithm_steps[::-1]:
+            if "type" in step and step["type"] == "success":
+                success = True
+                cost = len(step.get("current_path", []))
+                break
+        
+        X.append(perturbation)
+        y.append(cost if success else app.grid_size * 2)  # Assign high cost to failure
+        
+        # Restore environment
+        app.env.restore_from_perturbation(original_obstacles)
+    
+    X = np.array(X)
+    y = np.array(y)
+
+    # Fit a simple model
+    explainer = Ridge(alpha=1.0)
+    explainer.fit(X, y)
+
+    # Coefficients tell you the "importance" of each obstacle shape
+    importance = explainer.coef_
+
+    for shape_id, imp in zip(obstacle_keys, importance):
+        print(f"Obstacle shape {shape_id}: importance {imp:.4f}")
+
+    return importance
+
 # Run the application
 if __name__ == "__main__":
     root = tk.Tk()
