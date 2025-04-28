@@ -1,0 +1,11 @@
+# ignore all __pycache__ directories in any subdirectory
+__pycache__/
+
+# ignore output_images directory
+output_images/
+
+# ignore output_json directory
+output_json/
+
+# ignore all desktop.ini files in any subdirectory
+desktop.ini

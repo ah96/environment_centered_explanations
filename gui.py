@@ -12,6 +12,9 @@ import random
 from sklearn.linear_model import Ridge
 from matplotlib import colors
 
+from path_planning.astar import AStarPlanner
+from explanations.lime_explainer import LimeExplainer
+
 # Enhanced GridWorld environment with shaped obstacles
 class GridWorldEnv:
     def __init__(self, grid_size=10, num_obstacles=5):
@@ -770,53 +773,14 @@ class PathPlanningApp:
     def run_astar_for_analysis(self):
         """Non-visual A* implementation for analysis purposes"""
         state = self.env.get_state()
-        start = state["agent"]
-        goal = state["goal"] 
-        obstacles = state["obstacles"]
-        grid_size = state["grid_size"]
-        
-        if not start or not goal:
-            return None  # No path possible if start or goal not set
-        
-        # Manhattan distance heuristic
-        def h(pos):
-            return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
-        
-        # Initialize A* variables
-        open_set = []
-        heapq.heappush(open_set, (0, start))
-        came_from = {}
-        g_score = {tuple(start): 0}
-        
-        while open_set:
-            # Get current node
-            _, current = heapq.heappop(open_set)
-            
-            # Check if goal reached
-            if current == goal:
-                # Reconstruct path
-                path = []
-                curr = current
-                while tuple(curr) in came_from:
-                    path.append(curr)
-                    curr = came_from[tuple(curr)]
-                path.append(start)
-                path.reverse()
-                return path  # Return the path directly
-            
-            # Explore neighbors
-            for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
-                neighbor = [current[0] + dx, current[1] + dy]
-                
-                if 0 <= neighbor[0] < grid_size and 0 <= neighbor[1] < grid_size and neighbor not in obstacles:
-                    tentative_g = g_score[tuple(current)] + 1
-                    
-                    if tuple(neighbor) not in g_score or tentative_g < g_score[tuple(neighbor)]:
-                        came_from[tuple(neighbor)] = current
-                        g_score[tuple(neighbor)] = tentative_g
-                        heapq.heappush(open_set, (tentative_g + h(neighbor), neighbor))
-        
-        return None  # No path found
+        planner = AStarPlanner()
+        planner.set_environment(
+            start=state["agent"],
+            goal=state["goal"],
+            grid_size=state["grid_size"],
+            obstacles=state["obstacles"]
+        )
+        return planner.plan()
 
     def draw_step(self, step_idx):
         if step_idx >= len(self.algorithm_steps):
@@ -1131,9 +1095,29 @@ class PathPlanningApp:
         self.status_var.set("Generating explanations... Please wait.")
         self.root.update()
         
-        # Generate explanations with LIME
-        importance = lime_explanation(self, num_samples=len(self.env.obstacle_shapes.keys()) + 10)
+        # Create the planner for the explainer
+        planner = AStarPlanner()
+        planner.set_environment(
+            start=self.env.agent_pos,
+            goal=self.env.goal_pos,
+            grid_size=self.grid_size,
+            obstacles=self.env.obstacles
+        )
         
+        # Create and configure the explainer
+        explainer = LimeExplainer()
+        explainer.set_environment(self.env, planner)
+        
+        # Callback for progress updates
+        def update_progress(current, total):
+            self.status_var.set(f"Generating explanation: {current+1}/{total}")
+            self.root.update()
+        
+        # Generate explanations
+        importance = explainer.explain(
+            num_samples=len(self.env.obstacle_shapes.keys()) + 10,
+            callback=update_progress
+        )
         if len(importance) == 0:
             self.status_var.set("No obstacles to explain.")
             return
@@ -1218,95 +1202,6 @@ class PathPlanningApp:
         plt.show()
         
         self.status_var.set(f"Explanation generated and saved to {filepath}")
-
-# LIME
-def lime_explanation(app, num_samples=100):
-    """
-    Uses LIME technique to explain the importance of obstacles for path planning.
-    """
-    # Get obstacle keys
-    obstacle_keys = list(app.env.obstacle_shapes.keys())
-    num_obstacles = len(obstacle_keys)
-    
-    if num_obstacles == 0:
-        return []
-    
-    # Generate all combinations for each obstacle being removed once
-    combinations = app.env.generate_perturbation_combinations("remove_each_obstacle_once")
-    
-    # Also generate some random combinations (but limit total to avoid long processing)
-    max_random = min(20, num_samples - len(combinations))
-    random_combinations = []
-    for _ in range(max_random):
-        combo = [random.randint(0, 1) for _ in range(num_obstacles)]
-        random_combinations.append(combo)
-    
-    # Combine all the combinations
-    all_combinations = combinations + random_combinations
-    
-    X = []  # Perturbations (binary mask per sample)
-    y = []  # Path costs per sample
-    
-    # Store original obstacles to restore at the end
-    original_obstacles = app.env.obstacles.copy()
-    
-    # Create a progress counter for the status bar
-    total_combinations = len(all_combinations)
-    
-    for i, combination in enumerate(all_combinations):
-        # Update status
-        app.status_var.set(f"Generating explanation: {i+1}/{total_combinations}")
-        app.root.update()
-        
-        # Apply perturbation using the combination
-        original_state, _ = app.env.generate_perturbation(combination=combination)
-        
-        # Run non-visual A* planning
-        path = app.run_astar_for_analysis()
-        
-        # Measure outcome: path length or failure penalty
-        if path:
-            path_length = len(path)
-            success = True
-        else:
-            path_length = app.grid_size * 2  # Penalty for no path
-            success = False
-        
-        # Record results
-        X.append(combination)
-        y.append(path_length)
-        
-        # Restore environment to original state
-        app.env.restore_from_perturbation(original_state)
-    
-    # Convert to numpy arrays
-    X = np.array(X)
-    y = np.array(y)
-    
-    # Fit a Ridge regression model to explain obstacle importance
-    explainer = Ridge(alpha=1.0)
-    explainer.fit(X, y)
-    
-    # Get coefficients - positive means removing obstacle increases cost (important)
-    # Negative means removing obstacle decreases cost (harmful for path planning)
-    importance = explainer.coef_
-    
-    # Replace any infinite values with large finite values to avoid rendering errors
-    importance = np.nan_to_num(importance, nan=0.0, posinf=1000.0, neginf=-1000.0)
-    
-    # Print results for debugging
-    app.status_var.set("Explanation completed! Analyzing results...")
-    app.root.update()
-    
-    for shape_id, imp in zip(obstacle_keys, importance):
-        print(f"Obstacle shape #{shape_id}: importance {imp:.4f}")
-        # Positive importance means removing this obstacle makes path worse (helpful)
-        # Negative importance means removing this obstacle makes path better (obstructive)
-    
-    # Restore the original environment (just to be safe)
-    app.env.obstacles = original_obstacles.copy()
-    
-    return importance
 
 # Run the application
 if __name__ == "__main__":
