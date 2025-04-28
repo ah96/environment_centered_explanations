@@ -131,63 +131,129 @@ class GridWorldEnv:
         """Remove an obstacle shape by its ID"""
         if shape_id in self.obstacle_shapes:
             # Remove all points of this shape from obstacles list
-            for point in self.obstacle_shapes[shape_id]:
-                if point in self.obstacles:
-                    self.obstacles.remove(point)
-            
-            # Remove the shape from obstacle_shapes dictionary
-            self.obstacle_shapes.pop(shape_id)
-            
+            points_to_remove = self.obstacle_shapes[shape_id]
+            # Use list comprehension for potentially better performance on large lists
+            self.obstacles = [p for p in self.obstacles if p not in points_to_remove]
+            # Keep the shape definition in self.obstacle_shapes for restoration
             return True
         return False
     
-    def add_obstacle_shape(self, shape_id):
-        """Add back a previously removed obstacle shape"""
-        if shape_id in self.obstacle_shapes:
-            # Add all points to obstacles list
-            for point in self.obstacle_shapes[shape_id]:
-                if point not in self.obstacles:
-                    self.obstacles.append(point)
-            return True
-        return False
-    
-    def generate_perturbation(self, strategy="randomly"):
-        """Generate a perturbation by randomly removing some obstacle shapes"""
+    def generate_perturbation_combinations(self, strategy="random"):
+        """
+        Generates combinations of obstacle removals based on specified strategy.
+        
+        Args:
+            strategy (str): The combination generation strategy. Options:
+                "full_combinations": All possible binary combinations of obstacles.
+                "random": One random combination.
+                "remove_each_obstacle_once": N combinations, each with one obstacle removed.
+                
+        Returns:
+            list: List of combinations, where each combination is a list of 0s and 1s
+                (0 means obstacle removed, 1 means obstacle kept).
+        """
+        all_shape_ids = list(self.obstacle_shapes.keys())
+        n = len(all_shape_ids)
+        
+        if n == 0:  # No obstacles
+            return [[]]
+            
+        if strategy == "full_combinations":
+            # Generate all 2^n combinations using binary representation
+            combinations = []
+            for i in range(2**n):
+                # Convert number to binary and pad with leading zeros
+                binary = format(i, f'0{n}b')
+                # Convert to list of integers (0s and 1s)
+                combination = [int(bit) for bit in binary]
+                combinations.append(combination)
+            return combinations
+            
+        elif strategy == "random":
+            # Return one random combination
+            import random
+            combination = [random.randint(0, 1) for _ in range(n)]
+            return [combination]  # Return as a list of combinations
+            
+        elif strategy == "remove_each_obstacle_once":
+            # Generate n combinations, each removing exactly one obstacle
+            combinations = []
+            for i in range(n):
+                combination = [1] * n  # Start with all obstacles kept
+                combination[i] = 0     # Remove just one obstacle
+                combinations.append(combination)
+            return combinations
+        
+        else:
+            raise ValueError(f"Unknown combination strategy: {strategy}")
+
+    def generate_perturbation(self, strategy="random", combination=None):
+        """
+        Generates and applies perturbation by removing obstacle shapes based on strategy and combination.
+        
+        Args:
+            strategy (str): The perturbation strategy.
+            combination (list, optional): A specific combination to apply (list of 0s and 1s).
+                If provided, this overrides the strategy.
+                
+        Returns:
+            tuple: (original_obstacles, shapes_removed_ids)
+                original_obstacles (list): A copy of the obstacles list before perturbation.
+                shapes_removed_ids (list): A list of the IDs of the obstacle shapes that were removed.
+        """
         # Create a copy of the current obstacles for reverting later
         original_obstacles = self.obstacles.copy()
-
-        # Perturbation strategy: randomly, each_obstacle_once, full_perturbation
-        #perturbation_strategies = ["randomly", "each_obstacle_once", "full_perturbation"]
-        #strategy = perturbation_strategies[1]
-
-        if strategy == "randomly":         
-            # Randomly select shapes to remove (approximately 30% of shapes)
-            num_to_remove = max(1, self.num_obstacles // 3)
-            shapes_to_remove = random.sample(list(self.obstacle_shapes.keys()), 
-                                            min(num_to_remove, len(self.obstacle_shapes)))
+        all_shape_ids = list(self.obstacle_shapes.keys())
+        shapes_to_remove_ids = []
+        
+        if not all_shape_ids:  # No obstacles to remove
+            return original_obstacles, []
+        
+        # If a specific combination is provided, use it
+        if combination is not None:
+            # Ensure combination is the correct length
+            if len(combination) != len(all_shape_ids):
+                raise ValueError(f"Combination length {len(combination)} doesn't match obstacle count {len(all_shape_ids)}")
             
-            # Remove selected shapes
-            for shape_id in shapes_to_remove:
-                self.remove_obstacle_shape(shape_id)
-
+            # Remove obstacles where combination has 0
+            for i, keep in enumerate(combination):
+                if keep == 0:
+                    shapes_to_remove_ids.append(all_shape_ids[i])
+                    
+        # Otherwise use the strategy from before    
+        elif strategy == "randomly":
+            # Randomly select shapes to remove (approximately 30% of shapes)
+            # Ensure at least one is potentially removed if obstacles exist
+            num_to_remove = max(1, len(all_shape_ids) // 3)
+            # Ensure sample size doesn't exceed population size
+            k = min(num_to_remove, len(all_shape_ids))
+            if k > 0:  # Only sample if k is positive
+                shapes_to_remove_ids = random.sample(all_shape_ids, k)
+                
         elif strategy == "each_obstacle_once":
-            # Remove each obstacle shape once
-            shapes_to_remove = list()
-            for shape_id in range(0, self.num_obstacles):
-                shapes_to_remove.append(shape_id)
-                self.remove_obstacle_shape(shape_id)
-
+            # Remove exactly one randomly chosen obstacle shape
+            if all_shape_ids:
+                shape_to_remove_id = random.choice(all_shape_ids)
+                shapes_to_remove_ids = [shape_to_remove_id]
+                
         elif strategy == "full_perturbation":
             # Remove all obstacles
-            shapes_to_remove = list(self.obstacle_shapes.keys())
-            for shape_id in shapes_to_remove:
-                self.remove_obstacle_shape(shape_id)
+            shapes_to_remove_ids = list(all_shape_ids)
             
-        return original_obstacles, shapes_to_remove
-    
+        else:
+            raise ValueError(f"Unknown perturbation strategy: {strategy}")
+        
+        # Apply the perturbation by removing the selected obstacle shapes
+        for shape_id in shapes_to_remove_ids:
+            self.remove_obstacle_shape(shape_id)
+            
+        return original_obstacles, shapes_to_remove_ids
+
     def restore_from_perturbation(self, original_obstacles):
         """Restore the environment to the state before perturbation"""
+        # Simply reset the obstacles list to the saved original state.
         self.obstacles = original_obstacles.copy()
+
 
     def get_state(self):
         return {
@@ -237,9 +303,29 @@ class PathPlanningApp:
         control_frame = ttk.Frame(self.root, padding="10")
         control_frame.pack(fill=tk.X)
         
+        # Add settings panel for grid size and obstacles
+        settings_frame = ttk.LabelFrame(self.root, text="Environment Settings", padding="10")
+        settings_frame.pack(fill=tk.X, padx=10, pady=5, before=control_frame)
+        
+        # Grid size control
+        ttk.Label(settings_frame, text="Grid Size:").grid(row=0, column=0, padx=5, pady=5)
+        self.grid_size_var = tk.IntVar(value=self.grid_size)
+        grid_size_spin = ttk.Spinbox(settings_frame, from_=5, to=20, textvariable=self.grid_size_var, width=5)
+        grid_size_spin.grid(row=0, column=1, padx=5, pady=5)
+        
+        # Obstacles count control
+        ttk.Label(settings_frame, text="Obstacles:").grid(row=0, column=2, padx=5, pady=5)
+        self.num_obstacles_var = tk.IntVar(value=self.num_obstacles)
+        obstacles_spin = ttk.Spinbox(settings_frame, from_=0, to=30, textvariable=self.num_obstacles_var, width=5)
+        obstacles_spin.grid(row=0, column=3, padx=5, pady=5)
+        
+        # Apply button
+        ttk.Button(settings_frame, text="Apply Settings", 
+                command=self.apply_settings).grid(row=0, column=4, padx=5, pady=5)
+        
         # First row
         ttk.Button(control_frame, text="Generate Environment", 
-                   command=self.generate_environment).grid(row=0, column=0, padx=5, pady=5)
+                command=self.generate_environment).grid(row=0, column=0, padx=5, pady=5)  
         
         ttk.Label(control_frame, text="Algorithm:").grid(row=0, column=1, padx=5, pady=5)
         
@@ -279,6 +365,15 @@ class PathPlanningApp:
         self.canvas_widget.mpl_connect('button_press_event', self.on_grid_click)
         self.canvas_widget.mpl_connect('motion_notify_event', self.on_grid_drag)
         self.canvas_widget.mpl_connect('button_release_event', self.on_grid_release)
+    
+    def apply_settings(self):
+        # Update internal settings
+        self.grid_size = self.grid_size_var.get()
+        self.num_obstacles = self.num_obstacles_var.get()
+        
+        # Regenerate environment with new settings
+        self.generate_environment()
+        self.status_var.set(f"Settings applied: Grid size {self.grid_size}, Obstacles {self.num_obstacles}")
 
     def on_grid_click(self, event):
         if self.animation_running or event.xdata is None or event.ydata is None:
@@ -671,6 +766,57 @@ class PathPlanningApp:
         
         # Start the processing loop
         self.root.after(100, process_step)
+    
+    def run_astar_for_analysis(self):
+        """Non-visual A* implementation for analysis purposes"""
+        state = self.env.get_state()
+        start = state["agent"]
+        goal = state["goal"] 
+        obstacles = state["obstacles"]
+        grid_size = state["grid_size"]
+        
+        if not start or not goal:
+            return None  # No path possible if start or goal not set
+        
+        # Manhattan distance heuristic
+        def h(pos):
+            return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+        
+        # Initialize A* variables
+        open_set = []
+        heapq.heappush(open_set, (0, start))
+        came_from = {}
+        g_score = {tuple(start): 0}
+        
+        while open_set:
+            # Get current node
+            _, current = heapq.heappop(open_set)
+            
+            # Check if goal reached
+            if current == goal:
+                # Reconstruct path
+                path = []
+                curr = current
+                while tuple(curr) in came_from:
+                    path.append(curr)
+                    curr = came_from[tuple(curr)]
+                path.append(start)
+                path.reverse()
+                return path  # Return the path directly
+            
+            # Explore neighbors
+            for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+                neighbor = [current[0] + dx, current[1] + dy]
+                
+                if 0 <= neighbor[0] < grid_size and 0 <= neighbor[1] < grid_size and neighbor not in obstacles:
+                    tentative_g = g_score[tuple(current)] + 1
+                    
+                    if tuple(neighbor) not in g_score or tentative_g < g_score[tuple(neighbor)]:
+                        came_from[tuple(neighbor)] = current
+                        g_score[tuple(neighbor)] = tentative_g
+                        heapq.heappush(open_set, (tentative_g + h(neighbor), neighbor))
+        
+        return None  # No path found
 
     def draw_step(self, step_idx):
         if step_idx >= len(self.algorithm_steps):
@@ -980,87 +1126,186 @@ class PathPlanningApp:
         plt.savefig(save_path, dpi=150)
         plt.close(fig)
 
-    # explain function
     def explain(self):
-        importance = lime_explanation(self, num_samples=100)  # Call our perturbation-explanation function!
-
-        # Visualization
+        """Generates LIME-based explanations for the current path planning problem"""
+        self.status_var.set("Generating explanations... Please wait.")
+        self.root.update()
+        
+        # Generate explanations with LIME
+        importance = lime_explanation(self, num_samples=len(self.env.obstacle_shapes.keys()) + 10)
+        
+        if len(importance) == 0:
+            self.status_var.set("No obstacles to explain.")
+            return
+        
+        # Create a heatmap representation
         obstacle_keys = list(self.env.obstacle_shapes.keys())
         grid = np.zeros((self.grid_size, self.grid_size))
-
+        
+        # Map importance values to the grid
         for idx, shape_id in enumerate(obstacle_keys):
-            for (x, y) in self.env.obstacle_shapes[shape_id]:
+            imp_value = importance[idx]
+            for pos in self.env.obstacle_shapes[shape_id]:
+                x, y = pos
                 if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
-                    grid[y, x] = importance[idx]
-
+                    grid[x, y] = imp_value
+        
+        # Create visualization
+        fig, ax = plt.subplots(figsize=(8, 8))
+        
+        # Use diverging colormap for positive/negative influences
         cmap = plt.cm.coolwarm
-        norm = colors.TwoSlopeNorm(vmin=min(importance), vcenter=0, vmax=max(importance))
-
-        plt.figure(figsize=(6,6))
-        plt.imshow(grid, cmap=cmap, norm=norm)
-        plt.colorbar(label='Obstacle Importance')
-        plt.title('Obstacle Importance for Path Planning')
-        plt.axis('off')
+        
+        # Handle potential extreme values
+        grid_finite = np.nan_to_num(grid, nan=0.0, posinf=0.0, neginf=0.0)
+        
+        # Calculate bounds safely
+        if np.all(grid_finite == 0):
+            # All values are zero or NaN/inf (replaced with 0)
+            vmin, vmax = -1, 1  # Use default range
+        else:
+            # Normalize around zero with a safe range
+            max_abs = max(abs(np.min(grid_finite)), abs(np.max(grid_finite)))
+            # Add a small buffer to avoid exactly zero range
+            max_abs = max(max_abs, 0.1)
+            vmin, vmax = -max_abs, max_abs
+        
+        # Create a safer normalization
+        norm = colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+        
+        # Create heatmap with explicit min/max to avoid hover errors
+        heatmap = ax.imshow(grid_finite, cmap=cmap, norm=norm, interpolation='nearest')
+        
+        # Disable hover tooltips that cause problems
+        for artist in ax.get_children():
+            artist.set_picker(None)
+        
+        # Draw grid lines for clarity
+        ax.set_xticks(np.arange(-0.5, self.grid_size, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, self.grid_size, 1), minor=True)
+        ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5)
+        ax.tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
+        
+        # Mark start and goal positions
+        if self.env.agent_pos:
+            ax.scatter(self.env.agent_pos[1], self.env.agent_pos[0], 
+                    color='blue', s=150, marker='o', label='Start')
+        if self.env.goal_pos:
+            ax.scatter(self.env.goal_pos[1], self.env.goal_pos[0], 
+                    color='green', s=150, marker='*', label='Goal')
+        
+        # Add colorbar
+        cbar = plt.colorbar(heatmap, ax=ax)
+        cbar.set_label('Obstacle Importance')
+        
+        # Add title
+        plt.title('Obstacle Importance for Path Planning\n'
+                'Blue: Removal makes path worse (critical obstacle)\n'
+                'Red: Removal helps path (obstructive obstacle)')
+        
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=2)
+        
+        # Save explanation
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        images_dir = "output_images"
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        
+        filepath = os.path.join(images_dir, f"explanation_{timestamp}.png")
+        plt.savefig(filepath, bbox_inches='tight', dpi=150)
+        
+        # Also display it
         plt.show()
+        
+        self.status_var.set(f"Explanation generated and saved to {filepath}")
 
 # LIME
 def lime_explanation(app, num_samples=100):
-    # app.env is your environment
-    
-    # app.env.obstacle_shapes is a dictionary of obstacle shapes
+    """
+    Uses LIME technique to explain the importance of obstacles for path planning.
+    """
+    # Get obstacle keys
     obstacle_keys = list(app.env.obstacle_shapes.keys())
-    # print(f"Obstacle keys: {obstacle_keys}")    
-    # Number of obstacles
     num_obstacles = len(obstacle_keys)
-    # print(f"Number of obstacles: {num_obstacles}")
+    
+    if num_obstacles == 0:
+        return []
+    
+    # Generate all combinations for each obstacle being removed once
+    combinations = app.env.generate_perturbation_combinations("remove_each_obstacle_once")
+    
+    # Also generate some random combinations (but limit total to avoid long processing)
+    max_random = min(20, num_samples - len(combinations))
+    random_combinations = []
+    for _ in range(max_random):
+        combo = [random.randint(0, 1) for _ in range(num_obstacles)]
+        random_combinations.append(combo)
+    
+    # Combine all the combinations
+    all_combinations = combinations + random_combinations
     
     X = []  # Perturbations (binary mask per sample)
-    y = []  # Success/failure or path cost per sample
-
-    for _ in range(num_samples):
-        # Perturb environment
-        original_obstacles, shapes_removed = app.env.generate_perturbation("each_obstacle_once")
-
-        # Build binary vector for this perturbation
-        perturbation = [1] * num_obstacles
-        for rid in shapes_removed:
-            perturbation[rid] = 0
-
-        # Run planner
-        app.run_astar_visualization()
-        
-        # Wait until finished (important!)
-        while app.animation_running:
-            app.root.update()
-
-        # Measure output: success/failure or cost
-        success = False
-        cost = None
-        for step in app.algorithm_steps[::-1]:
-            if "type" in step and step["type"] == "success":
-                success = True
-                cost = len(step.get("current_path", []))
-                break
-        
-        X.append(perturbation)
-        y.append(cost if success else app.grid_size * 2)  # Assign high cost to failure
-        
-        # Restore environment
-        app.env.restore_from_perturbation(original_obstacles)
+    y = []  # Path costs per sample
     
+    # Store original obstacles to restore at the end
+    original_obstacles = app.env.obstacles.copy()
+    
+    # Create a progress counter for the status bar
+    total_combinations = len(all_combinations)
+    
+    for i, combination in enumerate(all_combinations):
+        # Update status
+        app.status_var.set(f"Generating explanation: {i+1}/{total_combinations}")
+        app.root.update()
+        
+        # Apply perturbation using the combination
+        original_state, _ = app.env.generate_perturbation(combination=combination)
+        
+        # Run non-visual A* planning
+        path = app.run_astar_for_analysis()
+        
+        # Measure outcome: path length or failure penalty
+        if path:
+            path_length = len(path)
+            success = True
+        else:
+            path_length = app.grid_size * 2  # Penalty for no path
+            success = False
+        
+        # Record results
+        X.append(combination)
+        y.append(path_length)
+        
+        # Restore environment to original state
+        app.env.restore_from_perturbation(original_state)
+    
+    # Convert to numpy arrays
     X = np.array(X)
     y = np.array(y)
-
-    # Fit a simple model
+    
+    # Fit a Ridge regression model to explain obstacle importance
     explainer = Ridge(alpha=1.0)
     explainer.fit(X, y)
-
-    # Coefficients tell you the "importance" of each obstacle shape
+    
+    # Get coefficients - positive means removing obstacle increases cost (important)
+    # Negative means removing obstacle decreases cost (harmful for path planning)
     importance = explainer.coef_
-
+    
+    # Replace any infinite values with large finite values to avoid rendering errors
+    importance = np.nan_to_num(importance, nan=0.0, posinf=1000.0, neginf=-1000.0)
+    
+    # Print results for debugging
+    app.status_var.set("Explanation completed! Analyzing results...")
+    app.root.update()
+    
     for shape_id, imp in zip(obstacle_keys, importance):
-        print(f"Obstacle shape {shape_id}: importance {imp:.4f}")
-
+        print(f"Obstacle shape #{shape_id}: importance {imp:.4f}")
+        # Positive importance means removing this obstacle makes path worse (helpful)
+        # Negative importance means removing this obstacle makes path better (obstructive)
+    
+    # Restore the original environment (just to be safe)
+    app.env.obstacles = original_obstacles.copy()
+    
     return importance
 
 # Run the application
