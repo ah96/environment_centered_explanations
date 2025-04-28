@@ -13,7 +13,13 @@ from sklearn.linear_model import Ridge
 from matplotlib import colors
 
 from path_planning.astar import AStarPlanner
+from path_planning.dijkstra import DijkstraPlanner
+from path_planning.theta_star import ThetaStarPlanner
+
 from explanations.lime_explainer import LimeExplainer
+from explanations.anchors_explainer import AnchorsExplainer
+from explanations.shap_explainer import SHAPExplainer
+
 
 # Enhanced GridWorld environment with shaped obstacles
 class GridWorldEnv:
@@ -288,11 +294,11 @@ class PathPlanningApp:
         self.selected_shape_id = None
         
         # Algorithm options
-        self.algorithms = ["A*"]  # Will add more algorithms later
+        self.algorithms = ["A*", "Dijkstra", "Theta*"]  # Added Dijkstra and Theta*
         self.selected_algorithm = tk.StringVar(value=self.algorithms[0])
         
         # Explainability options
-        self.explainability_methods = ["None", "Basic", "Advanced"]
+        self.explainability_methods = ["LIME", "Anchors", "SHAP"]  # Updated options
         self.selected_explainability = tk.StringVar(value=self.explainability_methods[0])
         
         # Create GUI components
@@ -599,14 +605,13 @@ class PathPlanningApp:
         
         self.start_button.config(state=tk.DISABLED)
         
-        # Start the algorithm and record start time
-        #self.start_time = time.time() # now implemented inside a run_astar_visualization function
-        
+        # Start the algorithm based on selection
         if algorithm == "A*":
             self.run_astar_visualization()
-        
-        # Note: We'll update execution time when the algorithm actually completes
-        # in the process_step function when animation_running becomes False
+        elif algorithm == "Dijkstra":
+            self.run_dijkstra_visualization()
+        elif algorithm == "Theta*":
+            self.run_thetastar_visualization()
 
     def run_astar_visualization(self):
         self.start_time = time.time()
@@ -769,6 +774,96 @@ class PathPlanningApp:
         
         # Start the processing loop
         self.root.after(100, process_step)
+    
+    def run_dijkstra_visualization(self):
+        """Run Dijkstra's algorithm with visualization"""
+        self.start_time = time.time()
+        
+        # Create planner
+        planner = DijkstraPlanner()
+        
+        # Get environment state
+        state = self.env.get_state()
+        
+        # Set up the planner
+        planner.set_environment(
+            start=state["agent"],
+            goal=state["goal"],
+            grid_size=state["grid_size"],
+            obstacles=state["obstacles"]
+        )
+        
+        # Run with step tracking
+        path, steps = planner.plan(return_steps=True)
+        
+        # Record execution time
+        execution_time = time.time() - self.start_time
+        
+        # Update UI
+        self.algorithm_steps = steps
+        self.current_step = len(steps) - 1 if steps else 0
+        
+        # Draw final state
+        if steps:
+            self.draw_step(self.current_step)
+        
+        # Update status
+        if path:
+            self.status_var.set(f"Path found! Length: {len(path)}")
+        else:
+            self.status_var.set("No path found!")
+        
+        self.exec_time_var.set(f"{execution_time:.4f} seconds")
+        
+        # Save steps and generate visualization
+        self.save_algorithm_steps(execution_time)
+        if path:
+            self.generate_mosaic_visualization()
+
+    def run_thetastar_visualization(self):
+        """Run Theta* algorithm with visualization"""
+        self.start_time = time.time()
+        
+        # Create planner
+        planner = ThetaStarPlanner()
+        
+        # Get environment state
+        state = self.env.get_state()
+        
+        # Set up the planner
+        planner.set_environment(
+            start=state["agent"],
+            goal=state["goal"],
+            grid_size=state["grid_size"],
+            obstacles=state["obstacles"]
+        )
+        
+        # Run with step tracking
+        path, steps = planner.plan(return_steps=True)
+        
+        # Record execution time
+        execution_time = time.time() - self.start_time
+        
+        # Update UI
+        self.algorithm_steps = steps
+        self.current_step = len(steps) - 1 if steps else 0
+        
+        # Draw final state
+        if steps:
+            self.draw_step(self.current_step)
+        
+        # Update status
+        if path:
+            self.status_var.set(f"Path found! Length: {len(path)}")
+        else:
+            self.status_var.set("No path found!")
+        
+        self.exec_time_var.set(f"{execution_time:.4f} seconds")
+        
+        # Save steps and generate visualization
+        self.save_algorithm_steps(execution_time)
+        if path:
+            self.generate_mosaic_visualization()
     
     def run_astar_for_analysis(self):
         """Non-visual A* implementation for analysis purposes"""
@@ -1091,12 +1186,29 @@ class PathPlanningApp:
         plt.close(fig)
 
     def explain(self):
-        """Generates LIME-based explanations for the current path planning problem"""
+        """Generate explanations based on selected explanation method"""
+        if self.env.agent_pos is None or self.env.goal_pos is None:
+            self.status_var.set("Please set start and goal positions first")
+            return
+            
         self.status_var.set("Generating explanations... Please wait.")
         self.root.update()
         
-        # Create the planner for the explainer
-        planner = AStarPlanner()
+        # Get the selected explanation method
+        explanation_method = self.selected_explainability.get()
+        
+        # Create the appropriate planner
+        algorithm = self.selected_algorithm.get()
+        if algorithm == "A*":
+            planner = AStarPlanner()
+        elif algorithm == "Dijkstra":
+            planner = DijkstraPlanner()
+        elif algorithm == "Theta*":
+            planner = ThetaStarPlanner()
+        else:
+            planner = AStarPlanner()  # Default
+        
+        # Set up the planner
         planner.set_environment(
             start=self.env.agent_pos,
             goal=self.env.goal_pos,
@@ -1104,13 +1216,25 @@ class PathPlanningApp:
             obstacles=self.env.obstacles
         )
         
-        # Create and configure the explainer
+        # Create and run the appropriate explainer
+        if explanation_method == "LIME":
+            self.explain_with_lime(planner)
+        elif explanation_method == "Anchors":
+            self.explain_with_anchors(planner)
+        elif explanation_method == "SHAP":
+            self.explain_with_shap(planner)
+        else:
+            self.status_var.set(f"Unknown explanation method: {explanation_method}")
+
+    def explain_with_lime(self, planner):
+        """Generate LIME explanations"""
+        # Create explainer
         explainer = LimeExplainer()
         explainer.set_environment(self.env, planner)
         
         # Callback for progress updates
         def update_progress(current, total):
-            self.status_var.set(f"Generating explanation: {current+1}/{total}")
+            self.status_var.set(f"Generating LIME explanation: {current+1}/{total}")
             self.root.update()
         
         # Generate explanations
@@ -1118,6 +1242,7 @@ class PathPlanningApp:
             num_samples=len(self.env.obstacle_shapes.keys()) + 10,
             callback=update_progress
         )
+        
         if len(importance) == 0:
             self.status_var.set("No obstacles to explain.")
             return
@@ -1183,7 +1308,7 @@ class PathPlanningApp:
         cbar.set_label('Obstacle Importance')
         
         # Add title
-        plt.title('Obstacle Importance for Path Planning\n'
+        plt.title('LIME: Obstacle Importance for Path Planning\n'
                 'Blue: Removal makes path worse (critical obstacle)\n'
                 'Red: Removal helps path (obstructive obstacle)')
         
@@ -1195,13 +1320,97 @@ class PathPlanningApp:
         if not os.path.exists(images_dir):
             os.makedirs(images_dir)
         
-        filepath = os.path.join(images_dir, f"explanation_{timestamp}.png")
+        filepath = os.path.join(images_dir, f"lime_explanation_{timestamp}.png")
         plt.savefig(filepath, bbox_inches='tight', dpi=150)
         
         # Also display it
         plt.show()
         
-        self.status_var.set(f"Explanation generated and saved to {filepath}")
+        self.status_var.set(f"LIME explanation generated and saved to {filepath}")
+
+    def explain_with_anchors(self, planner):
+        """Generate Anchors explanations"""
+        # Create explainer
+        explainer = AnchorsExplainer()
+        explainer.set_environment(self.env, planner)
+        
+        # Callback for progress updates
+        def update_progress(current, total):
+            self.status_var.set(f"Generating Anchors explanation: {current+1}/{total}")
+            self.root.update()
+        
+        # Generate explanations
+        anchors = explainer.explain(
+            num_samples=50,  # Less samples for faster computation
+            precision_threshold=0.9,
+            callback=update_progress
+        )
+        
+        if not anchors:
+            self.status_var.set("No meaningful anchors found.")
+            return
+        
+        # Visualize the anchors
+        fig = explainer.visualize(anchors)
+        
+        if fig:
+            # Save explanation
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+            
+            filepath = os.path.join(images_dir, f"anchors_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            
+            # Also display it
+            plt.show()
+            
+            self.status_var.set(f"Anchors explanation generated and saved to {filepath}")
+        else:
+            self.status_var.set("Could not generate Anchors visualization.")
+
+    def explain_with_shap(self, planner):
+        """Generate SHAP explanations"""
+        # Create explainer
+        explainer = SHAPExplainer()
+        explainer.set_environment(self.env, planner)
+        
+        # Callback for progress updates
+        def update_progress(current, total):
+            self.status_var.set(f"Generating SHAP explanation: {current+1}/{total}")
+            self.root.update()
+        
+        # Generate explanations
+        shap_values = explainer.explain(
+            num_samples=50,  # Less samples for faster computation
+            callback=update_progress
+        )
+        
+        if not shap_values:
+            self.status_var.set("No meaningful SHAP values found.")
+            return
+        
+        # Visualize the SHAP values
+        fig = explainer.visualize(shap_values)
+        
+        if fig:
+            # Save explanation
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+            
+            filepath = os.path.join(images_dir, f"shap_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            
+            # Also display it
+            plt.show()
+            
+            self.status_var.set(f"SHAP explanation generated and saved to {filepath}")
+        else:
+            self.status_var.set("Could not generate SHAP visualization.")
+
 
 # Run the application
 if __name__ == "__main__":
