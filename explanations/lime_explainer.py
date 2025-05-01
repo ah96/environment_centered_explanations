@@ -26,7 +26,7 @@ class LimeExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
     
-    def explain(self, num_samples=100, callback=None):
+    def explain(self, num_samples=100, callback=None, strategy="remove_each_obstacle_once"):
         """
         Generate LIME-based explanations for the path planning problem
         
@@ -44,15 +44,23 @@ class LimeExplainer:
         if num_obstacles == 0:
             return []
         
-        # Generate all combinations for each obstacle being removed once
-        combinations = self.env.generate_perturbation_combinations("remove_each_obstacle_once")
-        
-        # Also generate some random combinations (but limit total to avoid long processing)
-        max_random = min(20, num_samples - len(combinations))
+        combinations = []
         random_combinations = []
-        for _ in range(max_random):
-            combo = [random.randint(0, 1) for _ in range(num_obstacles)]
-            random_combinations.append(combo)
+        # Generate perturbation combinations based on strategy
+        if strategy == "remove_each_obstacle_once":
+            combinations = self.env.generate_perturbation_combinations("remove_each_obstacle_once")
+        
+            # Also generate some random combinations (but limit total to avoid long processing)
+            max_random = min(20, num_samples - len(combinations))
+            for _ in range(max_random):
+                combo = [random.randint(0, 1) for _ in range(num_obstacles)]
+                random_combinations.append(combo)
+
+        elif strategy == "random":
+            combinations = self.env.generate_perturbation_combinations("random") * num_samples
+
+        elif strategy == "full_combinations":
+            combinations = self.env.generate_perturbation_combinations("full_combinations")
         
         # Combine all the combinations
         all_combinations = combinations + random_combinations

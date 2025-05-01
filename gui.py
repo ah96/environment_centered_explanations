@@ -15,10 +15,18 @@ from matplotlib import colors
 from path_planning.astar import AStarPlanner
 from path_planning.dijkstra import DijkstraPlanner
 from path_planning.theta_star import ThetaStarPlanner
+from path_planning.bfs import BFSPlanner
+from path_planning.greedy_best_first import GreedyBestFirstPlanner
+from path_planning.dfs import DFSPlanner
+from path_planning.rrt import RRTPlanner
+from path_planning.rrt_star import RRTStarPlanner
+from path_planning.prm import PRMPlanner
 
 from explanations.lime_explainer import LimeExplainer
 from explanations.anchors_explainer import AnchorsExplainer
 from explanations.shap_explainer import SHAPExplainer
+from explanations.counterfactual_explainer import CounterfactualExplainer
+from explanations.contrastive_explainer import ContrastiveExplainer
 
 
 # Enhanced GridWorld environment with shaped obstacles
@@ -276,10 +284,21 @@ class GridWorldEnv:
 # Path Planning App
 class PathPlanningApp:
     def __init__(self, root):
+        self.mosaic = False
+        self.json = False
+
         self.root = root
         self.root.title("Interactive Path Planning Simulator")
         self.root.geometry("900x800")
-        
+        style = ttk.Style()
+        style.configure("Highlight.TButton", borderwidth=3, relief="solid")
+        self.free_selection_enabled = True  # Allows initial click-based setup
+
+        # Path Planning Visualization Type
+        self.visualization_mode = "final"  # Options: "step" or "final"
+        self.visualization_modes = ["step", "final"]
+        self.selected_visualization_mode = tk.StringVar(value=self.visualization_mode)
+
         # Environment settings
         self.grid_size = 10
         self.num_obstacles = 8
@@ -288,17 +307,19 @@ class PathPlanningApp:
         self.current_step = 0
         self.animation_speed = 200  # milliseconds
         self.animation_running = False
-        
+        self.setting_start = False
+        self.setting_goal = False
+
         # Interaction settings
         self.selected_obstacle = None
         self.selected_shape_id = None
         
         # Algorithm options
-        self.algorithms = ["A*", "Dijkstra", "Theta*"]  # Added Dijkstra and Theta*
+        self.algorithms = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First", "RRT", "RRT*", "PRM"]
         self.selected_algorithm = tk.StringVar(value=self.algorithms[0])
         
         # Explainability options
-        self.explainability_methods = ["LIME", "Anchors", "SHAP"]  # Updated options
+        self.explainability_methods = ["LIME", "Anchors", "SHAP", "Counterfactual", "Contrastive"]
         self.selected_explainability = tk.StringVar(value=self.explainability_methods[0])
         
         # Create GUI components
@@ -332,27 +353,49 @@ class PathPlanningApp:
         ttk.Button(settings_frame, text="Apply Settings", 
                 command=self.apply_settings).grid(row=0, column=4, padx=5, pady=5)
         
+        # Set start and goal buttons
+        self.set_start_button = ttk.Button(control_frame, text="Set Start", command=self.enable_set_start)
+        self.set_start_button.grid(row=7, column=2, padx=5, pady=5)
+        self.set_goal_button = ttk.Button(control_frame, text="Set Goal", command=self.enable_set_goal)
+        self.set_goal_button.grid(row=7, column=3, padx=5, pady=5)
+
         # First row
         ttk.Button(control_frame, text="Generate Environment", 
                 command=self.generate_environment).grid(row=0, column=0, padx=5, pady=5)  
         
         ttk.Label(control_frame, text="Algorithm:").grid(row=0, column=1, padx=5, pady=5)
         
-        ttk.Combobox(control_frame, textvariable=self.selected_algorithm, 
-                     values=self.algorithms, state="readonly").grid(row=0, column=2, padx=5, pady=5)
-        
+        self.algorithm_selector = ttk.Combobox(control_frame, textvariable=self.selected_algorithm, 
+                                       values=self.algorithms, state="readonly")
+        self.algorithm_selector.grid(row=0, column=2, padx=5, pady=5)
+        self.algorithm_selector.bind("<<ComboboxSelected>>", self.on_algorithm_changed)
+
+        # Path Planning Visualization Type
+        ttk.Label(control_frame, text="Visualization:").grid(row=0, column=3, padx=5, pady=5)
+        self.visualization_selector = ttk.Combobox(
+            control_frame, textvariable=self.selected_visualization_mode,
+            values=self.visualization_modes, state="readonly", width=8
+        )
+        self.visualization_selector.grid(row=0, column=4, padx=5, pady=5)
+        self.visualization_selector.bind("<<ComboboxSelected>>", self.on_visualization_mode_changed)
+
         # Add explainability method selection
-        ttk.Label(control_frame, text="Explainability:").grid(row=0, column=3, padx=5, pady=5)
+        ttk.Label(control_frame, text="Explainability:").grid(row=0, column=8, padx=5, pady=5)
         ttk.Combobox(control_frame, textvariable=self.selected_explainability, 
-                     values=self.explainability_methods, state="readonly").grid(row=0, column=4, padx=5, pady=5)
+                     values=self.explainability_methods, state="readonly").grid(row=0, column=9, padx=5, pady=5)
         
+        # Path Planning button
         self.start_button = ttk.Button(control_frame, text="Start Planning", 
                                        command=self.start_planning, state=tk.DISABLED)
-        self.start_button.grid(row=0, column=5, padx=5, pady=5)
+        self.start_button.grid(row=0, column=10, padx=5, pady=5)
 
+        # Explainability button
         explain_button = tk.Button(control_frame, text="Explain", command=self.explain)
         explain_button.grid(row=7, column=0, pady=5)
-        
+
+        # Clear results button
+        ttk.Button(control_frame, text="Clear Results", command=self.clear_results).grid(row=7, column=1, padx=5, pady=5)
+                
         # Second row - Status and info
         ttk.Label(control_frame, text="Status:").grid(row=1, column=0, pady=5, sticky="w")
         
@@ -374,7 +417,54 @@ class PathPlanningApp:
         self.canvas_widget.mpl_connect('button_press_event', self.on_grid_click)
         self.canvas_widget.mpl_connect('motion_notify_event', self.on_grid_drag)
         self.canvas_widget.mpl_connect('button_release_event', self.on_grid_release)
-    
+
+    def on_visualization_mode_changed(self, event=None):
+        self.visualization_mode = self.selected_visualization_mode.get()
+        if self.env.agent_pos and self.env.goal_pos:
+            self.start_button.config(state=tk.NORMAL)
+        self.status_var.set(f"Visualization mode set to '{self.visualization_mode}'")
+
+    def on_algorithm_changed(self, event=None):
+        if self.env.agent_pos and self.env.goal_pos:
+            self.start_button.config(state=tk.NORMAL)
+            self.status_var.set("Algorithm changed. Ready to start planning.")
+
+    def clear_results(self):
+        """Clear path, start and goal points for new selection."""
+        if self.env:
+            self.env.agent_pos = None
+            self.env.goal_pos = None
+
+        self.algorithm_steps = []
+        self.current_step = 0
+        self.animation_running = False
+
+        self.setting_start = False
+        self.setting_goal = False
+        self.free_selection_enabled = True  # ← Enable free clicking mode
+
+        self.set_start_button.config(style="TButton")
+        self.set_goal_button.config(style="TButton")
+        self.start_button.config(state=tk.DISABLED)
+        self.exec_time_var.set("N/A")
+        self.status_var.set("Cleared. Click on empty space to set start position.")
+
+        self.draw_grid()
+
+    def enable_set_start(self):
+        self.setting_start = True
+        self.setting_goal = False
+        self.set_start_button.config(style="Highlight.TButton")
+        self.set_goal_button.config(style="TButton")
+        self.status_var.set("Click on grid to set START position.")
+
+    def enable_set_goal(self):
+        self.setting_goal = True
+        self.setting_start = False
+        self.set_goal_button.config(style="Highlight.TButton")
+        self.set_start_button.config(style="TButton")
+        self.status_var.set("Click on grid to set GOAL position.")
+
     def apply_settings(self):
         # Update internal settings
         self.grid_size = self.grid_size_var.get()
@@ -409,21 +499,57 @@ class PathPlanningApp:
                     break
             
             # If not an obstacle, handle as empty space click - set points
-            if not is_obstacle:                
-                # Set start position
-                if self.env.agent_pos is None:
+            if not is_obstacle:
+                if self.setting_start:
                     self.env.agent_pos = position
-                    self.status_var.set("Click on empty space to set goal position")
+                    self.status_var.set("Start position set.")
+                    self.setting_start = False
+                    self.set_start_button.config(style="TButton")
+                    self.set_goal_button.config(style="TButton")
+                    self.free_selection_enabled = False  # Exit free selection
                     self.draw_grid()
+                    if self.env.agent_pos and self.env.goal_pos:
+                        self.status_var.set("Ready to start planning")
+                        self.start_button.config(state=tk.NORMAL)
                     return
-                        
-                # Set goal position
-                if self.env.goal_pos is None and position != self.env.agent_pos:
+
+                if self.setting_goal:
+                    if position == self.env.agent_pos:
+                        self.status_var.set("Goal cannot be the same as Start.")
+                        return
                     self.env.goal_pos = position
-                    self.status_var.set("Ready to start planning")
-                    self.start_button.config(state=tk.NORMAL)
+                    self.status_var.set("Goal position set.")
+                    self.setting_goal = False
+                    self.set_start_button.config(style="TButton")
+                    self.set_goal_button.config(style="TButton")
+                    self.free_selection_enabled = False
                     self.draw_grid()
+                    if self.env.agent_pos and self.env.goal_pos:
+                        self.status_var.set("Ready to start planning")
+                        self.start_button.config(state=tk.NORMAL)
                     return
+
+                if self.free_selection_enabled:
+                    # Set start if not set
+                    if self.env.agent_pos is None:
+                        self.env.agent_pos = position
+                        self.status_var.set("Click on empty space to set goal position")
+                        self.draw_grid()
+                        if self.env.agent_pos and self.env.goal_pos:
+                            self.status_var.set("Ready to start planning")
+                            self.start_button.config(state=tk.NORMAL)
+                        return
+                    # Set goal if not set
+                    if self.env.goal_pos is None and position != self.env.agent_pos:
+                        self.env.goal_pos = position
+                        self.status_var.set("Ready to start planning")
+                        self.start_button.config(state=tk.NORMAL)
+                        self.free_selection_enabled = False
+                        self.draw_grid()
+                        if self.env.agent_pos and self.env.goal_pos:
+                            self.status_var.set("Ready to start planning")
+                            self.start_button.config(state=tk.NORMAL)
+                        return
 
     def on_grid_drag(self, event):
         # Early return checks
@@ -530,10 +656,22 @@ class PathPlanningApp:
         self.status_var.set("Click on empty space to set start position")
         self.exec_time_var.set("N/A")
         self.start_button.config(state=tk.DISABLED)
+        self.free_selection_enabled = True
+        
+        # Reset interaction mode
+        self.setting_start = False
+        self.setting_goal = False
+        self.set_start_button.config(style="TButton")
+        self.set_goal_button.config(style="TButton")
+
+        self.status_var.set("Environment ready. Click on empty space to set start position.")
+
         self.draw_grid()
 
     def draw_grid(self):
-        self.ax.clear()
+        #self.ax.clear() # kicked to out to ensure proper visualization of new environment
+        self.fig.clf()
+        self.ax = self.fig.add_subplot(111)
         self.ax.set_xlim(-0.5, self.grid_size - 0.5)
         self.ax.set_ylim(-0.5, self.grid_size - 0.5)
         self.ax.set_xticks(np.arange(0, self.grid_size, 1))
@@ -606,263 +744,64 @@ class PathPlanningApp:
         self.start_button.config(state=tk.DISABLED)
         
         # Start the algorithm based on selection
-        if algorithm == "A*":
-            self.run_astar_visualization()
-        elif algorithm == "Dijkstra":
-            self.run_dijkstra_visualization()
-        elif algorithm == "Theta*":
-            self.run_thetastar_visualization()
+        planner_map = {
+            "A*": AStarPlanner,
+            "Dijkstra": DijkstraPlanner,
+            "Theta*": ThetaStarPlanner,
+            "BFS": BFSPlanner,
+            "DFS": DFSPlanner,
+            "Greedy Best-First": GreedyBestFirstPlanner,
+            "RRT": RRTPlanner,
+            "RRT*": RRTStarPlanner,
+            "PRM": PRMPlanner
+        }
+        planner_class = planner_map.get(self.selected_algorithm.get())
+        if planner_class:
+            self.visualize_planner(planner_class, name=self.selected_algorithm.get())
+        else:
+            self.status_var.set("Unknown algorithm selected.")
 
-    def run_astar_visualization(self):
+    def visualize_planner(self, planner_class, name=""):
         self.start_time = time.time()
-
-        # Prepare for recording steps
-        self.algorithm_steps = []
+        planner = planner_class()
         state = self.env.get_state()
-        start = state["agent"]
-        goal = state["goal"] 
-        obstacles = state["obstacles"]
-        grid_size = state["grid_size"]
-        
-        # Initialize A* variables
-        open_set = []
-        heapq.heappush(open_set, (0, start))
-        came_from = {}
-        g_score = {tuple(start): 0}
-        
-        # For visualization
-        visited = []
-        current_path = []
-        
-        def h(pos):
-            # Manhattan distance heuristic
-            return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
-        
-        # Record initial state
-        self.algorithm_steps.append({
-            "step": len(self.algorithm_steps),
-            "type": "init",
-            "open_set": [start],
-            "current": None,
-            "visited": [],
-            "current_path": [],
-            "description": "Initializing A* algorithm"
-        })
-        
-        # Start algorithm step by step
-        self.animation_running = True
-        self.current_step = 0
-        
-        def process_step():
-            nonlocal open_set, visited, current_path
-            
-            # Check if we should stop the algorithm
-            if not open_set:
-                # No path found case
-                self.animation_running = False
-                self.status_var.set("No path found!")
-                
-                # Calculate execution time
-                end_time = time.time()
-                execution_time = end_time - self.start_time
-                self.exec_time_var.set(f"{execution_time:.4f} seconds")
-                
-                # Save steps
-                self.save_algorithm_steps(execution_time)
-                
-                # Can't generate mosaic without path
-                self.root.update()
-                return
-            
-            # Get current node
-            _, current = heapq.heappop(open_set)
-            
-            # Record step data
-            step_data = {
-                "step": len(self.algorithm_steps),
-                "type": "explore",
-                "current": current,
-                "open_set": [list(n[1]) for n in open_set],
-                "visited": list(visited),
-                "g_score": {str(k): v for k, v in g_score.items()},
-                "description": f"Exploring node at {current}"
-            }
-            
-            # Check if goal reached
-            if current == goal:
-                # Reconstruct path
-                current_path = []
-                curr = current
-                while tuple(curr) in came_from:
-                    current_path.append(curr)
-                    curr = came_from[tuple(curr)]
-                current_path.append(start)
-                current_path.reverse()
-                
-                step_data["type"] = "success"
-                step_data["current_path"] = current_path
-                step_data["description"] = f"Goal reached! Path length: {len(current_path)}"
-                self.algorithm_steps.append(step_data)
-                
-                # Draw final path
-                self.draw_step(len(self.algorithm_steps) - 1)
-                
-                # Important: Stop the animation and perform finishing tasks
-                self.animation_running = False
-                self.status_var.set(f"Path found! Length: {len(current_path)}")
-                
-                # Calculate execution time
-                end_time = time.time()
-                execution_time = end_time - self.start_time
-                self.exec_time_var.set(f"{execution_time:.4f} seconds")
-                
-                # Save steps and generate visualization
-                self.save_algorithm_steps(execution_time)
-                self.generate_mosaic_visualization()
-                
-                # Make sure the GUI updates
-                self.root.update()
-                return
-                
-            # Add current to visited
-            visited.append(current)
-            
-            # Record the current path for visualization
-            if tuple(current) in came_from:
-                curr = current
-                current_path = []
-                while tuple(curr) in came_from:
-                    current_path.append(curr)
-                    curr = came_from[tuple(curr)]
-                current_path.append(start)
-                current_path.reverse()
-                step_data["current_path"] = current_path
-            
-            # Explore neighbors
-            neighbors_data = []
-            for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
-                neighbor = [current[0] + dx, current[1] + dy]
-                
-                if 0 <= neighbor[0] < grid_size and 0 <= neighbor[1] < grid_size and neighbor not in obstacles:
-                    tentative_g = g_score[tuple(current)] + 1
-                    
-                    neighbor_info = {
-                        "pos": neighbor,
-                        "g_score": tentative_g,
-                        "h_score": h(neighbor),
-                        "f_score": tentative_g + h(neighbor),
-                        "action": "skip"
-                    }
-                    
-                    if tuple(neighbor) not in g_score or tentative_g < g_score[tuple(neighbor)]:
-                        came_from[tuple(neighbor)] = current
-                        g_score[tuple(neighbor)] = tentative_g
-                        heapq.heappush(open_set, (tentative_g + h(neighbor), neighbor))
-                        neighbor_info["action"] = "add_or_update"
-                        
-                    neighbors_data.append(neighbor_info)
-            
-            step_data["neighbors"] = neighbors_data
-            self.algorithm_steps.append(step_data)
-            
-            # Update visualization
-            self.draw_step(len(self.algorithm_steps) - 1)
-            
-            # Schedule next step only if animation still running
-            if self.animation_running:
-                self.root.after(self.animation_speed, process_step)
-        
-        # Start the processing loop
-        self.root.after(100, process_step)
-    
-    def run_dijkstra_visualization(self):
-        """Run Dijkstra's algorithm with visualization"""
-        self.start_time = time.time()
-        
-        # Create planner
-        planner = DijkstraPlanner()
-        
-        # Get environment state
-        state = self.env.get_state()
-        
-        # Set up the planner
         planner.set_environment(
             start=state["agent"],
             goal=state["goal"],
             grid_size=state["grid_size"],
             obstacles=state["obstacles"]
         )
-        
-        # Run with step tracking
         path, steps = planner.plan(return_steps=True)
-        
-        # Record execution time
         execution_time = time.time() - self.start_time
-        
-        # Update UI
-        self.algorithm_steps = steps
-        self.current_step = len(steps) - 1 if steps else 0
-        
-        # Draw final state
-        if steps:
-            self.draw_step(self.current_step)
-        
-        # Update status
-        if path:
-            self.status_var.set(f"Path found! Length: {len(path)}")
-        else:
-            self.status_var.set("No path found!")
-        
-        self.exec_time_var.set(f"{execution_time:.4f} seconds")
-        
-        # Save steps and generate visualization
-        self.save_algorithm_steps(execution_time)
-        if path:
-            self.generate_mosaic_visualization()
 
-    def run_thetastar_visualization(self):
-        """Run Theta* algorithm with visualization"""
-        self.start_time = time.time()
-        
-        # Create planner
-        planner = ThetaStarPlanner()
-        
-        # Get environment state
-        state = self.env.get_state()
-        
-        # Set up the planner
-        planner.set_environment(
-            start=state["agent"],
-            goal=state["goal"],
-            grid_size=state["grid_size"],
-            obstacles=state["obstacles"]
-        )
-        
-        # Run with step tracking
-        path, steps = planner.plan(return_steps=True)
-        
-        # Record execution time
-        execution_time = time.time() - self.start_time
-        
-        # Update UI
         self.algorithm_steps = steps
         self.current_step = len(steps) - 1 if steps else 0
-        
-        # Draw final state
-        if steps:
+
+        if steps and self.visualization_mode == "final":
             self.draw_step(self.current_step)
-        
-        # Update status
+        elif steps and self.visualization_mode == "step":
+            self.animation_running = True
+            self.current_step = 0
+
+            def process_step():
+                if self.current_step < len(self.algorithm_steps):
+                    self.draw_step(self.current_step)
+                    self.current_step += 1
+                    self.root.after(self.animation_speed, process_step)
+                else:
+                    self.animation_running = False
+
+            self.root.after(100, process_step)
+
         if path:
-            self.status_var.set(f"Path found! Length: {len(path)}")
+            self.status_var.set(f"{name}: Path found! Length: {len(path)-1}")
         else:
-            self.status_var.set("No path found!")
-        
+            self.status_var.set(f"{name}: No path found!")
+
         self.exec_time_var.set(f"{execution_time:.4f} seconds")
-        
-        # Save steps and generate visualization
-        self.save_algorithm_steps(execution_time)
-        if path:
+        if self.json:
+            self.save_algorithm_steps(execution_time)
+        if path and self.mosaic:
             self.generate_mosaic_visualization()
     
     def run_astar_for_analysis(self):
@@ -1051,6 +990,7 @@ class PathPlanningApp:
             if path_steps[-1] not in step_indices:
                 step_indices.append(path_steps[-1])
         
+        
         # Prepare data for visualization
         paths = []
         titles = []
@@ -1109,7 +1049,7 @@ class PathPlanningApp:
         if path:
             path_x = [pos[1] for pos in path]
             path_y = [pos[0] for pos in path]
-            ax.plot(path_x, path_y, color='orange', linewidth=2, label=f"Path (length: {len(path)})")
+            ax.plot(path_x, path_y, color='orange', linewidth=2, label=f"Path (length: {len(path)-1})")
         
         # Add legend
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
@@ -1185,6 +1125,9 @@ class PathPlanningApp:
         plt.savefig(save_path, dpi=150)
         plt.close(fig)
 
+    #########################################################################################
+    # EXPLANATION METHODS    
+
     def explain(self):
         """Generate explanations based on selected explanation method"""
         if self.env.agent_pos is None or self.env.goal_pos is None:
@@ -1198,15 +1141,19 @@ class PathPlanningApp:
         explanation_method = self.selected_explainability.get()
         
         # Create the appropriate planner
-        algorithm = self.selected_algorithm.get()
-        if algorithm == "A*":
-            planner = AStarPlanner()
-        elif algorithm == "Dijkstra":
-            planner = DijkstraPlanner()
-        elif algorithm == "Theta*":
-            planner = ThetaStarPlanner()
-        else:
-            planner = AStarPlanner()  # Default
+        planner_map = {
+            "A*": AStarPlanner,
+            "Dijkstra": DijkstraPlanner,
+            "Theta*": ThetaStarPlanner,
+            "BFS": BFSPlanner,
+            "DFS": DFSPlanner,
+            "Greedy Best-First": GreedyBestFirstPlanner,
+            "RRT": RRTPlanner,
+            "RRT*": RRTStarPlanner,
+            "PRM": PRMPlanner
+        }
+        planner_class = planner_map.get(self.selected_algorithm.get(), AStarPlanner)
+        planner = planner_class()
         
         # Set up the planner
         planner.set_environment(
@@ -1223,6 +1170,10 @@ class PathPlanningApp:
             self.explain_with_anchors(planner)
         elif explanation_method == "SHAP":
             self.explain_with_shap(planner)
+        elif explanation_method == 'Counterfactual':
+            self.explain_with_counterfactual(planner)
+        elif explanation_method == 'Contrastive':
+            self.explain_with_contrastive(planner)
         else:
             self.status_var.set(f"Unknown explanation method: {explanation_method}")
 
@@ -1240,7 +1191,8 @@ class PathPlanningApp:
         # Generate explanations
         importance = explainer.explain(
             num_samples=len(self.env.obstacle_shapes.keys()) + 10,
-            callback=update_progress
+            callback=update_progress,
+            strategy="remove_each_obstacle_once" # "remove_each_obstacle_once", "random", "full_combinations"
         )
         
         if len(importance) == 0:
@@ -1343,7 +1295,9 @@ class PathPlanningApp:
         anchors = explainer.explain(
             num_samples=50,  # Less samples for faster computation
             precision_threshold=0.9,
-            callback=update_progress
+            min_coverage=0.1,
+            callback=update_progress,
+            detect_changes=False
         )
         
         if not anchors:
@@ -1383,7 +1337,7 @@ class PathPlanningApp:
         
         # Generate explanations
         shap_values = explainer.explain(
-            num_samples=50,  # Less samples for faster computation
+            num_samples=150,  # Less samples for faster computation
             callback=update_progress
         )
         
@@ -1411,6 +1365,53 @@ class PathPlanningApp:
         else:
             self.status_var.set("Could not generate SHAP visualization.")
 
+    def explain_with_counterfactual(self, planner):
+        explainer = CounterfactualExplainer()
+        explainer.set_environment(self.env, planner)
+        counterfactuals = explainer.explain(max_subset_size=2)
+
+        fig = explainer.visualize(counterfactuals)
+
+        if fig:
+            # Save explanation
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+            
+            filepath = os.path.join(images_dir, f"counterfactual_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            
+            # Also display it
+            plt.show()
+            
+            self.status_var.set(f"Counterfactual explanation generated and saved to {filepath}")
+        else:
+            self.status_var.set("Could not generate Counterfactual visualization.")
+
+    def explain_with_contrastive(self, planner):
+        explainer = ContrastiveExplainer()
+        explainer.set_environment(self.env, planner)
+        result = explainer.explain()
+
+        fig = explainer.visualize(result)
+
+        if fig:
+            # Save explanation
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+            
+            filepath = os.path.join(images_dir, f"contrastive_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            
+            # Also display it
+            plt.show()
+            
+            self.status_var.set(f"Contrastive explanation generated and saved to {filepath}")
+        else:
+            self.status_var.set("Could not generate Contrastive visualization.")
 
 # Run the application
 if __name__ == "__main__":
