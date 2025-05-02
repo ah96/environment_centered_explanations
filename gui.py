@@ -328,6 +328,102 @@ class PathPlanningApp:
         # Generate initial environment
         self.generate_environment()
 
+    def save_environment(self):
+        """Save the current environment to a JSON file."""
+        from tkinter import filedialog
+        
+        # Create dictionary with environment data
+        env_data = {
+            "grid_size": self.grid_size,
+            "num_obstacles": self.num_obstacles,
+            "obstacle_shapes": self.env.obstacle_shapes,
+            "agent_pos": self.env.agent_pos,
+            "goal_pos": self.env.goal_pos
+        }
+        
+        # Get filepath from user
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            title="Save Environment"
+        )
+        
+        if not filepath:  # User cancelled
+            return
+            
+        try:
+            with open(filepath, 'w') as f:
+                json.dump(env_data, f, indent=2)
+            self.status_var.set(f"Environment saved to {filepath}")
+        except Exception as e:
+            self.status_var.set(f"Error saving environment: {str(e)}")
+
+    def load_environment(self):
+        """Load an environment from a JSON file."""
+        from tkinter import filedialog
+        
+        # Get filepath from user
+        filepath = filedialog.askopenfilename(
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            title="Load Environment"
+        )
+        
+        if not filepath:  # User cancelled
+            return
+            
+        try:
+            with open(filepath, 'r') as f:
+                env_data = json.load(f)
+                
+            # Update grid size and number of obstacles (if provided)
+            self.grid_size = env_data.get("grid_size", self.grid_size)
+            self.num_obstacles = env_data.get("num_obstacles", self.num_obstacles)
+            
+            # Update the UI controls to match loaded values
+            self.grid_size_var.set(self.grid_size)
+            self.num_obstacles_var.set(self.num_obstacles)
+            
+            # Create new environment with loaded parameters
+            self.env = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
+            
+            # Load obstacle shapes
+            if "obstacle_shapes" in env_data:
+                # Convert string keys back to integers
+                obstacle_shapes = {int(k): v for k, v in env_data["obstacle_shapes"].items()}
+                self.env.obstacle_shapes = obstacle_shapes
+                
+                # Reconstruct flat obstacles list for quick lookup
+                self.env.obstacles = []
+                for shape_points in self.env.obstacle_shapes.values():
+                    self.env.obstacles.extend(shape_points)
+            
+            # Load agent and goal positions
+            self.env.agent_pos = env_data.get("agent_pos")
+            self.env.goal_pos = env_data.get("goal_pos")
+            
+            # Update UI state based on loaded positions
+            self.free_selection_enabled = False
+            if self.env.agent_pos and self.env.goal_pos:
+                self.start_button.config(state=tk.NORMAL)
+                self.status_var.set("Environment loaded. Ready to start planning.")
+            elif self.env.agent_pos:
+                self.status_var.set("Environment loaded. Click on empty space to set goal position.")
+            else:
+                self.status_var.set("Environment loaded. Click on empty space to set start position.")
+                self.free_selection_enabled = True
+            
+            # Reset algorithm info
+            self.algorithm_steps = []
+            self.current_step = 0
+            self.animation_running = False
+            self.exec_time_var.set("N/A")
+            
+            # Refresh display
+            self.draw_grid()
+                
+        except Exception as e:
+            self.status_var.set(f"Error loading environment: {str(e)}")
+
     def create_gui(self):
         # Top control panel
         control_frame = ttk.Frame(self.root, padding="10")
@@ -352,6 +448,12 @@ class PathPlanningApp:
         # Apply button
         ttk.Button(settings_frame, text="Apply Settings", 
                 command=self.apply_settings).grid(row=0, column=4, padx=5, pady=5)
+        
+        # Save and Load Environment buttons - moved to be after Apply Settings
+        ttk.Button(settings_frame, text="Save Environment", 
+                  command=self.save_environment).grid(row=0, column=5, padx=5, pady=5)
+        ttk.Button(settings_frame, text="Load Environment", 
+                  command=self.load_environment).grid(row=0, column=6, padx=5, pady=5)
         
         # Set start and goal buttons
         self.set_start_button = ttk.Button(control_frame, text="Set Start", command=self.enable_set_start)
