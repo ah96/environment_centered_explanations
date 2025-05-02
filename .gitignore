@@ -9,3 +9,5 @@ output_json/
 
 # ignore all desktop.ini files in any subdirectory
 desktop.ini
+
+environments/
