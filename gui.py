@@ -9,8 +9,10 @@ import json
 from datetime import datetime
 import os
 import random
-from sklearn.linear_model import Ridge
 from matplotlib import colors
+
+from environment_generator import EnvironmentGenerator
+from grid_world_env import GridWorldEnv
 
 from path_planning.astar import AStarPlanner
 from path_planning.dijkstra import DijkstraPlanner
@@ -27,259 +29,6 @@ from explanations.anchors_explainer import AnchorsExplainer
 from explanations.shap_explainer import SHAPExplainer
 from explanations.counterfactual_explainer import CounterfactualExplainer
 from explanations.contrastive_explainer import ContrastiveExplainer
-
-
-# Enhanced GridWorld environment with shaped obstacles
-class GridWorldEnv:
-    def __init__(self, grid_size=10, num_obstacles=5):
-        self.grid_size = grid_size
-        self.num_obstacles = num_obstacles
-        self.reset()
-
-    def reset(self):
-        self.agent_pos = None  # Will be set by user
-        self.goal_pos = None   # Will be set by user
-        # Dictionary to store obstacle shapes: {shape_id: list_of_positions}
-        self.obstacle_shapes = {}  
-        # List of all obstacle positions for quick lookup
-        self.obstacles = []    
-        self.generate_obstacles()
-        return self.get_state()
-
-    def generate_obstacles(self):
-        self.obstacle_shapes = {}
-        self.obstacles = []
-        
-        # Divide grid into regions for obstacles
-        regions = self.divide_grid_into_regions()
-        
-        # Generate an obstacle shape in each region
-        for shape_id, region in enumerate(regions):
-            if shape_id >= self.num_obstacles:
-                break
-                
-            # Generate a connected shape within this region
-            shape_points = self.generate_connected_shape(region)
-            
-            # Store the shape with its ID
-            self.obstacle_shapes[shape_id] = shape_points
-            
-            # Add all points to obstacles list for quick lookup
-            self.obstacles.extend(shape_points)
-    
-    def divide_grid_into_regions(self):
-        """Divide the grid into regions for placing obstacles"""
-        regions = []
-        
-        # Simple approach: divide into approximately equal quadrants
-        region_size = max(3, self.grid_size // 3)
-        
-        for row_start in range(0, self.grid_size, region_size):
-            for col_start in range(0, self.grid_size, region_size):
-                row_end = min(row_start + region_size, self.grid_size)
-                col_end = min(col_start + region_size, self.grid_size)
-                
-                region = {
-                    'min_row': row_start,
-                    'max_row': row_end - 1,
-                    'min_col': col_start,
-                    'max_col': col_end - 1
-                }
-                regions.append(region)
-        
-        # Shuffle regions to get random distribution
-        random.shuffle(regions)
-        return regions
-    
-    def generate_connected_shape(self, region):
-        """Generate a randomly connected shape within a region"""
-        min_row, max_row = region['min_row'], region['max_row']
-        min_col, max_col = region['min_col'], region['max_col']
-        
-        # Determine shape size (number of cells)
-        # Ensure it's reasonable for the region size
-        width = max_col - min_col + 1
-        height = max_row - min_row + 1
-        max_size = max(1, min(width * height // 3, 8))  # Limit max size
-        shape_size = random.randint(1, max_size)
-        
-        # Start with a random point in the region
-        start_row = random.randint(min_row, max_row)
-        start_col = random.randint(min_col, max_col)
-        shape_points = [[start_row, start_col]]
-        
-        # Add connected points
-        attempts = 0
-        while len(shape_points) < shape_size and attempts < 50:
-            # Get last point added
-            last_point = shape_points[-1]
-            
-            # Try to add a neighbor
-            neighbors = [
-                [last_point[0]-1, last_point[1]],  # up
-                [last_point[0]+1, last_point[1]],  # down
-                [last_point[0], last_point[1]-1],  # left
-                [last_point[0], last_point[1]+1]   # right
-            ]
-            
-            # Filter valid neighbors (within region and not already in shape)
-            valid_neighbors = [
-                n for n in neighbors 
-                if min_row <= n[0] <= max_row and 
-                   min_col <= n[1] <= max_col and 
-                   n not in shape_points
-            ]
-            
-            if valid_neighbors:
-                # Add a random valid neighbor
-                new_point = random.choice(valid_neighbors)
-                shape_points.append(new_point)
-                attempts = 0
-            else:
-                # No valid neighbors, backtrack and try from another point
-                attempts += 1
-                if shape_points:
-                    # Choose a random existing point as new last point
-                    shape_points[-1] = random.choice(shape_points)
-        
-        return shape_points
-    
-    def remove_obstacle_shape(self, shape_id):
-        """Remove an obstacle shape by its ID"""
-        if shape_id in self.obstacle_shapes:
-            # Remove all points of this shape from obstacles list
-            points_to_remove = self.obstacle_shapes[shape_id]
-            # Use list comprehension for potentially better performance on large lists
-            self.obstacles = [p for p in self.obstacles if p not in points_to_remove]
-            # Keep the shape definition in self.obstacle_shapes for restoration
-            return True
-        return False
-    
-    def generate_perturbation_combinations(self, strategy="random"):
-        """
-        Generates combinations of obstacle removals based on specified strategy.
-        
-        Args:
-            strategy (str): The combination generation strategy. Options:
-                "full_combinations": All possible binary combinations of obstacles.
-                "random": One random combination.
-                "remove_each_obstacle_once": N combinations, each with one obstacle removed.
-                
-        Returns:
-            list: List of combinations, where each combination is a list of 0s and 1s
-                (0 means obstacle removed, 1 means obstacle kept).
-        """
-        all_shape_ids = list(self.obstacle_shapes.keys())
-        n = len(all_shape_ids)
-        
-        if n == 0:  # No obstacles
-            return [[]]
-            
-        if strategy == "full_combinations":
-            # Generate all 2^n combinations using binary representation
-            combinations = []
-            for i in range(2**n):
-                # Convert number to binary and pad with leading zeros
-                binary = format(i, f'0{n}b')
-                # Convert to list of integers (0s and 1s)
-                combination = [int(bit) for bit in binary]
-                combinations.append(combination)
-            return combinations
-            
-        elif strategy == "random":
-            # Return one random combination
-            import random
-            combination = [random.randint(0, 1) for _ in range(n)]
-            return [combination]  # Return as a list of combinations
-            
-        elif strategy == "remove_each_obstacle_once":
-            # Generate n combinations, each removing exactly one obstacle
-            combinations = []
-            for i in range(n):
-                combination = [1] * n  # Start with all obstacles kept
-                combination[i] = 0     # Remove just one obstacle
-                combinations.append(combination)
-            return combinations
-        
-        else:
-            raise ValueError(f"Unknown combination strategy: {strategy}")
-
-    def generate_perturbation(self, strategy="random", combination=None):
-        """
-        Generates and applies perturbation by removing obstacle shapes based on strategy and combination.
-        
-        Args:
-            strategy (str): The perturbation strategy.
-            combination (list, optional): A specific combination to apply (list of 0s and 1s).
-                If provided, this overrides the strategy.
-                
-        Returns:
-            tuple: (original_obstacles, shapes_removed_ids)
-                original_obstacles (list): A copy of the obstacles list before perturbation.
-                shapes_removed_ids (list): A list of the IDs of the obstacle shapes that were removed.
-        """
-        # Create a copy of the current obstacles for reverting later
-        original_obstacles = self.obstacles.copy()
-        all_shape_ids = list(self.obstacle_shapes.keys())
-        shapes_to_remove_ids = []
-        
-        if not all_shape_ids:  # No obstacles to remove
-            return original_obstacles, []
-        
-        # If a specific combination is provided, use it
-        if combination is not None:
-            # Ensure combination is the correct length
-            if len(combination) != len(all_shape_ids):
-                raise ValueError(f"Combination length {len(combination)} doesn't match obstacle count {len(all_shape_ids)}")
-            
-            # Remove obstacles where combination has 0
-            for i, keep in enumerate(combination):
-                if keep == 0:
-                    shapes_to_remove_ids.append(all_shape_ids[i])
-                    
-        # Otherwise use the strategy from before    
-        elif strategy == "randomly":
-            # Randomly select shapes to remove (approximately 30% of shapes)
-            # Ensure at least one is potentially removed if obstacles exist
-            num_to_remove = max(1, len(all_shape_ids) // 3)
-            # Ensure sample size doesn't exceed population size
-            k = min(num_to_remove, len(all_shape_ids))
-            if k > 0:  # Only sample if k is positive
-                shapes_to_remove_ids = random.sample(all_shape_ids, k)
-                
-        elif strategy == "each_obstacle_once":
-            # Remove exactly one randomly chosen obstacle shape
-            if all_shape_ids:
-                shape_to_remove_id = random.choice(all_shape_ids)
-                shapes_to_remove_ids = [shape_to_remove_id]
-                
-        elif strategy == "full_perturbation":
-            # Remove all obstacles
-            shapes_to_remove_ids = list(all_shape_ids)
-            
-        else:
-            raise ValueError(f"Unknown perturbation strategy: {strategy}")
-        
-        # Apply the perturbation by removing the selected obstacle shapes
-        for shape_id in shapes_to_remove_ids:
-            self.remove_obstacle_shape(shape_id)
-            
-        return original_obstacles, shapes_to_remove_ids
-
-    def restore_from_perturbation(self, original_obstacles):
-        """Restore the environment to the state before perturbation"""
-        # Simply reset the obstacles list to the saved original state.
-        self.obstacles = original_obstacles.copy()
-
-
-    def get_state(self):
-        return {
-            "grid_size": self.grid_size,
-            "agent": self.agent_pos,
-            "goal": self.goal_pos,
-            "obstacles": self.obstacles,
-            "obstacle_shapes": self.obstacle_shapes
-        }
 
 # Path Planning App
 class PathPlanningApp:
@@ -321,6 +70,10 @@ class PathPlanningApp:
         # Explainability options
         self.explainability_methods = ["LIME", "Anchors", "SHAP", "Counterfactual", "Contrastive"]
         self.selected_explainability = tk.StringVar(value=self.explainability_methods[0])
+
+        # Environment type
+        self.environment_types = ["Random", "Feasible", "Infeasible"]
+        self.selected_environment_type = tk.StringVar(value=self.environment_types[0])
         
         # Create GUI components
         self.create_gui()
@@ -444,16 +197,26 @@ class PathPlanningApp:
         self.num_obstacles_var = tk.IntVar(value=self.num_obstacles)
         obstacles_spin = ttk.Spinbox(settings_frame, from_=0, to=30, textvariable=self.num_obstacles_var, width=5)
         obstacles_spin.grid(row=0, column=3, padx=5, pady=5)
+
+        # Environment type selector
+        ttk.Label(settings_frame, text="Environment Type:").grid(row=0, column=4, padx=5, pady=5)
+        env_type_dropdown = ttk.Combobox(
+            settings_frame, textvariable=self.selected_environment_type,
+            values=self.environment_types, state="readonly", width=10
+        )
+        env_type_dropdown.grid(row=0, column=5, padx=5, pady=5)
+
         
         # Apply button
-        ttk.Button(settings_frame, text="Apply Settings", 
-                command=self.apply_settings).grid(row=0, column=4, padx=5, pady=5)
+        ttk.Button(settings_frame, text="Apply Settings",
+                   command=self.apply_settings).grid(row=0, column=6, padx=5, pady=5)
+
         
         # Save and Load Environment buttons - moved to be after Apply Settings
         ttk.Button(settings_frame, text="Save Environment", 
-                  command=self.save_environment).grid(row=0, column=5, padx=5, pady=5)
+                  command=self.save_environment).grid(row=0, column=7, padx=5, pady=5)
         ttk.Button(settings_frame, text="Load Environment", 
-                  command=self.load_environment).grid(row=0, column=6, padx=5, pady=5)
+                  command=self.load_environment).grid(row=0, column=8, padx=5, pady=5)
         
         # Set start and goal buttons
         self.set_start_button = ttk.Button(control_frame, text="Set Start", command=self.enable_set_start)
@@ -574,7 +337,8 @@ class PathPlanningApp:
         
         # Regenerate environment with new settings
         self.generate_environment()
-        self.status_var.set(f"Settings applied: Grid size {self.grid_size}, Obstacles {self.num_obstacles}")
+        env_type = self.selected_environment_type.get()
+        self.status_var.set(f"Settings applied: Grid size {self.grid_size}, Obstacles {self.num_obstacles}, Type: {env_type}")
 
     def on_grid_click(self, event):
         if self.animation_running or event.xdata is None or event.ydata is None:
@@ -749,13 +513,10 @@ class PathPlanningApp:
                     self.status_var.set("Obstacle moved. Click on empty space to set goal position.")
 
     def generate_environment(self):
-        self.env = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
-        self.env.agent_pos = None
-        self.env.goal_pos = None
+        # Reset UI state
         self.algorithm_steps = []
         self.current_step = 0
         self.animation_running = False
-        self.status_var.set("Click on empty space to set start position")
         self.exec_time_var.set("N/A")
         self.start_button.config(state=tk.DISABLED)
         self.free_selection_enabled = True
@@ -765,9 +526,33 @@ class PathPlanningApp:
         self.setting_goal = False
         self.set_start_button.config(style="TButton")
         self.set_goal_button.config(style="TButton")
-
-        self.status_var.set("Environment ready. Click on empty space to set start position.")
-
+        
+        # Get selected environment type
+        env_type = self.selected_environment_type.get()
+        self.status_var.set(f"Generating {env_type.lower()} environment...")
+        self.root.update()  # Update GUI to show status
+        
+        # Create environment generator
+        generator = EnvironmentGenerator(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
+        
+        # Generate environment based on selected type
+        if env_type == "Feasible":
+            self.env = generator.generate_environment(feasible=True, max_attempts=100)
+        elif env_type == "Infeasible":
+            self.env = generator.generate_environment(feasible=False, max_attempts=100)
+        else:  # Random - don't care if feasible or not
+            self.env = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
+        
+        # Check if environment generation was successful
+        if self.env is None:
+            self.status_var.set(f"Failed to generate {env_type.lower()} environment after multiple attempts. Try different settings.")
+            self.env = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
+        else:
+            # Reset position markers
+            self.env.agent_pos = None
+            self.env.goal_pos = None
+            self.status_var.set("Environment ready. Click on empty space to set start position.")
+        
         self.draw_grid()
 
     def draw_grid(self):

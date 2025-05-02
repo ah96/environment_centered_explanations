@@ -1,7 +1,7 @@
 import random
 import os
 import json
-from gui import GridWorldEnv
+from grid_world_env import GridWorldEnv
 from path_planning.astar import AStarPlanner
 
 class EnvironmentGenerator:
