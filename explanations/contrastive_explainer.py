@@ -17,7 +17,7 @@ class ContrastiveExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
 
-    def explain(self, alternative_combination=None):
+    def explain(self, alternative_combination=None, perturbation_mode="remove"):
         # Plan A: factual plan (original environment)
         factual_path = self.planner.plan()
         factual_length = len(factual_path) if factual_path else float('inf')
@@ -34,7 +34,7 @@ class ContrastiveExplainer:
                 alternative_combination[0] = 0
                 alternative_combination[1] = 0
 
-        original_state, _ = self.env.generate_perturbation(combination=alternative_combination)
+        original_state, _ = self.env.generate_perturbation(combination=alternative_combination, mode=perturbation_mode)
 
         alt_path = self.planner.plan()
         alt_length = len(alt_path) if alt_path else float('inf')

@@ -211,7 +211,11 @@ class PathPlanningApp:
         ttk.Button(settings_frame, text="Apply Settings",
                    command=self.apply_settings).grid(row=0, column=6, padx=5, pady=5)
 
-        
+        # Affordance selector   
+        self.selected_affordance = tk.StringVar(value="remove")
+        ttk.Label(control_frame, text="Affordance:").grid(row=4, column=0)
+        ttk.OptionMenu(control_frame, self.selected_affordance, "remove", "remove", "move", "random").grid(row=4, column=1)
+    
         # Save and Load Environment buttons - moved to be after Apply Settings
         ttk.Button(settings_frame, text="Save Environment", 
                   command=self.save_environment).grid(row=0, column=7, padx=5, pady=5)
@@ -338,7 +342,7 @@ class PathPlanningApp:
         # Regenerate environment with new settings
         self.generate_environment()
         env_type = self.selected_environment_type.get()
-        self.status_var.set(f"Settings applied: Grid size {self.grid_size}, Obstacles {self.num_obstacles}, Type: {env_type}")
+        self.status_var.set(f"Settings applied: Grid size {self.grid_size}, Obstacles {self.num_obstacles}, Type: {env_type}. Click on empty space to set start position.")
 
     def on_grid_click(self, event):
         if self.animation_running or event.xdata is None or event.ydata is None:
@@ -531,16 +535,27 @@ class PathPlanningApp:
         env_type = self.selected_environment_type.get()
         self.status_var.set(f"Generating {env_type.lower()} environment...")
         self.root.update()  # Update GUI to show status
-        
+
         # Create environment generator
         generator = EnvironmentGenerator(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
         
-        # Generate environment based on selected type
-        if env_type == "Feasible":
-            self.env = generator.generate_environment(feasible=True, max_attempts=100)
-        elif env_type == "Infeasible":
-            self.env = generator.generate_environment(feasible=False, max_attempts=100)
-        else:  # Random - don't care if feasible or not
+        # Safely extract start and goal if env is initialized
+        start = self.env.agent_pos if self.env else None
+        goal = self.env.goal_pos if self.env else None
+        
+        if env_type in ["Feasible", "Infeasible"]:
+            if start is None or goal is None:
+                self.status_var.set("Please set START and GOAL positions before generating a feasible or infeasible environment.")
+                return
+
+            self.env = generator.generate_environment(
+                feasible=(env_type == "Feasible"),
+                max_attempts=100,
+                start=start,
+                goal=goal,
+                infeasibility_mode="block_path" if env_type == "Infeasible" else None
+            )
+        else:
             self.env = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
         
         # Check if environment generation was successful
@@ -549,9 +564,13 @@ class PathPlanningApp:
             self.env = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
         else:
             # Reset position markers
-            self.env.agent_pos = None
-            self.env.goal_pos = None
-            self.status_var.set("Environment ready. Click on empty space to set start position.")
+            if self.env.agent_pos is not None and self.env.goal_pos is not None:
+                self.start_button.config(state=tk.NORMAL)
+                self.status_var.set("Environment generated. Ready to start planning.") 
+            else:
+                self.env.agent_pos = None
+                self.env.goal_pos = None
+                self.status_var.set("Environment ready. Click on empty space to set start position.")
         
         self.draw_grid()
 
@@ -1076,10 +1095,12 @@ class PathPlanningApp:
             self.root.update()
         
         # Generate explanations
+        affordance_mode = self.selected_affordance.get()
         importance = explainer.explain(
             num_samples=len(self.env.obstacle_shapes.keys()) + 10,
             callback=update_progress,
-            strategy="remove_each_obstacle_once" # "remove_each_obstacle_once", "random", "full_combinations"
+            strategy="remove_each_obstacle_once", # "remove_each_obstacle_once", "random", "full_combinations"
+            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
         )
         
         if len(importance) == 0:
@@ -1179,12 +1200,14 @@ class PathPlanningApp:
             self.root.update()
         
         # Generate explanations
+        affordance_mode = self.selected_affordance.get()
         anchors = explainer.explain(
             num_samples=50,  # Less samples for faster computation
             precision_threshold=0.9,
             min_coverage=0.1,
             callback=update_progress,
-            detect_changes=False
+            detect_changes=False,
+            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
         )
         
         if not anchors:
@@ -1223,9 +1246,11 @@ class PathPlanningApp:
             self.root.update()
         
         # Generate explanations
+        affordance_mode = self.selected_affordance.get()
         shap_values = explainer.explain(
             num_samples=150,  # Less samples for faster computation
-            callback=update_progress
+            callback=update_progress,
+            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
         )
         
         if not shap_values:
@@ -1255,7 +1280,10 @@ class PathPlanningApp:
     def explain_with_counterfactual(self, planner):
         explainer = CounterfactualExplainer()
         explainer.set_environment(self.env, planner)
-        counterfactuals = explainer.explain(max_subset_size=2)
+        affordance_mode = self.selected_affordance.get()
+        counterfactuals = explainer.explain(max_subset_size=2,
+                                            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
+                                            )
 
         fig = explainer.visualize(counterfactuals)
 
@@ -1279,7 +1307,10 @@ class PathPlanningApp:
     def explain_with_contrastive(self, planner):
         explainer = ContrastiveExplainer()
         explainer.set_environment(self.env, planner)
-        result = explainer.explain()
+        affordance_mode = self.selected_affordance.get()
+        result = explainer.explain(
+            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
+        )
 
         fig = explainer.visualize(result)
 

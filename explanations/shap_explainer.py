@@ -17,9 +17,9 @@ class SHAPExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
         self.baseline_path = planner.plan()
-        self.baseline_path_length = len(self.baseline_path) if self.baseline_path else float('inf')
+        self.baseline_path_length = len(self.baseline_path) if self.baseline_path else self.get_penalty_value()
 
-    def explain(self, num_samples=100, callback=None):
+    def explain(self, num_samples=100, callback=None, perturbation_mode="remove"):
         obstacle_keys = list(self.env.obstacle_shapes.keys())
         num_obstacles = len(obstacle_keys)
 
@@ -77,7 +77,7 @@ class SHAPExplainer:
             if key in cache:
                 return cache[key]
 
-        original_state, _ = self.env.generate_perturbation(combination=combination)
+        original_state, _ = self.env.generate_perturbation(combination=combination, mode=perturbation_mode)
 
         planner_class = type(self.planner)
         planner = planner_class()
@@ -89,13 +89,17 @@ class SHAPExplainer:
         )
         path = planner.plan()
 
-        path_length = len(path) if path else float('inf')
+        path_length = len(path) if path else self.get_penalty_value()
         self.env.restore_from_perturbation(original_state)
 
         if cache is not None:
             cache[tuple(combination)] = path_length
 
         return path_length
+    
+    def get_penalty_value(self):
+    # Return a large constant penalty for infeasible paths
+        return self.grid_size * self.grid_size + 1
 
     def visualize(self, shap_values):
         if not shap_values:

@@ -26,7 +26,7 @@ class LimeExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
     
-    def explain(self, num_samples=100, callback=None, strategy="remove_each_obstacle_once"):
+    def explain(self, num_samples=100, callback=None, strategy="remove_each_obstacle_once", perturbation_mode="remove"):
         """
         Generate LIME-based explanations for the path planning problem
         
@@ -80,7 +80,10 @@ class LimeExplainer:
                 callback(i, total_combinations)
             
             # Apply perturbation using the combination
-            original_state, _ = self.env.generate_perturbation(combination=combination)
+            original_state, _ = self.env.generate_perturbation(
+                combination=combination,
+                mode=perturbation_mode
+            )
             
             # Run path planning
             path = self.planner.plan(

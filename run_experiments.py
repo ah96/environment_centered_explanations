@@ -43,7 +43,8 @@ def main():
             grid_size=args.grid_size,
             num_obstacles=args.num_obstacles,
             max_attempts_per_env=args.max_attempts_per_env,
-            max_total_attempts=args.max_total_attempts
+            max_total_attempts=args.max_total_attempts,
+            infeasibility_mode="block_path" if not args.feasible else None
         )
         print(f"Generated {len(env_paths)} environments")
     

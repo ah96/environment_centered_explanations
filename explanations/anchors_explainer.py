@@ -30,7 +30,7 @@ class AnchorsExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
         
-    def explain(self, num_samples=100, precision_threshold=0.95, min_coverage=0.1, callback=None, detect_changes=False):
+    def explain(self, num_samples=100, precision_threshold=0.95, min_coverage=0.1, callback=None, detect_changes=False, perturbation_mode="remove"):
         """
         Generate Anchors-based explanations for the path planning problem.
 
@@ -95,7 +95,7 @@ class AnchorsExplainer:
                     else:
                         combination.append(random.randint(0, 1))
 
-                original_state, _ = self.env.generate_perturbation(combination=combination)
+                original_state, _ = self.env.generate_perturbation(combination=combination, mode=perturbation_mode)
                 path = self.planner.plan()
                 path_length = len(path) if path else float('inf')
 

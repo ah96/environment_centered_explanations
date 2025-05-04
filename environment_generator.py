@@ -37,7 +37,7 @@ class EnvironmentGenerator:
             if pos not in env.obstacles and (env.agent_pos is None or pos != env.agent_pos):
                 return pos
                 
-    def generate_environment(self, feasible=True, max_attempts=100):
+    def generate_environment(self, feasible=True, max_attempts=100, start=None, goal=None, infeasibility_mode=None):
         """
         Generate an environment that meets the specified feasibility criteria.
         
@@ -53,9 +53,19 @@ class EnvironmentGenerator:
             env = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
             
             # Set random start and goal positions
-            env.agent_pos = self.generate_position(env)
-            env.goal_pos = self.generate_position(env)
-            
+            if start:
+                env.agent_pos = start
+            else:
+                env.agent_pos = self.generate_position(env)
+
+            if goal:
+                env.goal_pos = goal
+            else:
+                env.goal_pos = self.generate_position(env)
+
+            if not feasible and infeasibility_mode == "block_path":
+                self._block_corridor(env, env.agent_pos, env.goal_pos)
+
             # Check if the environment meets our criteria
             env_feasible = self.is_feasible(env)
             
@@ -70,7 +80,49 @@ class EnvironmentGenerator:
         print(f"Failed to generate environment after {max_attempts} attempts")
         return None  # Failed to generate a suitable environment
     
-    def generate_environments_batch(self, n, feasible=True, max_attempts_per_env=100, max_total_attempts=10000):
+    def _block_corridor(self, env, start, goal):
+        """
+        Adds obstacles along the straight-line path between start and goal.
+        This increases the chance of making the environment infeasible.
+        """
+        if not start or not goal:
+            return
+
+        def bresenham(p0, p1):
+            x0, y0 = p0[1], p0[0]
+            x1, y1 = p1[1], p1[0]
+            points = []
+            dx = abs(x1 - x0)
+            dy = -abs(y1 - y0)
+            sx = 1 if x0 < x1 else -1
+            sy = 1 if y0 < y1 else -1
+            err = dx + dy
+            while True:
+                points.append([y0, x0])
+                if x0 == x1 and y0 == y1:
+                    break
+                e2 = 2 * err
+                if e2 >= dy:
+                    err += dy
+                    x0 += sx
+                if e2 <= dx:
+                    err += dx
+                    y0 += sy
+            return points
+
+        path_line = bresenham(start, goal)
+        shape_id = max(env.obstacle_shapes.keys(), default=-1) + 1
+        shape_cells = []
+
+        for cell in path_line[1:-1]:  # exclude start and goal
+            if cell not in env.obstacles:
+                env.obstacles.append(cell)
+                shape_cells.append(cell)
+
+        if shape_cells:
+            env.obstacle_shapes[shape_id] = shape_cells
+    
+    def generate_environments_batch(self, n, feasible=True, max_attempts_per_env=100, max_total_attempts=10000, infeasibility_mode=None):
         """
         Generate n environments that meet the feasibility criteria.
         
@@ -96,7 +148,7 @@ class EnvironmentGenerator:
                 break
                 
             print(f"Generating environment {i+1}/{n}...")
-            env = self.generate_environment(feasible=feasible, max_attempts=attempts_left)
+            env = self.generate_environment(feasible=feasible, max_attempts=attempts_left, infeasibility_mode=infeasibility_mode)
             
             if env:
                 environments.append(env)

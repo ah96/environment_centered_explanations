@@ -18,7 +18,7 @@ class CounterfactualExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
 
-    def explain(self, max_subset_size=2, improvement_threshold=1):
+    def explain(self, max_subset_size=2, improvement_threshold=1, perturbation_mode="remove"):
         obstacle_keys = list(self.env.obstacle_shapes.keys())
         num_obstacles = len(obstacle_keys)
         if num_obstacles == 0:
@@ -36,7 +36,7 @@ class CounterfactualExplainer:
                 for i in subset:
                     combination[i] = 0  # remove obstacle
 
-                original_state, _ = self.env.generate_perturbation(combination=combination)
+                original_state, _ = self.env.generate_perturbation(combination=combination, mode=perturbation_mode)
                 path = self.planner.plan(
                     self.env.agent_pos,
                     self.env.goal_pos,

@@ -174,7 +174,7 @@ class GridWorldEnv:
         else:
             raise ValueError(f"Unknown combination strategy: {strategy}")
 
-    def generate_perturbation(self, strategy="random", combination=None):
+    def generate_perturbation(self, strategy="random", combination=None, mode="remove"):
         """
         Generates and applies perturbation by removing obstacle shapes based on strategy and combination.
         
@@ -230,9 +230,17 @@ class GridWorldEnv:
         else:
             raise ValueError(f"Unknown perturbation strategy: {strategy}")
         
-        # Apply the perturbation by removing the selected obstacle shapes
+        # Apply the perturbation by removing or moving the selected obstacle shapes
         for shape_id in shapes_to_remove_ids:
-            self.remove_obstacle_shape(shape_id)
+            if mode == "remove":
+                self.remove_obstacle_shape(shape_id)
+            elif mode == "move":
+                self.move_obstacle_shape(shape_id)
+            elif mode == "random":
+                if random.random() < 0.5:
+                    self.remove_obstacle_shape(shape_id)
+                else:
+                    self.move_obstacle_shape(shape_id)
             
         return original_obstacles, shapes_to_remove_ids
 
@@ -249,3 +257,28 @@ class GridWorldEnv:
             "obstacles": self.obstacles,
             "obstacle_shapes": self.obstacle_shapes
         }
+    
+    def move_obstacle_shape(self, shape_id, max_attempts=10):
+        """Attempt to move the obstacle shape to a new valid location."""
+        if shape_id not in self.obstacle_shapes:
+            return False
+        
+        old_shape = self.obstacle_shapes[shape_id]
+        shape_vector = [(r - old_shape[0][0], c - old_shape[0][1]) for r, c in old_shape]
+
+        for _ in range(max_attempts):
+            new_anchor = random.choice([
+                [r, c]
+                for r in range(self.grid_size)
+                for c in range(self.grid_size)
+                if [r, c] not in self.obstacles
+            ])
+            new_shape = [[new_anchor[0] + dr, new_anchor[1] + dc] for dr, dc in shape_vector]
+            if all(0 <= r < self.grid_size and 0 <= c < self.grid_size and [r, c] not in self.obstacles for r, c in new_shape):
+                for point in old_shape:
+                    if point in self.obstacles:
+                        self.obstacles.remove(point)
+                self.obstacle_shapes[shape_id] = new_shape
+                self.obstacles.extend(new_shape)
+                return True
+        return False

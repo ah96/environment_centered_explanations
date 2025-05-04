@@ -24,6 +24,7 @@ from explanations.contrastive_explainer import ContrastiveExplainer
 
 from environment_generator import EnvironmentGenerator
 from gui import GridWorldEnv
+from metrics import compute_path_metrics
 
 class BatchExperimentRunner:
     def __init__(self):
@@ -76,7 +77,7 @@ class BatchExperimentRunner:
     
     
     def generate_environments(self, n, feasible=True, grid_size=10, num_obstacles=8, 
-                         max_attempts_per_env=100, max_total_attempts=10000):
+                         max_attempts_per_env=100, max_total_attempts=10000, infeasibility_mode=None):
         """
         Generate n environments and save them to the environments folder.
         
@@ -102,7 +103,8 @@ class BatchExperimentRunner:
             n, 
             feasible=feasible,
             max_attempts_per_env=max_attempts_per_env,
-            max_total_attempts=max_total_attempts
+            max_total_attempts=max_total_attempts,
+            infeasibility_mode=infeasibility_mode
         )
         
         # Save the environments
@@ -147,7 +149,9 @@ class BatchExperimentRunner:
                 "New Execution Time",
                 "Path Length Difference",
                 "Path Length Change %",
-                "Execution Time Difference"
+                "Execution Time Difference",
+                "Path Restored",
+                "Path Success"
             ])
             
         # Process each environment
@@ -243,34 +247,34 @@ class BatchExperimentRunner:
             new_path = result[0] if isinstance(result, tuple) else result
             new_exec_time = time.time() - start_time
             
-            new_path_length = len(new_path) if new_path else 0
-            
-            # Calculate differences
-            path_length_diff = new_path_length - original_path_length
-            
-            if original_path_length > 0:
-                path_length_change_pct = (path_length_diff / original_path_length) * 100
-            else:
-                path_length_change_pct = float('inf') if new_path_length > 0 else 0
-            
-            exec_time_diff = new_exec_time - original_exec_time
-            
+            # Compute metrics
+            metrics = compute_path_metrics(original_path, new_path, original_exec_time, new_exec_time, env.grid_size)
+            '''
+            original_path_length = metrics["original_length"]
+            new_path_length = metrics["new_length"]
+            path_length_diff = metrics["path_length_diff"]
+            path_length_change_pct = metrics["path_length_change_pct"]
+            exec_time_diff = metrics["exec_time_diff"]
+            '''
+
             # Write results to CSV
             with open(results_csv, 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow([
-                    os.path.basename(env_path),
-                    planner_name,
-                    explainer_name,
-                    original_path_length,
-                    original_exec_time,
-                    obstacles_removed,
-                    new_path_length,
-                    new_exec_time,
-                    path_length_diff,
-                    path_length_change_pct,
-                    exec_time_diff
-                ])
+                os.path.basename(env_path),
+                planner_name,
+                explainer_name,
+                metrics["original_length"],
+                original_exec_time,
+                obstacles_removed,
+                metrics["new_length"],
+                new_exec_time,
+                metrics["path_length_diff"],
+                metrics["path_length_change_pct"],
+                metrics["exec_time_diff"],
+                metrics["path_restored"],
+                metrics["path_success"]
+            ])
             
             # Restore environment to original state
             env.obstacles = original_obstacles.copy()
