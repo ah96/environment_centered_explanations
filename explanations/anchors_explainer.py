@@ -74,6 +74,32 @@ class AnchorsExplainer:
                 idx = random.randint(0, num_obstacles - 1)
                 rule[idx] = random.choice([0, 1])
             candidate_anchors.append(rule)
+            
+        # Add more specific combinations - especially useful for path changes
+        for i in range(num_obstacles):
+            for j in range(i+1, num_obstacles):
+                # Try keep-keep combinations
+                rule = [None] * num_obstacles
+                rule[i] = 1
+                rule[j] = 1
+                candidate_anchors.append(rule)
+                
+                # Try remove-remove combinations
+                rule = [None] * num_obstacles
+                rule[i] = 0
+                rule[j] = 0
+                candidate_anchors.append(rule)
+                
+                # Try keep-remove combinations
+                rule = [None] * num_obstacles
+                rule[i] = 1
+                rule[j] = 0
+                candidate_anchors.append(rule)
+                
+                rule = [None] * num_obstacles
+                rule[i] = 0
+                rule[j] = 1
+                candidate_anchors.append(rule)
 
         anchor_results = {}
         original_obstacles = self.env.obstacles.copy()
@@ -116,24 +142,42 @@ class AnchorsExplainer:
                 precision = outcome_counts[majority_outcome] / len(samples_results)
                 coverage = sum(1 for r in anchor_rule if r is not None) / num_obstacles
 
-                # match user-desired outcome type
-                if majority_outcome == detect_changes and precision >= precision_threshold and coverage >= min_coverage:
-                    rule_description = []
-                    for i, value in enumerate(anchor_rule):
-                        if value is not None:
-                            action = "keep" if value == 1 else "remove"
-                            rule_description.append(f"{action} obstacle #{i}")
-
-                    rule_str = " AND ".join(rule_description)
-                    outcome_str = "path changes significantly" if detect_changes else "path remains similar"
-
-                    anchor_results[rule_str] = {
-                        "rule": anchor_rule,
-                        "precision": precision,
-                        "coverage": coverage,
-                        "outcome": majority_outcome,
-                        "description": f"When we {rule_str}, the {outcome_str} (precision: {precision:.2f})"
-                    }
+                # Modified anchor selection logic based on the detect_changes parameter
+                if detect_changes:
+                    # For path changes, we want rules where majority_outcome is True (path changed)
+                    # and use a slightly lower precision threshold
+                    if majority_outcome and precision >= (precision_threshold * 0.8) and coverage >= min_coverage:
+                        rule_description = []
+                        for i, value in enumerate(anchor_rule):
+                            if value is not None:
+                                action = "keep" if value == 1 else "remove"
+                                rule_description.append(f"{action} obstacle #{obstacle_keys[i]}")
+                        
+                        rule_str = " AND ".join(rule_description)
+                        anchor_results[rule_str] = {
+                            "rule": anchor_rule,
+                            "precision": precision, 
+                            "coverage": coverage,
+                            "outcome": majority_outcome,
+                            "description": f"When we {rule_str}, the path changes significantly (precision: {precision:.2f})"
+                        }
+                else:
+                    # For path stability, we want rules where majority_outcome is False (path didn't change)
+                    if not majority_outcome and precision >= precision_threshold and coverage >= min_coverage:
+                        rule_description = []
+                        for i, value in enumerate(anchor_rule):
+                            if value is not None:
+                                action = "keep" if value == 1 else "remove"
+                                rule_description.append(f"{action} obstacle #{obstacle_keys[i]}")
+                        
+                        rule_str = " AND ".join(rule_description)
+                        anchor_results[rule_str] = {
+                            "rule": anchor_rule,
+                            "precision": precision, 
+                            "coverage": coverage,
+                            "outcome": majority_outcome,
+                            "description": f"When we {rule_str}, the path remains similar (precision: {precision:.2f})"
+                        }
 
         self.env.obstacles = original_obstacles.copy()
 
@@ -169,7 +213,8 @@ class AnchorsExplainer:
         for i, (rule_str, anchor_data) in enumerate(top_anchors):
             ax = axes[i]
             ax.set_xlim(-0.5, self.grid_size - 0.5)
-            ax.set_ylim(-0.5, self.grid_size - 0.5)
+            # ax.set_ylim(-0.5, self.grid_size - 0.5)  # Fixed: Don't invert y-axis
+            ax.set_ylim(self.grid_size - 0.5, -0.5)  # Invert y axis for correct orientation
             ax.set_aspect('equal')
             ax.set_xticks(np.arange(0, self.grid_size, 1))
             ax.set_yticks(np.arange(0, self.grid_size, 1))

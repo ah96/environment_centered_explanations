@@ -1190,49 +1190,97 @@ class PathPlanningApp:
 
     def explain_with_anchors(self, planner):
         """Generate Anchors explanations"""
-        # Create explainer
         explainer = AnchorsExplainer()
         explainer.set_environment(self.env, planner)
         
-        # Callback for progress updates
-        def update_progress(current, total):
-            self.status_var.set(f"Generating Anchors explanation: {current+1}/{total}")
-            self.root.update()
+        # Create UI for detection mode choice
+        top = tk.Toplevel(self.root)
+        top.title("Anchors Explanation Options")
+        top.geometry("400x200")
         
-        # Generate explanations
+        # Create variables for user choices
+        detect_changes_var = tk.BooleanVar(value=False)
+        num_samples_var = tk.IntVar(value=20)
         affordance_mode = self.selected_affordance.get()
-        anchors = explainer.explain(
-            num_samples=50,  # Less samples for faster computation
-            precision_threshold=0.9,
-            min_coverage=0.1,
-            callback=update_progress,
-            detect_changes=False,
-            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
-        )
         
-        if not anchors:
-            self.status_var.set("No meaningful anchors found.")
-            return
+        # Create option selection frame
+        frame = ttk.Frame(top, padding="20")
+        frame.pack(fill=tk.BOTH, expand=True)
         
-        # Visualize the anchors
-        fig = explainer.visualize(anchors)
+        # Explanation target options
+        ttk.Label(frame, text="Find rules where:").grid(row=0, column=0, sticky="w", pady=10)
+        ttk.Radiobutton(frame, text="Path remains stable", variable=detect_changes_var, 
+                        value=False).grid(row=1, column=0, sticky="w", padx=20)
+        ttk.Radiobutton(frame, text="Path changes significantly", variable=detect_changes_var, 
+                        value=True).grid(row=2, column=0, sticky="w", padx=20)
         
-        if fig:
-            # Save explanation
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            images_dir = "output_images"
-            if not os.path.exists(images_dir):
-                os.makedirs(images_dir)
+        # Number of samples slider
+        ttk.Label(frame, text="Number of samples:").grid(row=3, column=0, sticky="w", pady=10)
+        ttk.Scale(frame, from_=10, to=200, variable=num_samples_var, 
+                orient=tk.HORIZONTAL).grid(row=4, column=0, sticky="ew")
+        ttk.Label(frame, textvariable=num_samples_var).grid(row=4, column=1)
+        
+        # Run button
+        ttk.Button(frame, text="Generate Explanation", 
+                command=lambda: run_explanation()).grid(row=5, column=0, pady=15)
+        
+        def run_explanation():
+            # Close dialog
+            top.destroy()
             
-            filepath = os.path.join(images_dir, f"anchors_explanation_{timestamp}.png")
-            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            # Get user selections
+            detect_changes = detect_changes_var.get()
+            num_samples = num_samples_var.get()
             
-            # Also display it
-            plt.show()
+            # Update status
+            self.status_var.set(f"Generating Anchors explanation: finding rules where paths {'change' if detect_changes else 'remain stable'}...")
+            self.root.update()
             
-            self.status_var.set(f"Anchors explanation generated and saved to {filepath}")
-        else:
-            self.status_var.set("Could not generate Anchors visualization.")
+            # Callback for progress updates
+            def update_progress(current, total):
+                self.status_var.set(f"Generating Anchors explanation: {current+1}/{total}")
+                self.root.update()
+
+            # set smaller precision for path changes
+            if detect_changes:
+                precision_threshold = 0.1
+            else:
+                precision_threshold = 0.9
+            
+            # Generate explanations
+            anchors = explainer.explain(
+                num_samples=num_samples,
+                precision_threshold=precision_threshold,
+                min_coverage=0.1,
+                callback=update_progress,
+                detect_changes=detect_changes,
+                perturbation_mode=affordance_mode
+            )
+            
+            if not anchors:
+                self.status_var.set(f"No meaningful anchors found for {'path changes' if detect_changes else 'path stability'}.")
+                return
+            
+            # Visualize the anchors
+            fig = explainer.visualize(anchors)
+            
+            if fig:
+                # Save explanation
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                images_dir = "output_images"
+                if not os.path.exists(images_dir):
+                    os.makedirs(images_dir)
+                
+                path_type = "changing" if detect_changes else "stable"
+                filepath = os.path.join(images_dir, f"anchors_explanation_{path_type}_{timestamp}.png")
+                fig.savefig(filepath, bbox_inches='tight', dpi=150)
+                
+                # Also display it
+                plt.show()
+                
+                self.status_var.set(f"Anchors explanation for {path_type} paths generated and saved to {filepath}")
+            else:
+                self.status_var.set("Could not generate Anchors visualization.")
 
     def explain_with_shap(self, planner):
         """Generate SHAP explanations"""
