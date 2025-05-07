@@ -30,7 +30,7 @@ class SHAPExplainer:
         original_obstacles = self.env.obstacles.copy()
         evaluated_combinations = {}
 
-        baseline_path_length = self.compute_path_length([1] * num_obstacles)
+        baseline_path_length = self.compute_path_length([1] * num_obstacles, evaluated_combinations, perturbation_mode)
 
         for sample in range(num_samples):
             if callback:
@@ -44,7 +44,7 @@ class SHAPExplainer:
 
             for obs_idx in obstacle_order:
                 current_combination[obs_idx] = 0
-                new_path_length = self.compute_path_length(current_combination, evaluated_combinations)
+                new_path_length = self.compute_path_length(current_combination, evaluated_combinations, perturbation_mode)
                 marginal_contribution = prev_path_length - new_path_length
                 shap_values[obstacle_keys[obs_idx]] += marginal_contribution
                 prev_path_length = new_path_length
@@ -63,7 +63,7 @@ class SHAPExplainer:
             combo = [1] * num_obstacles
             idx = obstacle_keys.index(shape_id)
             combo[idx] = 0
-            length = self.compute_path_length(combo)
+            length = self.compute_path_length(combo, None, perturbation_mode)
             print(f"Removing obstacle #{shape_id}: path length = {length}")
 
         for k, v in shap_values.items():
@@ -71,7 +71,7 @@ class SHAPExplainer:
 
         return shap_values
 
-    def compute_path_length(self, combination, cache=None):
+    def compute_path_length(self, combination, cache=None, perturbation_mode="remove"):
         if cache is not None:
             key = tuple(combination)
             if key in cache:
