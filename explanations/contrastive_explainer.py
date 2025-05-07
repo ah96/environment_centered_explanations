@@ -70,7 +70,7 @@ class ContrastiveExplainer:
     def visualize(self, contrastive_result):
         fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_xlim(-0.5, self.grid_size - 0.5)
-        ax.set_ylim(-0.5, self.grid_size - 0.5)
+        ax.set_ylim(self.grid_size - 0.5, -0.5)
         ax.set_aspect('equal')
         ax.set_xticks(np.arange(0, self.grid_size, 1))
         ax.set_yticks(np.arange(0, self.grid_size, 1))

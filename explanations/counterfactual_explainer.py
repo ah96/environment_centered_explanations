@@ -70,7 +70,7 @@ class CounterfactualExplainer:
         for i, cf in enumerate(top_counterfactuals):
             ax = axes[i]
             ax.set_xlim(-0.5, self.grid_size - 0.5)
-            ax.set_ylim(-0.5, self.grid_size - 0.5)
+            ax.set_ylim(self.grid_size - 0.5, -0.5)
             ax.set_aspect('equal')
             ax.set_xticks(np.arange(0, self.grid_size, 1))
             ax.set_yticks(np.arange(0, self.grid_size, 1))
