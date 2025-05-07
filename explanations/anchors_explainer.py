@@ -53,7 +53,14 @@ class AnchorsExplainer:
 
         original_path = self.planner.plan()
         baseline_path_length = len(original_path) if original_path else float('inf')
-
+        
+        # Adjust parameters for path changes detection
+        if detect_changes:
+            # Lower threshold for path changes to find any relevant patterns
+            precision_threshold = max(0.6, precision_threshold * 0.7)
+            # Allow smaller coverage for path changes
+            min_coverage = min_coverage * 0.8
+        
         candidate_anchors = []
 
         # Basic one-obstacle rules
@@ -66,9 +73,10 @@ class AnchorsExplainer:
             remove_rule[i] = 0
             candidate_anchors.append(remove_rule)
 
-        # Random multi-obstacle rules
-        for _ in range(min(20, num_obstacles * 2)):
-            rule_size = random.randint(2, min(3, num_obstacles))
+        # Random multi-obstacle rules - adjust max rule size for path changes
+        max_rule_size = 5 if detect_changes else 3
+        for _ in range(min(40, num_obstacles * 2)):
+            rule_size = random.randint(2, min(max_rule_size, num_obstacles))
             rule = [None] * num_obstacles
             for _ in range(rule_size):
                 idx = random.randint(0, num_obstacles - 1)
@@ -100,15 +108,76 @@ class AnchorsExplainer:
                 rule[i] = 0
                 rule[j] = 1
                 candidate_anchors.append(rule)
+        
+        # For path changes, add larger combinations - clusters of obstacles
+        if detect_changes and num_obstacles > 3:
+            # Try some larger combinations for more complex scenarios
+            for _ in range(min(20, num_obstacles)):
+                # Create larger rules (3-6 obstacles specified)
+                rule_size = random.randint(3, min(6, num_obstacles))
+                rule = [None] * num_obstacles
+                selected_indices = random.sample(range(num_obstacles), rule_size)
+                for idx in selected_indices:
+                    rule[idx] = random.choice([0, 1])
+                candidate_anchors.append(rule)
+                
+            # Try removing/keeping clusters of adjacent obstacles
+            # This is useful because path changes often happen when groups of obstacles are affected
+            obstacle_indices = list(range(num_obstacles))
+            random.shuffle(obstacle_indices)
+            for start_idx in range(0, min(20, num_obstacles), 3):
+                end_idx = min(start_idx + 3, num_obstacles)
+                selected_indices = obstacle_indices[start_idx:end_idx]
+                
+                # Keep all selected
+                rule = [None] * num_obstacles
+                for idx in selected_indices:
+                    rule[idx] = 1  # Keep
+                candidate_anchors.append(rule)
+                
+                # Remove all selected
+                rule = [None] * num_obstacles
+                for idx in selected_indices:
+                    rule[idx] = 0  # Remove
+                candidate_anchors.append(rule)
 
         anchor_results = {}
         original_obstacles = self.env.obstacles.copy()
         total_iterations = len(candidate_anchors) * num_samples
         iteration = 0
+        
+        # If detecting path changes, run some initial tests to find promising obstacle combinations
+        promising_indices = []
+        if detect_changes and num_obstacles > 5:
+            # Check each obstacle's individual impact
+            for i in range(min(num_obstacles, 20)):
+                # Remove just this obstacle
+                temp_obstacles = original_obstacles.copy()
+                obstacle_id = obstacle_keys[i]
+                if obstacle_id in temp_obstacles:
+                    del temp_obstacles[obstacle_id]
+                    
+                    self.env.obstacles = temp_obstacles
+                    path = self.planner.plan()
+                    new_path_length = len(path) if path else float('inf')
+                    
+                    # If removing this obstacle causes a significant path change, it's promising
+                    if abs(new_path_length - baseline_path_length) > 1:
+                        promising_indices.append(i)
+                        
+                    self.env.obstacles = original_obstacles.copy()
 
         for anchor_idx, anchor_rule in enumerate(candidate_anchors):
             if callback:
                 callback(anchor_idx, len(candidate_anchors))
+                
+            # For path changes, prioritize rules that involve promising obstacles
+            if detect_changes and promising_indices and random.random() < 0.3:
+                # 30% chance to modify this rule to include promising obstacles
+                rule = list(anchor_rule)  # Copy the rule
+                promising_idx = random.choice(promising_indices)
+                rule[promising_idx] = random.choice([0, 1])  # Either keep or remove this promising obstacle
+                anchor_rule = rule
 
             samples_results = []
 
@@ -145,8 +214,7 @@ class AnchorsExplainer:
                 # Modified anchor selection logic based on the detect_changes parameter
                 if detect_changes:
                     # For path changes, we want rules where majority_outcome is True (path changed)
-                    # and use a slightly lower precision threshold
-                    if majority_outcome and precision >= (precision_threshold * 0.8) and coverage >= min_coverage:
+                    if majority_outcome and precision >= precision_threshold and coverage >= min_coverage:
                         rule_description = []
                         for i, value in enumerate(anchor_rule):
                             if value is not None:
