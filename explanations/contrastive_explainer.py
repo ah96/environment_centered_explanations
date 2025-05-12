@@ -29,10 +29,11 @@ class ContrastiveExplainer:
 
         if alternative_combination is None:
             alternative_combination = [1] * num_obstacles
-            # Randomly remove 2 obstacles for contrast
-            if num_obstacles >= 2:
-                alternative_combination[0] = 0
-                alternative_combination[1] = 0
+            # Try removing obstacles near factual path
+            factual_set = set(tuple(p) for p in factual_path)
+            for i, (key, shape) in enumerate(self.env.obstacle_shapes.items()):
+                if any(tuple(p) in factual_set for p in shape):
+                    alternative_combination[i] = 0
 
         original_state, _ = self.env.generate_perturbation(combination=alternative_combination, mode=perturbation_mode)
 
