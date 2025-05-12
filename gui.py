@@ -27,8 +27,13 @@ from path_planning.prm import PRMPlanner
 from explanations.lime_explainer import LimeExplainer
 from explanations.anchors_explainer import AnchorsExplainer
 from explanations.shap_explainer import SHAPExplainer
-from explanations.counterfactual_explainer import CounterfactualExplainer
 from explanations.contrastive_explainer import ContrastiveExplainer
+from explanations.counterfactual_explainer import CounterfactualExplainer
+from explanations.goal_counterfactual_explainer import GoalCounterfactualExplainer
+from explanations.woe_explainer import WoEExplainer
+from explanations.bayesian_surprise_explainer import BayesianSurpriseExplainer
+from explanations.pse_explainer import PSEExplainer
+from explanations.responsibility_explainer import ResponsibilityExplainer
 
 # Path Planning App
 class PathPlanningApp:
@@ -68,7 +73,7 @@ class PathPlanningApp:
         self.selected_algorithm = tk.StringVar(value=self.algorithms[0])
         
         # Explainability options
-        self.explainability_methods = ["LIME", "Anchors", "SHAP", "Counterfactual", "Contrastive"]
+        self.explainability_methods = ["LIME", "Anchors", "SHAP", "Counterfactual", "Goal-Counterfactual", "Contrastive", "WoE", "Bayesian Surprise", "PSE", "Responsibility"]
         self.selected_explainability = tk.StringVar(value=self.explainability_methods[0])
 
         # Environment type
@@ -1076,10 +1081,20 @@ class PathPlanningApp:
             self.explain_with_anchors(planner)
         elif explanation_method == "SHAP":
             self.explain_with_shap(planner)
-        elif explanation_method == 'Counterfactual':
-            self.explain_with_counterfactual(planner)
         elif explanation_method == 'Contrastive':
             self.explain_with_contrastive(planner)
+        elif explanation_method == 'Counterfactual':
+            self.explain_with_counterfactual(planner)
+        elif explanation_method == 'Goal-Counterfactual':
+            self.explain_with_goal_counterfactual(planner)
+        elif explanation_method == "WoE":
+            self.explain_with_woe(planner)
+        elif explanation_method == "Bayesian Surprise":
+            self.explain_with_bayesian_surprise(planner)
+        elif explanation_method == "PSE":
+            self.explain_with_pse(planner)
+        elif explanation_method == "Responsibility":
+            self.explain_with_responsibility(planner)
         else:
             self.status_var.set(f"Unknown explanation method: {explanation_method}")
 
@@ -1378,6 +1393,114 @@ class PathPlanningApp:
             self.status_var.set(f"Contrastive explanation generated and saved to {filepath}")
         else:
             self.status_var.set("Could not generate Contrastive visualization.")
+
+    def explain_with_goal_counterfactual(self, planner):
+        explainer = GoalCounterfactualExplainer()
+        explainer.set_environment(self.env, planner)
+        counterfactuals = explainer.explain(max_goals=5)
+
+        fig = explainer.visualize(counterfactuals)
+        if fig:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+
+            filepath = os.path.join(images_dir, f"goal_cf_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            plt.show()
+            self.status_var.set(f"Goal-Counterfactual explanation saved to {filepath}")
+        else:
+            self.status_var.set("No valid goal counterfactuals could be generated.")
+
+    def explain_with_woe(self, planner):
+        explainer = WoEExplainer()
+        explainer.set_environment(self.env, planner)
+
+        # Example simulated posterior map: {(observation): (p_g, p_g')}
+        # You should replace this with actual plan-trace-based logic
+        posterior_map = {
+            "obs_1": (0.8, 0.2),
+            "obs_2": (0.5, 0.5),
+            "obs_3": (0.2, 0.7),
+            "obs_4": (0.9, 0.1)
+        }
+
+        result = explainer.explain(posterior_map)
+        ranked = result["ranked"]
+
+        fig = explainer.visualize(ranked)
+        if fig:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+
+            filepath = os.path.join(images_dir, f"woe_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            plt.show()
+            self.status_var.set(f"WoE explanation saved to {filepath}")
+        else:
+            self.status_var.set("Failed to visualize WoE explanation.")
+
+    def explain_with_bayesian_surprise(self, planner):
+        explainer = BayesianSurpriseExplainer()
+        explainer.set_environment(self.env, planner)
+
+        surprise_value = explainer.explain(perturbation_mode=self.selected_affordance.get(),
+                                        num_samples=30)
+
+        posterior_probs = np.ones(30) / 30  # For visualization
+        fig = explainer.visualize(posterior_probs)
+
+        if fig:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+
+            filepath = os.path.join(images_dir, f"bayesian_surprise_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            plt.show()
+            self.status_var.set(f"Bayesian Surprise: {surprise_value:.4f} | Saved to {filepath}")
+        else:
+            self.status_var.set(f"Bayesian Surprise: {surprise_value:.4f}")
+
+    def explain_with_pse(self, planner):
+        explainer = PSEExplainer()
+        explainer.set_environment(self.env, planner)
+        result = explainer.explain(threshold=0.9)
+
+        fig = explainer.visualize(result)
+        if fig:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+            filepath = os.path.join(images_dir, f"pse_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            plt.show()
+            self.status_var.set(f"PSE explanation saved to {filepath}")
+        else:
+            self.status_var.set("Could not generate PSE explanation.")
+
+    def explain_with_responsibility(self, planner):
+        explainer = ResponsibilityExplainer()
+        explainer.set_environment(self.env, planner)
+        result = explainer.explain(max_changes=2)
+
+        fig = explainer.visualize(result)
+        if fig:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            images_dir = "output_images"
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+            filepath = os.path.join(images_dir, f"responsibility_explanation_{timestamp}.png")
+            fig.savefig(filepath, bbox_inches='tight', dpi=150)
+            plt.show()
+            self.status_var.set(f"Responsibility explanation saved to {filepath}")
+        else:
+            self.status_var.set("Could not generate Responsibility explanation.")
 
 # Run the application
 if __name__ == "__main__":

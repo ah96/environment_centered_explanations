@@ -37,12 +37,18 @@ class CounterfactualExplainer:
                     combination[i] = 0  # remove obstacle
 
                 original_state, _ = self.env.generate_perturbation(combination=combination, mode=perturbation_mode)
-                path = self.planner.plan(
-                    self.env.agent_pos,
-                    self.env.goal_pos,
-                    self.env.obstacles
+
+                # RECREATE the planner instance or reset it properly
+                self.planner.set_environment(
+                    start=self.env.agent_pos,
+                    goal=self.env.goal_pos,
+                    grid_size=self.env.grid_size,
+                    obstacles=self.env.obstacles
                 )
+
+                path = self.planner.plan()
                 new_length = len(path) if path else float('inf')
+
                 self.env.restore_from_perturbation(original_state)
 
                 if new_length + improvement_threshold < baseline_length:

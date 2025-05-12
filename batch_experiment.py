@@ -278,3 +278,33 @@ class BatchExperimentRunner:
             
             # Restore environment to original state
             env.obstacles = original_obstacles.copy()
+
+    
+    def run_woe_logging(self, env_paths, planner_name, explainer_name, results_csv, affordance="remove"):
+        from woe_explainer import rank_observations_by_woe, select_observational_marker, select_counterfactual_marker
+        with open(results_csv, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["Environment", "Observation", "WoE", "Type", "Predicted_Goal", "Counterfactual_Goal"])
+            for env_path in env_paths:
+                env = self.load_environment(env_path)
+                planner = self.planners[planner_name]()
+                planner.set_environment(env.agent_pos, env.goal_pos, env.grid_size, env.obstacles)
+                explainer = self.explainers[explainer_name]()
+                explainer.set_environment(env, planner)
+                
+                # Dummy posterior map: replace with actual posterior if available
+                posterior_map = {}
+                observations = [f"obs{i}" for i in range(5)]
+                for i in range(len(observations)):
+                    p_g = 0.5 + i * 0.05  # placeholder
+                    p_g_prime = 0.5 - i * 0.03
+                    posterior_map[observations[i]] = (p_g, p_g_prime)
+
+                woe_list = rank_observations_by_woe(posterior_map, observations)
+                om = select_observational_marker(woe_list)
+                cfo = select_counterfactual_marker(woe_list)
+
+                if om:
+                    writer.writerow([os.path.basename(env_path), om[0], om[1], "WHY", "G", "G'"])
+                if cfo:
+                    writer.writerow([os.path.basename(env_path), cfo[0], cfo[1], "WHY-NOT", "G", "G'"])
