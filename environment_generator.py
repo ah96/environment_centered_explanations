@@ -14,9 +14,10 @@ class EnvironmentGenerator:
         self.grid_size = grid_size
         self.num_obstacles = num_obstacles
         
-    def is_feasible(self, env):
+    def is_feasible(self, env, planner=None):
         """Check if the environment has a valid path from start to goal."""
-        planner = AStarPlanner()
+        if planner is None:
+            planner = AStarPlanner
         planner.set_environment(
             start=env.agent_pos,
             goal=env.goal_pos,
@@ -37,7 +38,7 @@ class EnvironmentGenerator:
             if pos not in env.obstacles and (env.agent_pos is None or pos != env.agent_pos):
                 return pos
                 
-    def generate_environment(self, feasible=True, max_attempts=100, start=None, goal=None, infeasibility_mode=None):
+    def generate_environment(self, feasible=True, max_attempts=100, start=None, goal=None, infeasibility_mode=None, planner_class=None):
         """
         Generate an environment that meets the specified feasibility criteria.
         
@@ -64,7 +65,9 @@ class EnvironmentGenerator:
                 env.goal_pos = self.generate_position(env)
 
             if not feasible and infeasibility_mode == "block_path":
-                self._block_corridor(env, env.agent_pos, env.goal_pos)
+                if planner_class is None:
+                    planner_class = AStarPlanner
+                self._block_planner_path(env, planner_class)
 
             # Check if the environment meets our criteria
             env_feasible = self.is_feasible(env)
@@ -80,49 +83,47 @@ class EnvironmentGenerator:
         print(f"Failed to generate environment after {max_attempts} attempts")
         return None  # Failed to generate a suitable environment
     
-    def _block_corridor(self, env, start, goal):
+    def _block_planner_path(self, env, planner_class, max_block_attempts=5):
         """
-        Adds obstacles along the straight-line path between start and goal.
-        This increases the chance of making the environment infeasible.
+        Iteratively blocks the path returned by the planner until the environment becomes infeasible.
+
+        Args:
+            env (GridWorldEnv): The environment instance
+            planner_class (class): The planner class to use (must have set_environment() and plan())
+            max_block_attempts (int): Max number of blocking iterations
         """
-        if not start or not goal:
-            return
+        for attempt in range(max_block_attempts):
+            # Set up planner
+            planner = planner_class()
+            planner.set_environment(
+                start=env.agent_pos,
+                goal=env.goal_pos,
+                grid_size=env.grid_size,
+                obstacles=env.obstacles
+            )
 
-        def bresenham(p0, p1):
-            x0, y0 = p0[1], p0[0]
-            x1, y1 = p1[1], p1[0]
-            points = []
-            dx = abs(x1 - x0)
-            dy = -abs(y1 - y0)
-            sx = 1 if x0 < x1 else -1
-            sy = 1 if y0 < y1 else -1
-            err = dx + dy
-            while True:
-                points.append([y0, x0])
-                if x0 == x1 and y0 == y1:
-                    break
-                e2 = 2 * err
-                if e2 >= dy:
-                    err += dy
-                    x0 += sx
-                if e2 <= dx:
-                    err += dx
-                    y0 += sy
-            return points
+            result = planner.plan(return_steps=False)
+            path = result[0] if isinstance(result, tuple) else result
 
-        path_line = bresenham(start, goal)
-        shape_id = max(env.obstacle_shapes.keys(), default=-1) + 1
-        shape_cells = []
+            if not path or len(path) == 0:
+                print(f"Path already blocked after {attempt} blocking attempts")
+                break  # Already infeasible
 
-        for cell in path_line[1:-1]:  # exclude start and goal
-            if cell not in env.obstacles:
-                env.obstacles.append(cell)
-                shape_cells.append(cell)
+            shape_id = max(env.obstacle_shapes.keys(), default=-1) + 1
+            shape_cells = []
 
-        if shape_cells:
-            env.obstacle_shapes[shape_id] = shape_cells
+            for cell in path[1:-1]:
+                if cell not in env.obstacles:
+                    env.obstacles.append(cell)
+                    shape_cells.append(cell)
+
+            if shape_cells:
+                env.obstacle_shapes[shape_id] = shape_cells
+            else:
+                print(f"No new cells blocked on attempt {attempt}.")
+                break
     
-    def generate_environments_batch(self, n, feasible=True, max_attempts_per_env=100, max_total_attempts=10000, infeasibility_mode=None):
+    def generate_environments_batch(self, n, feasible=True, max_attempts_per_env=100, max_total_attempts=10000, infeasibility_mode=None, planner_class=None):
         """
         Generate n environments that meet the feasibility criteria.
         
@@ -148,7 +149,7 @@ class EnvironmentGenerator:
                 break
                 
             print(f"Generating environment {i+1}/{n}...")
-            env = self.generate_environment(feasible=feasible, max_attempts=attempts_left, infeasibility_mode=infeasibility_mode)
+            env = self.generate_environment(feasible=feasible, max_attempts=attempts_left, infeasibility_mode=infeasibility_mode, planner_class=planner_class)
             
             if env:
                 environments.append(env)

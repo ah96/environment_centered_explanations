@@ -19,8 +19,13 @@ from path_planning.prm import PRMPlanner
 from explanations.lime_explainer import LimeExplainer
 from explanations.anchors_explainer import AnchorsExplainer
 from explanations.shap_explainer import SHAPExplainer
-from explanations.counterfactual_explainer import CounterfactualExplainer
 from explanations.contrastive_explainer import ContrastiveExplainer
+from explanations.counterfactual_explainer import CounterfactualExplainer
+from explanations.goal_counterfactual_explainer import GoalCounterfactualExplainer
+from explanations.woe_explainer import WoEExplainer
+from explanations.bayesian_surprise_explainer import BayesianSurpriseExplainer
+from explanations.pse_explainer import PSEExplainer
+from explanations.responsibility_explainer import ResponsibilityExplainer
 
 from environment_generator import EnvironmentGenerator
 from gui import GridWorldEnv
@@ -46,7 +51,12 @@ class BatchExperimentRunner:
             "Anchors": AnchorsExplainer,
             "SHAP": SHAPExplainer,
             "Counterfactual": CounterfactualExplainer,
-            "Contrastive": ContrastiveExplainer
+            "GoalCounterfactual": GoalCounterfactualExplainer,
+            "Contrastive": ContrastiveExplainer,
+            "WoE": WoEExplainer,
+            "BayesianSurprise": BayesianSurpriseExplainer,
+            "PSE": PSEExplainer,
+            "Responsibility": ResponsibilityExplainer
         }
         
     def load_environment(self, filepath):
@@ -77,7 +87,7 @@ class BatchExperimentRunner:
     
     
     def generate_environments(self, n, feasible=True, grid_size=10, num_obstacles=8, 
-                         max_attempts_per_env=100, max_total_attempts=10000, infeasibility_mode=None):
+                         max_attempts_per_env=100, max_total_attempts=10000, infeasibility_mode=None, planner_name="A*"):
         """
         Generate n environments and save them to the environments folder.
         
@@ -97,6 +107,8 @@ class BatchExperimentRunner:
         
         # Initialize generator
         generator = EnvironmentGenerator(grid_size=grid_size, num_obstacles=num_obstacles)
+
+        planner_class = self.planners.get(planner_name)
         
         # Generate environments in batch
         environments, count = generator.generate_environments_batch(
@@ -104,7 +116,8 @@ class BatchExperimentRunner:
             feasible=feasible,
             max_attempts_per_env=max_attempts_per_env,
             max_total_attempts=max_total_attempts,
-            infeasibility_mode=infeasibility_mode
+            infeasibility_mode=infeasibility_mode,
+            planner_class=planner_class
         )
         
         # Save the environments
@@ -220,12 +233,38 @@ class BatchExperimentRunner:
                 counterfactuals = explainer.explain(max_subset_size=1)
                 if counterfactuals and counterfactuals.get("counterfactuals"):
                     obstacles_removed = counterfactuals["counterfactuals"][0]
-            
+
+            elif explainer_name == "GoalCounterfactual":
+                counterfactuals = explainer.explain(goal_condition=True)
+                if counterfactuals and counterfactuals.get("counterfactuals"):
+                    obstacles_removed = counterfactuals["counterfactuals"][0]
+
             elif explainer_name == "Contrastive":
                 result = explainer.explain()
                 if result and result.get("critical_obstacles"):
                     obstacles_removed = [result["critical_obstacles"][0]]
-            
+
+            elif explainer_name == "WoE":
+                observation = explainer.explain()
+                if observation:
+                    # Example: interpret the result as a single obstacle ID
+                    obstacles_removed = [observation]
+
+            elif explainer_name == "BayesianSurprise":
+                surprise_result = explainer.explain()
+                if surprise_result and "important_obstacles" in surprise_result:
+                    obstacles_removed = [surprise_result["important_obstacles"][0]]
+
+            elif explainer_name == "PSE":
+                pse_result = explainer.explain()
+                if pse_result and "relevant_obstacles" in pse_result:
+                    obstacles_removed = [pse_result["relevant_obstacles"][0]]
+
+            elif explainer_name == "Responsibility":
+                resp = explainer.explain()
+                if resp and "responsible_obstacles" in resp:
+                    obstacles_removed = [resp["responsible_obstacles"][0]]
+           
             # Remove the obstacles
             original_obstacles = env.obstacles.copy()
             for obs_id in obstacles_removed:
@@ -278,33 +317,3 @@ class BatchExperimentRunner:
             
             # Restore environment to original state
             env.obstacles = original_obstacles.copy()
-
-    
-    def run_woe_logging(self, env_paths, planner_name, explainer_name, results_csv, affordance="remove"):
-        from woe_explainer import rank_observations_by_woe, select_observational_marker, select_counterfactual_marker
-        with open(results_csv, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["Environment", "Observation", "WoE", "Type", "Predicted_Goal", "Counterfactual_Goal"])
-            for env_path in env_paths:
-                env = self.load_environment(env_path)
-                planner = self.planners[planner_name]()
-                planner.set_environment(env.agent_pos, env.goal_pos, env.grid_size, env.obstacles)
-                explainer = self.explainers[explainer_name]()
-                explainer.set_environment(env, planner)
-                
-                # Dummy posterior map: replace with actual posterior if available
-                posterior_map = {}
-                observations = [f"obs{i}" for i in range(5)]
-                for i in range(len(observations)):
-                    p_g = 0.5 + i * 0.05  # placeholder
-                    p_g_prime = 0.5 - i * 0.03
-                    posterior_map[observations[i]] = (p_g, p_g_prime)
-
-                woe_list = rank_observations_by_woe(posterior_map, observations)
-                om = select_observational_marker(woe_list)
-                cfo = select_counterfactual_marker(woe_list)
-
-                if om:
-                    writer.writerow([os.path.basename(env_path), om[0], om[1], "WHY", "G", "G'"])
-                if cfo:
-                    writer.writerow([os.path.basename(env_path), cfo[0], cfo[1], "WHY-NOT", "G", "G'"])

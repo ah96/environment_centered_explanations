@@ -241,6 +241,9 @@ class GridWorldEnv:
                     self.remove_obstacle_shape(shape_id)
                 else:
                     self.move_obstacle_shape(shape_id)
+            elif mode == "minimal_move":
+                for shape_id in shapes_to_remove_ids:
+                    self.move_obstacle_shape_min_displacement(shape_id)
             
         return original_obstacles, shapes_to_remove_ids
 
@@ -282,3 +285,51 @@ class GridWorldEnv:
                 self.obstacles.extend(new_shape)
                 return True
         return False
+    
+    def move_obstacle_shape_min_displacement(self, shape_id, max_radius=3):
+        """
+        Move an obstacle shape to a nearby valid location with minimal displacement.
+        
+        Args:
+            shape_id (int): ID of the obstacle shape to move
+            max_radius (int): Max Manhattan distance for displacement
+            
+        Returns:
+            bool: True if successfully moved, False otherwise
+        """
+        import random
+
+        if shape_id not in self.obstacle_shapes:
+            return False
+
+        old_shape = self.obstacle_shapes[shape_id]
+        shape_vector = [(r - old_shape[0][0], c - old_shape[0][1]) for r, c in old_shape]
+
+        # Try small displacements
+        directions = [
+            (-1, 0), (1, 0), (0, -1), (0, 1),  # up, down, left, right
+            (-1, -1), (-1, 1), (1, -1), (1, 1)  # diagonals
+        ]
+        random.shuffle(directions)
+
+        for radius in range(1, max_radius + 1):
+            for dr, dc in directions:
+                delta = (dr * radius, dc * radius)
+                new_anchor = [old_shape[0][0] + delta[0], old_shape[0][1] + delta[1]]
+                new_shape = [[new_anchor[0] + d_r, new_anchor[1] + d_c] for d_r, d_c in shape_vector]
+
+                if all(
+                    0 <= r < self.grid_size and 0 <= c < self.grid_size and [r, c] not in self.obstacles
+                    for r, c in new_shape
+                ):
+                    # Remove old shape points
+                    for p in old_shape:
+                        if p in self.obstacles:
+                            self.obstacles.remove(p)
+
+                    # Apply new shape
+                    self.obstacle_shapes[shape_id] = new_shape
+                    self.obstacles.extend(new_shape)
+                    return True
+        return False
+
