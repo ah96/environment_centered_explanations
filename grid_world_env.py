@@ -1,4 +1,5 @@
 import random
+import copy
 
 class GridWorldEnv:
     def __init__(self, grid_size=10, num_obstacles=5):
@@ -333,3 +334,21 @@ class GridWorldEnv:
                     return True
         return False
 
+    import copy
+
+    def clone(self):
+        """Deep copy the environment, including obstacle shapes."""
+        cloned = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
+        cloned.agent_pos = copy.deepcopy(self.agent_pos)
+        cloned.goal_pos = copy.deepcopy(self.goal_pos)
+        cloned.obstacle_shapes = copy.deepcopy(self.obstacle_shapes)
+        cloned.obstacles = [pt for shape in cloned.obstacle_shapes.values() for pt in shape]
+        return cloned
+
+    def remove_obstacle_shape(self, shape_id):
+        """Remove an obstacle shape and update obstacle list."""
+        if shape_id in self.obstacle_shapes:
+            for pt in self.obstacle_shapes[shape_id]:
+                if pt in self.obstacles:
+                    self.obstacles.remove(pt)
+            del self.obstacle_shapes[shape_id]

@@ -233,6 +233,11 @@ class PathPlanningApp:
         self.set_goal_button = ttk.Button(control_frame, text="Set Goal", command=self.enable_set_goal)
         self.set_goal_button.grid(row=7, column=3, padx=5, pady=5)
 
+        # Button to finalize Plan B selection
+        self.done_button = ttk.Button(control_frame, text="Done selecting Plan B", command=lambda: self.finalize_plan_b(self.explainer, self.factual_path))
+        self.done_button.grid(row=5, column=0, columnspan=2, pady=5)
+        self.done_button.grid_remove()  # Hide initially
+
         # First row
         ttk.Button(control_frame, text="Generate Environment", 
                 command=self.generate_environment).grid(row=0, column=0, padx=5, pady=5)  
@@ -1368,31 +1373,53 @@ class PathPlanningApp:
             self.status_var.set("Could not generate Counterfactual visualization.")
 
     def explain_with_contrastive(self, planner):
-        explainer = ContrastiveExplainer()
-        explainer.set_environment(self.env, planner)
-        affordance_mode = self.selected_affordance.get()
-        result = explainer.explain(
-            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
-        )
+        self.explainer = ContrastiveExplainer()
+        self.explainer.set_environment(self.env, planner)
 
+        self.factual_path = planner.plan()
+        if not self.factual_path:
+            self.status_var.set("Factual path not found. Cannot explain.")
+            return
+
+        self.status_var.set("Click to define an alternative path (Plan B). Press 'Done' when finished.")
+        self.alt_path = []
+        self.plan_b_connection_id = self.canvas_widget.mpl_connect('button_press_event', self.collect_alt_path_click)
+        self.done_button.grid()  # Show button
+
+    def finalize_plan_b(self, explainer, factual_path):
+        if not self.alt_path:
+            self.status_var.set("No alternative path selected.")
+            return
+
+        self.canvas_widget.mpl_disconnect(self.plan_b_connection_id)
+        self.done_button.grid_remove()
+
+        use_minimal = tk.messagebox.askyesno("Minimal Explanation", "Do you want to compute a minimal explanation?")
+        result = explainer.explain(factual_path, self.alt_path, minimal=use_minimal)
         fig = explainer.visualize(result)
 
         if fig:
-            # Save explanation
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             images_dir = "output_images"
             if not os.path.exists(images_dir):
                 os.makedirs(images_dir)
-            
             filepath = os.path.join(images_dir, f"contrastive_explanation_{timestamp}.png")
             fig.savefig(filepath, bbox_inches='tight', dpi=150)
-            
-            # Also display it
             plt.show()
-            
-            self.status_var.set(f"Contrastive explanation generated and saved to {filepath}")
-        else:
-            self.status_var.set("Could not generate Contrastive visualization.")
+            self.status_var.set(f"Contrastive explanation saved to {filepath}")
+
+
+    def collect_alt_path_click(self, event):
+        if event.xdata is None or event.ydata is None:
+            return
+        row = int(round(event.ydata))
+        col = int(round(event.xdata))
+        if 0 <= row < self.grid_size and 0 <= col < self.grid_size:
+            self.alt_path.append([row, col])
+            self.status_var.set(f"Added point to Plan B: ({row}, {col})")
+            self.draw_grid()
+            self.ax.plot([p[1] for p in self.alt_path], [p[0] for p in self.alt_path], color='purple', linewidth=2)
+            self.canvas_widget.draw()
 
     def explain_with_goal_counterfactual(self, planner):
         explainer = GoalCounterfactualExplainer()
@@ -1413,35 +1440,57 @@ class PathPlanningApp:
         else:
             self.status_var.set("No valid goal counterfactuals could be generated.")
 
-    def explain_with_woe(self, planner):
-        explainer = WoEExplainer()
-        explainer.set_environment(self.env, planner)
+    def explain_with_woe(self):
+        self.explainer = WoEExplainer()
+        self.explainer.set_environment(self.env, self.planner)
 
-        # Example simulated posterior map: {(observation): (p_g, p_g')}
-        # You should replace this with actual plan-trace-based logic
-        posterior_map = {
-            "obs_1": (0.8, 0.2),
-            "obs_2": (0.5, 0.5),
-            "obs_3": (0.2, 0.7),
-            "obs_4": (0.9, 0.1)
-        }
+        self.factual_path = self.planner.plan()
+        if not self.factual_path:
+            self.status_var.set("Factual path not found. Cannot explain.")
+            return
 
-        result = explainer.explain(posterior_map)
-        ranked = result["ranked"]
+        self.status_var.set("Click to define an alternative path (Plan B). Press 'Done' when finished.")
+        self.alt_path = []
+        self.plan_b_connection_id = self.canvas_widget.mpl_connect('button_press_event', self.collect_alt_path_click_woe)
+        self.done_button.configure(command=lambda: self.finalize_plan_b_woe(self.explainer, self.factual_path))
+        self.done_button.pack(side='left', padx=5)
 
-        fig = explainer.visualize(ranked)
+    def collect_alt_path_click_woe(self, event):
+        if event.xdata is None or event.ydata is None:
+            return
+        row = int(round(event.ydata))
+        col = int(round(event.xdata))
+        if 0 <= row < self.grid_size and 0 <= col < self.grid_size:
+            self.alt_path.append([row, col])
+            self.status_var.set(f"Added point to Plan B: ({row}, {col})")
+            self.draw_grid()
+            self.ax.plot([p[1] for p in self.alt_path], [p[0] for p in self.alt_path], color='purple', linewidth=2)
+            self.canvas_widget.draw()
+
+    def finalize_plan_b_woe(self, explainer, factual_path):
+        if not self.alt_path:
+            self.status_var.set("No alternative path selected.")
+            return
+
+        self.canvas_widget.mpl_disconnect(self.plan_b_connection_id)
+        self.done_button.pack_forget()
+
+        trials = tk.simpledialog.askinteger("Trials", "How many trials per obstacle?", initialvalue=10, minvalue=1)
+        if not trials:
+            trials = 10
+
+        result = explainer.explain(factual_path, self.alt_path, trials=trials)
+        fig = explainer.visualize(result)
+
         if fig:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             images_dir = "output_images"
             if not os.path.exists(images_dir):
                 os.makedirs(images_dir)
-
             filepath = os.path.join(images_dir, f"woe_explanation_{timestamp}.png")
             fig.savefig(filepath, bbox_inches='tight', dpi=150)
             plt.show()
             self.status_var.set(f"WoE explanation saved to {filepath}")
-        else:
-            self.status_var.set("Failed to visualize WoE explanation.")
 
     def explain_with_bayesian_surprise(self, planner):
         explainer = BayesianSurpriseExplainer()
