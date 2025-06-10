@@ -2,9 +2,10 @@ import random
 import copy
 
 class GridWorldEnv:
-    def __init__(self, grid_size=10, num_obstacles=5):
+    def __init__(self, grid_size=10, num_obstacles=5, seed=0):
         self.grid_size = grid_size
         self.num_obstacles = num_obstacles
+        random.seed(seed)
         self.reset()
 
     def reset(self):
@@ -21,22 +22,108 @@ class GridWorldEnv:
         self.obstacle_shapes = {}
         self.obstacles = []
         
-        # Divide grid into regions for obstacles
-        regions = self.divide_grid_into_regions()
+        successful_obstacles = 0
         
-        # Generate an obstacle shape in each region
-        for shape_id, region in enumerate(regions):
-            if shape_id >= self.num_obstacles:
-                break
+        # Generate obstacles without being limited by regions
+        for shape_id in range(self.num_obstacles):
+            # Try to find a valid location for this obstacle
+            max_attempts = 100
+            obstacle_created = False
+            
+            for attempt in range(max_attempts):
+                # Pick a random starting point anywhere in the grid
+                start_row = random.randint(0, self.grid_size - 1)
+                start_col = random.randint(0, self.grid_size - 1)
                 
-            # Generate a connected shape within this region
-            shape_points = self.generate_connected_shape(region)
+                # Skip if this position is already occupied
+                if [start_row, start_col] in self.obstacles:
+                    continue
+                
+                # Generate a connected shape with random size (1-8 cells)
+                shape_size = random.randint(1, 8)
+                shape_points = [[start_row, start_col]]
+                
+                # Add connected points
+                for _ in range(shape_size - 1):
+                    if not shape_points:
+                        break
+                        
+                    # Get a random point from existing shape to expand from
+                    base_point = random.choice(shape_points)
+                    
+                    # Try neighbors
+                    neighbors = [
+                        [base_point[0]-1, base_point[1]],  # up
+                        [base_point[0]+1, base_point[1]],  # down
+                        [base_point[0], base_point[1]-1],  # left
+                        [base_point[0], base_point[1]+1]   # right
+                    ]
+                    
+                    # Filter valid neighbors
+                    valid_neighbors = [
+                        n for n in neighbors 
+                        if 0 <= n[0] < self.grid_size and 
+                        0 <= n[1] < self.grid_size and 
+                        n not in shape_points and
+                        n not in self.obstacles
+                    ]
+                    
+                    if valid_neighbors:
+                        new_point = random.choice(valid_neighbors)
+                        shape_points.append(new_point)
+                
+                # Only accept if we have at least one point and it's not conflicting
+                if shape_points and all(p not in self.obstacles for p in shape_points):
+                    # Store the shape
+                    self.obstacle_shapes[shape_id] = shape_points
+                    # Add all points to obstacles list
+                    self.obstacles.extend(shape_points)
+                    successful_obstacles += 1
+                    obstacle_created = True
+                    break
             
-            # Store the shape with its ID
-            self.obstacle_shapes[shape_id] = shape_points
+            if not obstacle_created:
+                # Try to place a single-cell obstacle at any free position
+                free_positions = [
+                    [r, c] for r in range(self.grid_size) 
+                    for c in range(self.grid_size)
+                    if [r, c] not in self.obstacles
+                ]
+                
+                if free_positions:
+                    pos = random.choice(free_positions)
+                    self.obstacle_shapes[shape_id] = [pos]
+                    self.obstacles.append(pos)
+                    successful_obstacles += 1
+                else:
+                    # No free positions left, break early
+                    break
+        
+        # Print warning if we couldn't generate all requested obstacles
+        if successful_obstacles < self.num_obstacles:
+            print(f"WARNING: Could only generate {successful_obstacles}/{self.num_obstacles} obstacles "
+                f"for grid size {self.grid_size}x{self.grid_size}. Grid may be too small or too crowded.")
+        
+    # def generate_obstacles(self):
+    #     self.obstacle_shapes = {}
+    #     self.obstacles = []
+        
+    #     # Divide grid into regions for obstacles
+    #     regions = self.divide_grid_into_regions()
+        
+    #     # Generate an obstacle shape in each region
+    #     for shape_id, region in enumerate(regions):
+    #         if shape_id >= self.num_obstacles:
+    #             break
+                
+    #         # Generate a connected shape within this region
+    #         shape_points = self.generate_connected_shape(region)
             
-            # Add all points to obstacles list for quick lookup
-            self.obstacles.extend(shape_points)
+    #         # Store the shape with its ID
+    #         self.obstacle_shapes[shape_id] = shape_points
+            
+    #         # Add all points to obstacles list for quick lookup
+    #         self.obstacles.extend(shape_points)
     
     def divide_grid_into_regions(self):
         """Divide the grid into regions for placing obstacles"""
