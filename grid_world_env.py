@@ -74,8 +74,8 @@ class GridWorldEnv:
                 
                 # Only accept if we have at least one point and it's not conflicting
                 if shape_points and all(p not in self.obstacles for p in shape_points):
-                    # Store the shape
-                    self.obstacle_shapes[shape_id] = shape_points
+                    # Store the shape using the current successful_obstacles count as ID
+                    self.obstacle_shapes[successful_obstacles] = shape_points
                     # Add all points to obstacles list
                     self.obstacles.extend(shape_points)
                     successful_obstacles += 1
@@ -92,17 +92,19 @@ class GridWorldEnv:
                 
                 if free_positions:
                     pos = random.choice(free_positions)
-                    self.obstacle_shapes[shape_id] = [pos]
+                    # Use the current successful_obstacles count as ID
+                    self.obstacle_shapes[successful_obstacles] = [pos]
                     self.obstacles.append(pos)
                     successful_obstacles += 1
-                else:
-                    # No free positions left, break early
-                    break
         
         # Print warning if we couldn't generate all requested obstacles
         if successful_obstacles < self.num_obstacles:
             print(f"WARNING: Could only generate {successful_obstacles}/{self.num_obstacles} obstacles "
                 f"for grid size {self.grid_size}x{self.grid_size}. Grid may be too small or too crowded.")
+        
+        # Update num_obstacles to reflect actual number generated
+        self.num_obstacles = successful_obstacles
+
         
     # def generate_obstacles(self):
     #     self.obstacle_shapes = {}
@@ -270,6 +272,7 @@ class GridWorldEnv:
             strategy (str): The perturbation strategy.
             combination (list, optional): A specific combination to apply (list of 0s and 1s).
                 If provided, this overrides the strategy.
+            mode (str): The perturbation mode ("remove", "move", "random", "minimal_move").
                 
         Returns:
             tuple: (original_obstacles, shapes_removed_ids)
@@ -278,6 +281,7 @@ class GridWorldEnv:
         """
         # Create a copy of the current obstacles for reverting later
         original_obstacles = self.obstacles.copy()
+        # Get shape IDs at the start of the function to maintain consistency
         all_shape_ids = list(self.obstacle_shapes.keys())
         shapes_to_remove_ids = []
         
@@ -330,8 +334,7 @@ class GridWorldEnv:
                 else:
                     self.move_obstacle_shape(shape_id)
             elif mode == "minimal_move":
-                for shape_id in shapes_to_remove_ids:
-                    self.move_obstacle_shape_min_displacement(shape_id)
+                self.move_obstacle_shape_min_displacement(shape_id)
             
         return original_obstacles, shapes_to_remove_ids
 

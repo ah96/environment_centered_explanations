@@ -101,6 +101,9 @@ class EnvironmentGenerator:
             planner_class (class): The planner class to use (must have set_environment() and plan())
             max_block_attempts (int): Max number of blocking iterations
         """
+        # Store the original number of obstacles to maintain the limit
+        original_num_obstacles = env.num_obstacles
+        
         for attempt in range(max_block_attempts):
             # Set up planner
             planner = planner_class()
@@ -118,19 +121,30 @@ class EnvironmentGenerator:
                 print(f"Path already blocked after {attempt} blocking attempts")
                 break  # Already infeasible
 
-            shape_id = max(env.obstacle_shapes.keys(), default=-1) + 1
-            shape_cells = []
-
-            for cell in path[1:-1]:
-                if cell not in env.obstacles:
-                    env.obstacles.append(cell)
-                    shape_cells.append(cell)
-
-            if shape_cells:
-                env.obstacle_shapes[shape_id] = shape_cells
+            # Instead of adding new obstacles, modify existing ones or use a different approach
+            # Option 1: Extend existing obstacle shapes instead of creating new ones
+            blocking_cells = [cell for cell in path[1:-1] if cell not in env.obstacles]
+            
+            if blocking_cells:
+                # Try to extend existing obstacle shapes with the blocking cells
+                if env.obstacle_shapes:
+                    # Find the obstacle shape with the most cells to extend
+                    largest_shape_id = max(env.obstacle_shapes.keys(), 
+                                        key=lambda k: len(env.obstacle_shapes[k]))
+                    
+                    # Add blocking cells to the largest existing obstacle shape
+                    env.obstacle_shapes[largest_shape_id].extend(blocking_cells)
+                    env.obstacles.extend(blocking_cells)
+                    
+                    print(f"Extended obstacle {largest_shape_id} with {len(blocking_cells)} blocking cells")
+                else:
+                    # If no existing obstacles, create one (shouldn't happen in normal cases)
+                    env.obstacle_shapes[0] = blocking_cells
+                    env.obstacles.extend(blocking_cells)
             else:
-                print(f"No new cells blocked on attempt {attempt}.")
+                print(f"No new cells to block on attempt {attempt}.")
                 break
+        
     
     def generate_environments_batch(self, n, feasible=True, max_attempts_per_env=100, max_total_attempts=10000, infeasibility_mode=None, planner_class=None, start_seed=None):
         """
@@ -205,8 +219,9 @@ def main():
     random.seed(seed)
     
     # Parameters for complex environments with many obstacles
+    n = 1000  # Number of environments to generate
     grid_size = 15  # Larger grid to accommodate more obstacles
-    num_obstacles = 30  # Many obstacles for complex explanations
+    num_obstacles = 15  # Many obstacles for complex explanations
     
     # Create output directories
     base_dir = "environments"
@@ -226,7 +241,7 @@ def main():
     # Generate infeasible environments with deterministic seeds
     print("Generating 10000 infeasible environments...")
     infeasible_envs, infeasible_count = generator.generate_environments_batch(
-        n=10000,
+        n=n,
         feasible=False,
         max_attempts_per_env=200,
         max_total_attempts=50000,
@@ -249,7 +264,7 @@ def main():
     # Generate feasible environments with deterministic seeds
     print("Generating 10000 feasible environments...")
     feasible_envs, feasible_count = generator.generate_environments_batch(
-        n=10000,
+        n=n,
         feasible=True,
         max_attempts_per_env=200,
         max_total_attempts=50000,
