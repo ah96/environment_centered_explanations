@@ -424,15 +424,14 @@ class GridWorldEnv:
                     return True
         return False
 
-    import copy
-
     def clone(self):
         """Deep copy the environment, including obstacle shapes."""
+        import copy
         cloned = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
         cloned.agent_pos = copy.deepcopy(self.agent_pos)
         cloned.goal_pos = copy.deepcopy(self.goal_pos)
         cloned.obstacle_shapes = copy.deepcopy(self.obstacle_shapes)
-        cloned.obstacles = [pt for shape in cloned.obstacle_shapes.values() for pt in shape]
+        cloned.obstacles = copy.deepcopy(self.obstacles)
         return cloned
 
     def remove_obstacle_shape(self, shape_id):
