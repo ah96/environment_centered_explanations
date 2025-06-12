@@ -13,7 +13,7 @@ class SHAPExplainer:
         self.baseline_path_length = None
 
     def set_environment(self, env, planner):
-        self.env = env
+        self.env = env.clone()
         self.planner = planner
         self.grid_size = env.grid_size
         self.baseline_path = planner.plan()
@@ -77,6 +77,20 @@ class SHAPExplainer:
             if key in cache:
                 return cache[key]
 
+        # Get current obstacle IDs before perturbation
+        all_shape_ids = list(self.env.obstacle_shapes.keys())
+        
+        # Ensure combination length matches current obstacle count
+        if len(combination) != len(all_shape_ids):
+            # Handle mismatch by adjusting combination to match current obstacle count
+            if len(combination) > len(all_shape_ids):
+                # Trim combination if too long
+                combination = combination[:len(all_shape_ids)]
+            else:
+                # Extend combination if too short (with 1s to keep new obstacles)
+                combination = combination + [1] * (len(all_shape_ids) - len(combination))
+
+        # Now apply the perturbation with the adjusted combination
         original_state, _ = self.env.generate_perturbation(combination=combination, mode=perturbation_mode)
 
         planner_class = type(self.planner)

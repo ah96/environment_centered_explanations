@@ -22,7 +22,7 @@ class LimeExplainer:
             env: Environment object with grid_size and obstacles
             planner: Path planner that has a plan() method
         """
-        self.env = env
+        self.env = env.clone()
         self.planner = planner
         self.grid_size = env.grid_size
     
@@ -79,7 +79,19 @@ class LimeExplainer:
             if callback:
                 callback(i, total_combinations)
             
-            # Apply perturbation using the combination
+            # Ensure combination length matches current obstacle count
+            current_obstacle_keys = list(self.env.obstacle_shapes.keys())
+            current_num_obstacles = len(current_obstacle_keys)
+            
+            if len(combination) != current_num_obstacles:
+                if len(combination) > current_num_obstacles:
+                    # Trim combination if too long
+                    combination = combination[:current_num_obstacles]
+                else:
+                    # Extend combination if too short
+                    combination = combination + [1] * (current_num_obstacles - len(combination))
+            
+            # Apply perturbation using the adjusted combination
             original_state, _ = self.env.generate_perturbation(
                 combination=combination,
                 mode=perturbation_mode
