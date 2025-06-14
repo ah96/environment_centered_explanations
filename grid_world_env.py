@@ -265,83 +265,92 @@ class GridWorldEnv:
             raise ValueError(f"Unknown combination strategy: {strategy}")
 
     def generate_perturbation(self, strategy="random", combination=None, mode="remove"):
-        """
-        Generates and applies perturbation by removing obstacle shapes based on strategy and combination.
-        
-        Args:
-            strategy (str): The perturbation strategy.
-            combination (list, optional): A specific combination to apply (list of 0s and 1s).
-                If provided, this overrides the strategy.
-            mode (str): The perturbation mode ("remove", "move", "random", "minimal_move").
-                
-        Returns:
-            tuple: (original_obstacles, shapes_removed_ids)
-                original_obstacles (list): A copy of the obstacles list before perturbation.
-                shapes_removed_ids (list): A list of the IDs of the obstacle shapes that were removed.
-        """
-        # Create a copy of the current obstacles for reverting later
-        original_obstacles = self.obstacles.copy()
-        # Get shape IDs at the start of the function to maintain consistency
-        all_shape_ids = list(self.obstacle_shapes.keys())
-        shapes_to_remove_ids = []
-        
-        if not all_shape_ids:  # No obstacles to remove
-            return original_obstacles, []
-        
-        # If a specific combination is provided, use it
-        if combination is not None:
-            # Ensure combination is the correct length
-            if len(combination) != len(all_shape_ids):
-                raise ValueError(f"Combination length {len(combination)} doesn't match obstacle count {len(all_shape_ids)}")
+            """
+            Generates and applies perturbation by removing obstacle shapes based on strategy and combination.
             
-            # Remove obstacles where combination has 0
-            for i, keep in enumerate(combination):
-                if keep == 0:
-                    shapes_to_remove_ids.append(all_shape_ids[i])
+            Args:
+                strategy (str): The perturbation strategy.
+                combination (list, optional): A specific combination to apply (list of 0s and 1s).
+                    If provided, this overrides the strategy.
+                mode (str): The perturbation mode ("remove", "move", "random", "minimal_move").
                     
-        # Otherwise use the strategy from before    
-        elif strategy == "randomly":
-            # Randomly select shapes to remove (approximately 30% of shapes)
-            # Ensure at least one is potentially removed if obstacles exist
-            num_to_remove = max(1, len(all_shape_ids) // 3)
-            # Ensure sample size doesn't exceed population size
-            k = min(num_to_remove, len(all_shape_ids))
-            if k > 0:  # Only sample if k is positive
-                shapes_to_remove_ids = random.sample(all_shape_ids, k)
-                
-        elif strategy == "each_obstacle_once":
-            # Remove exactly one randomly chosen obstacle shape
-            if all_shape_ids:
-                shape_to_remove_id = random.choice(all_shape_ids)
-                shapes_to_remove_ids = [shape_to_remove_id]
-                
-        elif strategy == "full_perturbation":
-            # Remove all obstacles
-            shapes_to_remove_ids = list(all_shape_ids)
+            Returns:
+                tuple: (original_state, shapes_removed_ids)
+                    original_state (dict): A dictionary with copies of obstacles and obstacle_shapes.
+                    shapes_removed_ids (list): A list of the IDs of the obstacle shapes that were removed.
+            """
+            # Create deep copies of both obstacles and obstacle_shapes
+            original_state = {
+                'obstacles': copy.deepcopy(self.obstacles),
+                'obstacle_shapes': copy.deepcopy(self.obstacle_shapes)
+            }
             
-        else:
-            raise ValueError(f"Unknown perturbation strategy: {strategy}")
-        
-        # Apply the perturbation by removing or moving the selected obstacle shapes
-        for shape_id in shapes_to_remove_ids:
-            if mode == "remove":
-                self.remove_obstacle_shape(shape_id)
-            elif mode == "move":
-                self.move_obstacle_shape(shape_id)
-            elif mode == "random":
-                if random.random() < 0.5:
+            # Get shape IDs at the start of the function to maintain consistency
+            all_shape_ids = list(self.obstacle_shapes.keys())
+            shapes_to_remove_ids = []
+            
+            if not all_shape_ids:  # No obstacles to remove
+                return original_state, []
+            
+            # If a specific combination is provided, use it
+            if combination is not None:
+                # Ensure combination is the correct length
+                if len(combination) != len(all_shape_ids):
+                    raise ValueError(f"Combination length {len(combination)} doesn't match obstacle count {len(all_shape_ids)}")
+                
+                # Remove obstacles where combination has 0
+                for i, keep in enumerate(combination):
+                    if keep == 0:
+                        shapes_to_remove_ids.append(all_shape_ids[i])
+                        
+            # Otherwise use the strategy from before    
+            elif strategy == "randomly":
+                # Randomly select shapes to remove (approximately 30% of shapes)
+                # Ensure at least one is potentially removed if obstacles exist
+                num_to_remove = max(1, len(all_shape_ids) // 3)
+                # Ensure sample size doesn't exceed population size
+                k = min(num_to_remove, len(all_shape_ids))
+                if k > 0:  # Only sample if k is positive
+                    shapes_to_remove_ids = random.sample(all_shape_ids, k)
+                    
+            elif strategy == "each_obstacle_once":
+                # Remove exactly one randomly chosen obstacle shape
+                if all_shape_ids:
+                    shape_to_remove_id = random.choice(all_shape_ids)
+                    shapes_to_remove_ids = [shape_to_remove_id]
+                    
+            elif strategy == "full_perturbation":
+                # Remove all obstacles
+                shapes_to_remove_ids = list(all_shape_ids)
+                
+            else:
+                raise ValueError(f"Unknown perturbation strategy: {strategy}")
+            
+            # Apply the perturbation by removing or moving the selected obstacle shapes
+            for shape_id in shapes_to_remove_ids:
+                if mode == "remove":
                     self.remove_obstacle_shape(shape_id)
-                else:
+                elif mode == "move":
                     self.move_obstacle_shape(shape_id)
-            elif mode == "minimal_move":
-                self.move_obstacle_shape_min_displacement(shape_id)
-            
-        return original_obstacles, shapes_to_remove_ids
+                elif mode == "random":
+                    if random.random() < 0.5:
+                        self.remove_obstacle_shape(shape_id)
+                    else:
+                        self.move_obstacle_shape(shape_id)
+                elif mode == "minimal_move":
+                    self.move_obstacle_shape_min_displacement(shape_id)
+                
+            return original_state, shapes_to_remove_ids
 
-    def restore_from_perturbation(self, original_obstacles):
-        """Restore the environment to the state before perturbation"""
-        # Simply reset the obstacles list to the saved original state.
-        self.obstacles = original_obstacles.copy()
+    def restore_from_perturbation(self, original_state):
+            """Restore the environment to the state before perturbation
+            
+            Args:
+                original_state (dict): A dictionary containing original obstacles and obstacle_shapes.
+            """
+            # Restore both obstacles and obstacle_shapes
+            self.obstacles = original_state['obstacles'].copy()
+            self.obstacle_shapes = original_state['obstacle_shapes'].copy()
 
     def get_state(self):
         return {
