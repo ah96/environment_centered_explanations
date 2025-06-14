@@ -21,7 +21,32 @@ class PRMPlanner:
         if self.connection_radius is None:
             self.connection_radius = max(3.0, grid_size * 0.4)
 
-    def plan(self, return_steps=False):
+    def plan(self, start=None, goal=None, obstacles=None, return_steps=False):
+        """
+        Run PRM path planning algorithm
+        
+        Args:
+            start: Start position [row, col], uses stored start if None
+            goal: Goal position [row, col], uses stored goal if None
+            obstacles: List of obstacle positions, uses stored obstacles if None
+            return_steps: If True, returns planning steps for visualization
+            
+        Returns:
+            If return_steps is False: path or None (if no path found)
+            If return_steps is True: (path, steps) or (None, steps)
+        """
+        # Update parameters if provided
+        if start is not None:
+            self.start = start
+        if goal is not None:
+            self.goal = goal
+        if obstacles is not None:
+            self.obstacles = set(tuple(o) for o in obstacles)
+                
+        # Verify we have valid start and goal
+        if not self.start or not self.goal:
+            return None if not return_steps else (None, [])
+            
         start_time = time.time()
 
         nodes = [self.start, self.goal]

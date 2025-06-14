@@ -14,7 +14,32 @@ class DFSPlanner:
         self.grid_size = grid_size
         self.obstacles = obstacles
 
-    def plan(self, return_steps=False):
+    def plan(self, start=None, goal=None, obstacles=None, return_steps=False):
+        """
+        Run DFS path planning algorithm
+        
+        Args:
+            start: Start position [row, col], uses stored start if None
+            goal: Goal position [row, col], uses stored goal if None
+            obstacles: List of obstacle positions, uses stored obstacles if None
+            return_steps: If True, returns planning steps for visualization
+            
+        Returns:
+            If return_steps is False: path or None (if no path found)
+            If return_steps is True: (path, steps) or (None, steps)
+        """
+        # Update parameters if provided
+        if start is not None:
+            self.start = start
+        if goal is not None:
+            self.goal = goal
+        if obstacles is not None:
+            self.obstacles = obstacles
+            
+        # Verify we have valid start and goal
+        if not self.start or not self.goal:
+            return None if not return_steps else (None, [])
+        
         start_time = time.time()
         stack = [self.start]
         came_from = {}

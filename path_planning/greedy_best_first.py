@@ -18,12 +18,39 @@ class GreedyBestFirstPlanner:
     def h(self, pos):
         return abs(pos[0] - self.goal[0]) + abs(pos[1] - self.goal[1])  # Manhattan
 
-    def plan(self, return_steps=False):
+    def plan(self, start=None, goal=None, obstacles=None, return_steps=False):
+        """
+        Run Greedy Best-First Search path planning algorithm
+        
+        Args:
+            start: Start position [row, col], uses stored start if None
+            goal: Goal position [row, col], uses stored goal if None
+            obstacles: List of obstacle positions, uses stored obstacles if None
+            return_steps: If True, returns planning steps for visualization
+            
+        Returns:
+            If return_steps is False: path or None (if no path found)
+            If return_steps is True: (path, steps) or (None, steps)
+        """
+        # Update parameters if provided
+        if start is not None:
+            self.start = start
+        if goal is not None:
+            self.goal = goal
+        if obstacles is not None:
+            self.obstacles = obstacles
+            
+        # Verify we have valid start and goal
+        if not self.start or not self.goal:
+            return None if not return_steps else (None, [])
+            
+        # Start timer
         start_time = time.time()
+        
         open_set = []
         heapq.heappush(open_set, (self.h(self.start), self.start))
         came_from = {}
-        visited = [self.start]
+        visited = []
 
         steps = []
         if return_steps:
@@ -39,17 +66,17 @@ class GreedyBestFirstPlanner:
         while open_set:
             _, current = heapq.heappop(open_set)
 
-            step_data = {
-                "step": len(steps),
-                "type": "explore",
-                "current": current,
-                "open_set": [n[1] for n in open_set],
-                "visited": list(visited),
-                "description": f"Exploring {current}"
-            }
-
-            # Path so far
             if return_steps:
+                step_data = {
+                    "step": len(steps),
+                    "type": "explore",
+                    "current": current,
+                    "open_set": [n[1] for n in open_set],
+                    "visited": list(visited),
+                    "description": f"Exploring {current}"
+                }
+
+                # Path so far
                 if tuple(current) in came_from:
                     path_so_far = []
                     curr = current
@@ -91,10 +118,10 @@ class GreedyBestFirstPlanner:
 
                     heapq.heappush(open_set, (self.h(neighbor), neighbor))
                     came_from[tuple(neighbor)] = current
-                    visited.append(neighbor)
+                    # Don't add to visited here - we'll add when we explore it
 
-            if return_steps:
-                steps.append(step_data)
+                if return_steps:
+                    steps.append(step_data)
 
         self.execution_time = time.time() - start_time
         return None if not return_steps else (None, steps)
