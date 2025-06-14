@@ -295,21 +295,21 @@ def main():
     parser = argparse.ArgumentParser(description="Run comparison experiments for path planning explanations")
     parser.add_argument("--env_dir", type=str, default="environments/infeasible",
                         help="Directory with existing environments")
-    parser.add_argument("--num_envs", type=int, default=3,
+    parser.add_argument("--num_envs", type=int, default=100,
                         help="Number of environments to load")
     parser.add_argument("--output", type=str, default="why_did_you_fail_results.csv",
                         help="Output CSV file for results")
     parser.add_argument("--top_k", type=int, default=3,
                         help="Number of top features to consider")
-    parser.add_argument("--average_only", default=True,action="store_true",
+    parser.add_argument("--average_only", default=True, action="store_true",
                         help="When set, only save average results across all environments")
     
     args = parser.parse_args()
     
     # Set up experiment parameters
     explanations = ["SHAP", "LIME", "Anchors"]
-    planners = ["A*", "Dijkstra"]#, "RRT*"]
-    perturbation_counts = [10]#, 50, 100]
+    planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First", "RRT", "RRT*", "PRM"]
+    perturbation_counts = [10, 50, 100]
     perturbation_types = ["remove", "move"] #, "random"] # random doesn't make sense, remove and move cover all cases
     
     MAX_PERTURBATION_RETRIES = 100  # Maximum attempts to find an infeasible perturbation
@@ -334,131 +334,120 @@ def main():
     # For storing planner robustness data
     planner_features = {}
     
-    # Run experiments
-    for env_path in tqdm(env_paths, desc="Environments"):
-        env_name = os.path.basename(env_path)
-        env = runner.load_environment(env_path)
-        
-        # Store features for each planner for this environment
-        planner_features[env_name] = {}
-        
-        # For each planner
-        for planner_name in tqdm(planners, desc="Planners", leave=False):
-            planner_class = runner.planners[planner_name]
-            planner_instance = planner_class()
-            planner_instance.set_environment(
-                start=env.agent_pos,
-                goal=env.goal_pos,
-                grid_size=env.grid_size,
-                obstacles=env.obstacles
-            )
+    # Calculate total number of iterations for progress tracking
+    total_iterations = len(env_paths) * len(planners) * len(explanations) * len(perturbation_types) * len(perturbation_counts)
+    
+    # Run experiments with a single progress bar
+    with tqdm(total=total_iterations, desc="Overall Progress") as pbar:
+        for env_path in env_paths:
+            env_name = os.path.basename(env_path)
+            env = runner.load_environment(env_path)
             
-            # Get original path (should be None/empty for infeasible environments)
-            result = planner_instance.plan(return_steps=False)
-            original_path = result[0] if isinstance(result, tuple) else result
-            # for infeasible environments path length is 0
-            path_length = len(original_path) if original_path else 0
+            # Store features for each planner for this environment
+            planner_features[env_name] = {}
             
-            # For each explanation method
-            for explainer_name in tqdm(explanations, desc="Explainers", leave=False):
-                explainer_class = runner.explainers[explainer_name]
-                explainer = explainer_class()
-                explainer.set_environment(env, planner_instance)
-                
-                # Get important features for original environment
-                original_features, explanation_time = get_important_features(
-                    explainer, explainer_name, env, planner_instance, top_k=args.top_k
+            # For each planner
+            for planner_name in planners:
+                planner_class = runner.planners[planner_name]
+                planner_instance = planner_class()
+                planner_instance.set_environment(
+                    start=env.agent_pos,
+                    goal=env.goal_pos,
+                    grid_size=env.grid_size,
+                    obstacles=env.obstacles
                 )
                 
-                # Store features for planner robustness calculation
-                planner_features[env_name][f"{planner_name}_{explainer_name}"] = original_features
+                # Get original path (should be None/empty for infeasible environments)
+                result = planner_instance.plan(return_steps=False)
+                original_path = result[0] if isinstance(result, tuple) else result
+                # for infeasible environments path length is 0
+                path_length = len(original_path) if original_path else 0
                 
-                # Get ranked list of all obstacles for faithfulness calculation
-                all_obstacles = list(env.obstacle_shapes.keys())
-                if explainer_name in ["LIME", "SHAP"]:
-                    # For LIME and SHAP, we can get a full ranking
-                    explanation = explainer.explain(num_samples=100)
-                    if hasattr(explanation, '__len__') and len(explanation) > 0:
-                        importance_values = [(i, abs(val)) for i, val in enumerate(explanation) if i < len(all_obstacles)]
-                        importance_values.sort(key=lambda x: x[1], reverse=True)
-                        ranked_obstacles = [all_obstacles[i] for i, _ in importance_values]
-                    else:
-                        ranked_obstacles = all_obstacles
-                else:  # Anchors
-                    # For Anchors, we put anchor obstacles first, then the rest
-                    anchors = explainer.explain(num_samples=100)
-                    anchor_obstacles = []
-                    if anchors and "anchors" in anchors and anchors["anchors"]:
-                        anchor_obstacles = anchors["anchors"]
-                    ranked_obstacles = anchor_obstacles + [o for o in all_obstacles if o not in anchor_obstacles]
-                
-                # Get ranked list of all obstacles for faithfulness calculation
-                ranked_obstacles = get_ranked_obstacles_from_explanation(explainer, explainer_name, env)
-                
-                # Calculate faithfulness score
-                faithfulness_score = calculate_faithfulness_score(env, planner_class, explainer, ranked_obstacles)
-                
-                # For each perturbation type and count
-                for perturbation_type in tqdm(perturbation_types, desc="Perturbation Types", leave=False):
-                    for num_perturbations in tqdm(perturbation_counts, desc="Perturbation Counts", leave=False):
-                        
-                        current_perturbed_env = None
-                        final_planner_check_for_perturbed = None
-                        found_infeasible_perturbation = False
+                # For each explanation method
+                for explainer_name in explanations:
+                    explainer_class = runner.explainers[explainer_name]
+                    explainer = explainer_class()
+                    explainer.set_environment(env, planner_instance)
+                    
+                    # Get important features for original environment
+                    original_features, explanation_time = get_important_features(
+                        explainer, explainer_name, env, planner_instance, top_k=args.top_k
+                    )
+                    
+                    # Store features for planner robustness calculation
+                    planner_features[env_name][f"{planner_name}_{explainer_name}"] = original_features
+                    
+                    # Get ranked list of all obstacles for faithfulness calculation
+                    ranked_obstacles = get_ranked_obstacles_from_explanation(explainer, explainer_name, env)
+                    
+                    # Calculate faithfulness score
+                    faithfulness_score = calculate_faithfulness_score(env, planner_class, explainer, ranked_obstacles)
+                    
+                    # For each perturbation type and count
+                    for perturbation_type in perturbation_types:
+                        for num_perturbations in perturbation_counts:
+                            
+                            current_perturbed_env = None
+                            final_planner_check_for_perturbed = None
+                            found_infeasible_perturbation = False
 
-                        for attempt in range(MAX_PERTURBATION_RETRIES):
-                            # Create perturbed environment
-                            perturbed_env_candidate = perturb_environment(env, perturbation_type, num_perturbations)
+                            for attempt in range(MAX_PERTURBATION_RETRIES):
+                                # Create perturbed environment
+                                perturbed_env_candidate = perturb_environment(env, perturbation_type, num_perturbations)
+                                
+                                # Check if perturbed environment is still infeasible
+                                planner_check = planner_class()
+                                planner_check.set_environment(
+                                    start=perturbed_env_candidate.agent_pos,
+                                    goal=perturbed_env_candidate.goal_pos,
+                                    grid_size=perturbed_env_candidate.grid_size,
+                                    obstacles=perturbed_env_candidate.obstacles
+                                )
+                                result_check = planner_check.plan(return_steps=False)
+                                path_check = result_check[0] if isinstance(result_check, tuple) else result_check
+                                
+                                if not (path_check and len(path_check) > 0): # Path NOT found (still infeasible)
+                                    current_perturbed_env = perturbed_env_candidate
+                                    final_planner_check_for_perturbed = planner_check
+                                    found_infeasible_perturbation = True
+                                    break # Exit retry loop, we found a suitable environment
+                                # else: environment became feasible, try perturbing again in the next attempt
                             
-                            # Check if perturbed environment is still infeasible
-                            planner_check = planner_class()
-                            planner_check.set_environment(
-                                start=perturbed_env_candidate.agent_pos,
-                                goal=perturbed_env_candidate.goal_pos,
-                                grid_size=perturbed_env_candidate.grid_size,
-                                obstacles=perturbed_env_candidate.obstacles
+                            if not found_infeasible_perturbation:
+                                print(f"Warning: Max retries ({MAX_PERTURBATION_RETRIES}) reached for {env_name}, {planner_name}, {explainer_name}, {perturbation_type}, {num_perturbations}. "
+                                      f"Could not generate an infeasible perturbed environment. Skipping this combination.")
+                                pbar.update(1)  # Update progress bar even when skipped
+                                continue # Skip to the next num_perturbations or perturbation_type
+                            
+                            # Now, current_perturbed_env is an infeasible perturbed environment
+                            # and final_planner_check_for_perturbed is the planner instance that confirmed it.
+                            
+                            # Get explanation for perturbed environment
+                            explainer_perturbed = explainer_class()
+                            explainer_perturbed.set_environment(current_perturbed_env, final_planner_check_for_perturbed)
+                            perturbed_features, _ = get_important_features(
+                                explainer_perturbed, explainer_name, current_perturbed_env, final_planner_check_for_perturbed, top_k=args.top_k
                             )
-                            result_check = planner_check.plan(return_steps=False)
-                            path_check = result_check[0] if isinstance(result_check, tuple) else result_check
                             
-                            if not (path_check and len(path_check) > 0): # Path NOT found (still infeasible)
-                                current_perturbed_env = perturbed_env_candidate
-                                final_planner_check_for_perturbed = planner_check
-                                found_infeasible_perturbation = True
-                                break # Exit retry loop, we found a suitable environment
-                            # else: environment became feasible, try perturbing again in the next attempt
-                        
-                        if not found_infeasible_perturbation:
-                            print(f"Warning: Max retries ({MAX_PERTURBATION_RETRIES}) reached for {env_name}, {planner_name}, {explainer_name}, {perturbation_type}, {num_perturbations}. "
-                                  f"Could not generate an infeasible perturbed environment. Skipping this combination.")
-                            continue # Skip to the next num_perturbations or perturbation_type
-                        
-                        # Now, current_perturbed_env is an infeasible perturbed environment
-                        # and final_planner_check_for_perturbed is the planner instance that confirmed it.
-                        
-                        # Get explanation for perturbed environment
-                        explainer_perturbed = explainer_class()
-                        explainer_perturbed.set_environment(current_perturbed_env, final_planner_check_for_perturbed)
-                        perturbed_features, _ = get_important_features(
-                            explainer_perturbed, explainer_name, current_perturbed_env, final_planner_check_for_perturbed, top_k=args.top_k
-                        )
-                        
-                        # Calculate explanation stability (Jaccard similarity)
-                        stability = calculate_explanation_stability(original_features, perturbed_features)
-                        
-                        # Add results to list
-                        results_data.append({
-                            "Environment": env_name,
-                            "Explanation": explainer_name,
-                            "Planner": planner_name,
-                            "Num_Perturbations": num_perturbations,
-                            "Perturbation_Type": perturbation_type,
-                            "Explanation_Stability": stability,
-                            "Faithfulness_Score": faithfulness_score,
-                            "Planner_Robustness": None,  # Will be filled later
-                            "Path_Length": path_length,
-                            "Explanation_Time_s": explanation_time
-                        })
+                            # Calculate explanation stability (Jaccard similarity)
+                            stability = calculate_explanation_stability(original_features, perturbed_features)
+                            
+                            # Add results to list
+                            results_data.append({
+                                "Environment": env_name,
+                                "Explanation": explainer_name,
+                                "Planner": planner_name,
+                                "Num_Perturbations": num_perturbations,
+                                "Perturbation_Type": perturbation_type,
+                                "Explanation_Stability": stability,
+                                "Faithfulness_Score": faithfulness_score,
+                                "Planner_Robustness": None,  # Will be filled later
+                                "Path_Length": path_length,
+                                "Explanation_Time_s": explanation_time
+                            })
+                            
+                            # Update the progress bar
+                            pbar.update(1)
     
         # Create DataFrame from results
     df = pd.DataFrame(results_data)
