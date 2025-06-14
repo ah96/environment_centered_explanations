@@ -37,7 +37,10 @@ class LimeExplainer:
         Returns:
             importance: Array of importance values for each obstacle shape
         """
-        # Get obstacle keys
+        # Make a deep copy of the original environment state to restore later
+        original_env_state = self.env.clone()
+        
+        # Get obstacle keys and store them to maintain consistency
         obstacle_keys = list(self.env.obstacle_shapes.keys())
         num_obstacles = len(obstacle_keys)
         
@@ -57,7 +60,10 @@ class LimeExplainer:
                 random_combinations.append(combo)
 
         elif strategy == "random":
-            combinations = self.env.generate_perturbation_combinations("random") * num_samples
+            combinations = []
+            for _ in range(num_samples):
+                combo = [random.randint(0, 1) for _ in range(num_obstacles)]
+                combinations.append(combo)
 
         elif strategy == "full_combinations":
             combinations = self.env.generate_perturbation_combinations("full_combinations")
@@ -68,8 +74,9 @@ class LimeExplainer:
         X = []  # Perturbations (binary mask per sample)
         y = []  # Path costs per sample
         
-        # Store original obstacles to restore at the end
+        # Store original obstacles to restore after each perturbation
         original_obstacles = self.env.obstacles.copy()
+        original_obstacle_shapes = {k: v.copy() for k, v in self.env.obstacle_shapes.items()}
         
         # Process each combination
         total_combinations = len(all_combinations)
@@ -79,19 +86,20 @@ class LimeExplainer:
             if callback:
                 callback(i, total_combinations)
             
-            # Ensure combination length matches current obstacle count
-            current_obstacle_keys = list(self.env.obstacle_shapes.keys())
-            current_num_obstacles = len(current_obstacle_keys)
-            
-            if len(combination) != current_num_obstacles:
-                if len(combination) > current_num_obstacles:
+            # Ensure combination length matches original obstacle count
+            if len(combination) != num_obstacles:
+                if len(combination) > num_obstacles:
                     # Trim combination if too long
-                    combination = combination[:current_num_obstacles]
+                    combination = combination[:num_obstacles]
                 else:
                     # Extend combination if too short
-                    combination = combination + [1] * (current_num_obstacles - len(combination))
+                    combination = combination + [1] * (num_obstacles - len(combination))
             
-            # Apply perturbation using the adjusted combination
+            # Reset environment to original state before each perturbation
+            self.env.obstacles = original_obstacles.copy()
+            self.env.obstacle_shapes = {k: v.copy() for k, v in original_obstacle_shapes.items()}
+            
+            # Apply perturbation using the fixed-length combination
             original_state, _ = self.env.generate_perturbation(
                 combination=combination,
                 mode=perturbation_mode
@@ -112,7 +120,7 @@ class LimeExplainer:
                 path_length = self.grid_size * 2  # Penalty for no path
                 success = False
             
-            # Record results
+            # Record results (ensuring consistent length)
             X.append(combination)
             y.append(path_length)
             
@@ -120,7 +128,7 @@ class LimeExplainer:
             self.env.restore_from_perturbation(original_state)
         
         # Convert to numpy arrays
-        X = np.array(X)
+        X = np.array(X, dtype=np.int32)  # Specify dtype to ensure consistent types
         y = np.array(y)
         
         # Fit a Ridge regression model to explain obstacle importance
@@ -134,7 +142,7 @@ class LimeExplainer:
         # Replace any infinite values with large finite values to avoid rendering errors
         importance = np.nan_to_num(importance, nan=0.0, posinf=1000.0, neginf=-1000.0)
         
-        # Restore the original environment (just to be safe)
-        self.env.obstacles = original_obstacles.copy()
+        # Restore the original environment completely
+        self.env = original_env_state
         
         return importance

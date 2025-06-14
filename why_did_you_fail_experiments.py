@@ -121,23 +121,23 @@ def perturb_environment(env, perturbation_type, num_perturbations):
             for obs_id in obstacles_to_move:
                 perturbed_env.move_obstacle_shape(obs_id)
     
-    elif perturbation_type == "random":
-        # Add random new obstacles using the environment's method
-        for _ in range(min(num_perturbations, 5)):  # Limit to prevent overcrowding
-            # Find a free position for new obstacle
-            free_positions = []
-            for r in range(perturbed_env.grid_size):
-                for c in range(perturbed_env.grid_size):
-                    if [r, c] not in perturbed_env.obstacles and \
-                       [r, c] != perturbed_env.agent_pos and \
-                       [r, c] != perturbed_env.goal_pos:
-                        free_positions.append([r, c])
+    # elif perturbation_type == "random":
+    #     # Add random new obstacles using the environment's method
+    #     for _ in range(min(num_perturbations, 5)):  # Limit to prevent overcrowding
+    #         # Find a free position for new obstacle
+    #         free_positions = []
+    #         for r in range(perturbed_env.grid_size):
+    #             for c in range(perturbed_env.grid_size):
+    #                 if [r, c] not in perturbed_env.obstacles and \
+    #                    [r, c] != perturbed_env.agent_pos and \
+    #                    [r, c] != perturbed_env.goal_pos:
+    #                     free_positions.append([r, c])
             
-            if free_positions:
-                pos = free_positions[np.random.randint(len(free_positions))]
-                new_obstacle_id = max(perturbed_env.obstacle_shapes.keys(), default=0) + 1
-                perturbed_env.obstacle_shapes[new_obstacle_id] = [pos]
-                perturbed_env.obstacles.append(pos)
+    #         if free_positions:
+    #             pos = free_positions[np.random.randint(len(free_positions))]
+    #             new_obstacle_id = max(perturbed_env.obstacle_shapes.keys(), default=0) + 1
+    #             perturbed_env.obstacle_shapes[new_obstacle_id] = [pos]
+    #             perturbed_env.obstacles.append(pos)
     
     return perturbed_env
 
@@ -247,6 +247,7 @@ def get_ranked_obstacles_from_explanation(explainer, explainer_name, env):
     try:
         obstacle_ids = list(env.obstacle_shapes.keys())
         
+        # TODO fix anchors
         if explainer_name in ["LIME", "SHAP"]:
             explanation = explainer.explain(num_samples=50)
             
@@ -295,7 +296,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run comparison experiments for path planning explanations")
     parser.add_argument("--env_dir", type=str, default="environments/infeasible",
                         help="Directory with existing environments")
-    parser.add_argument("--num_envs", type=int, default=2,
+    parser.add_argument("--num_envs", type=int, default=3,
                         help="Number of environments to load")
     parser.add_argument("--output", type=str, default="why_did_you_fail_results.csv",
                         help="Output CSV file for results")
@@ -307,11 +308,13 @@ def main():
     args = parser.parse_args()
     
     # Set up experiment parameters
-    explanations = ["LIME", "SHAP"]#, "Anchors"]
+    explanations = ["SHAP", "LIME"]#, "Anchors"]
     planners = ["A*", "Dijkstra"]#, "RRT*"]
-    perturbation_counts = [10, 50, 100]
-    perturbation_types = ["remove", "move", "random"]
+    perturbation_counts = [10]#, 50, 100]
+    perturbation_types = ["remove", "move"] #, "random"] # random doesn't make sense, remove and move cover all cases
     
+    MAX_PERTURBATION_RETRIES = 100  # Maximum attempts to find an infeasible perturbation
+
     runner = BatchExperimentRunner()
     
     # Initialize results list for pandas DataFrame
@@ -375,7 +378,7 @@ def main():
                 all_obstacles = list(env.obstacle_shapes.keys())
                 if explainer_name in ["LIME", "SHAP"]:
                     # For LIME and SHAP, we can get a full ranking
-                    explanation = explainer.explain(num_samples=100) if explainer_name == "LIME" else explainer.explain(num_samples=100)
+                    explanation = explainer.explain(num_samples=100)
                     if hasattr(explanation, '__len__') and len(explanation) > 0:
                         importance_values = [(i, abs(val)) for i, val in enumerate(explanation) if i < len(all_obstacles)]
                         importance_values.sort(key=lambda x: x[1], reverse=True)
@@ -399,29 +402,46 @@ def main():
                 # For each perturbation type and count
                 for perturbation_type in tqdm(perturbation_types, desc="Perturbation Types", leave=False):
                     for num_perturbations in tqdm(perturbation_counts, desc="Perturbation Counts", leave=False):
-                        # Create perturbed environment
-                        perturbed_env = perturb_environment(env, perturbation_type, num_perturbations)
                         
-                        # Check if perturbed environment is still infeasible
-                        planner_check = planner_class()
-                        planner_check.set_environment(
-                            start=perturbed_env.agent_pos,
-                            goal=perturbed_env.goal_pos,
-                            grid_size=perturbed_env.grid_size,
-                            obstacles=perturbed_env.obstacles
-                        )
-                        result_check = planner_check.plan(return_steps=False)
-                        path_check = result_check[0] if isinstance(result_check, tuple) else result_check
+                        current_perturbed_env = None
+                        final_planner_check_for_perturbed = None
+                        found_infeasible_perturbation = False
+
+                        for attempt in range(MAX_PERTURBATION_RETRIES):
+                            # Create perturbed environment
+                            perturbed_env_candidate = perturb_environment(env, perturbation_type, num_perturbations)
+                            
+                            # Check if perturbed environment is still infeasible
+                            planner_check = planner_class()
+                            planner_check.set_environment(
+                                start=perturbed_env_candidate.agent_pos,
+                                goal=perturbed_env_candidate.goal_pos,
+                                grid_size=perturbed_env_candidate.grid_size,
+                                obstacles=perturbed_env_candidate.obstacles
+                            )
+                            result_check = planner_check.plan(return_steps=False)
+                            path_check = result_check[0] if isinstance(result_check, tuple) else result_check
+                            
+                            if not (path_check and len(path_check) > 0): # Path NOT found (still infeasible)
+                                current_perturbed_env = perturbed_env_candidate
+                                final_planner_check_for_perturbed = planner_check
+                                found_infeasible_perturbation = True
+                                break # Exit retry loop, we found a suitable environment
+                            # else: environment became feasible, try perturbing again in the next attempt
                         
-                        # Skip this perturbation if it made the environment feasible
-                        if path_check and len(path_check) > 0:
-                            continue
+                        if not found_infeasible_perturbation:
+                            print(f"Warning: Max retries ({MAX_PERTURBATION_RETRIES}) reached for {env_name}, {planner_name}, {explainer_name}, {perturbation_type}, {num_perturbations}. "
+                                  f"Could not generate an infeasible perturbed environment. Skipping this combination.")
+                            continue # Skip to the next num_perturbations or perturbation_type
+                        
+                        # Now, current_perturbed_env is an infeasible perturbed environment
+                        # and final_planner_check_for_perturbed is the planner instance that confirmed it.
                         
                         # Get explanation for perturbed environment
                         explainer_perturbed = explainer_class()
-                        explainer_perturbed.set_environment(perturbed_env, planner_check)
+                        explainer_perturbed.set_environment(current_perturbed_env, final_planner_check_for_perturbed)
                         perturbed_features, _ = get_important_features(
-                            explainer_perturbed, explainer_name, perturbed_env, planner_check, top_k=args.top_k
+                            explainer_perturbed, explainer_name, current_perturbed_env, final_planner_check_for_perturbed, top_k=args.top_k
                         )
                         
                         # Calculate explanation stability (Jaccard similarity)
