@@ -247,7 +247,6 @@ def get_ranked_obstacles_from_explanation(explainer, explainer_name, env):
     try:
         obstacle_ids = list(env.obstacle_shapes.keys())
         
-        # TODO fix anchors
         if explainer_name in ["LIME", "SHAP"]:
             explanation = explainer.explain(num_samples=50)
             
@@ -308,7 +307,7 @@ def main():
     args = parser.parse_args()
     
     # Set up experiment parameters
-    explanations = ["SHAP", "LIME"]#, "Anchors"]
+    explanations = ["SHAP", "LIME", "Anchors"]
     planners = ["A*", "Dijkstra"]#, "RRT*"]
     perturbation_counts = [10]#, 50, 100]
     perturbation_types = ["remove", "move"] #, "random"] # random doesn't make sense, remove and move cover all cases

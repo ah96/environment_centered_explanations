@@ -33,7 +33,7 @@ class AnchorsExplainer:
     def explain(self, num_samples=100, precision_threshold=0.95, min_coverage=0.1, callback=None, detect_changes=False, perturbation_mode="remove"):
         """
         Generate Anchors-based explanations for the path planning problem.
-
+        
         Args:
             num_samples: Number of perturbation samples to generate
             precision_threshold: Minimum precision required for an anchor rule
@@ -51,20 +51,24 @@ class AnchorsExplainer:
         if num_obstacles == 0:
             return {}
 
+        # Set a reasonable maximum for candidate rules
+        max_candidates = min(500, num_obstacles * 20)
+        
         original_path = self.planner.plan()
         baseline_path_length = len(original_path) if original_path else float('inf')
         
+        # Limit rule size based on obstacle count
+        max_rule_size = min(3, max(2, num_obstacles // 2)) if detect_changes else min(2, max(1, num_obstacles // 3))
+        
         # Adjust parameters for path changes detection
         if detect_changes:
-            # Lower threshold for path changes to find any relevant patterns
             precision_threshold = max(0.6, precision_threshold * 0.7)
-            # Allow smaller coverage for path changes
             min_coverage = min_coverage * 0.8
         
         candidate_anchors = []
 
-        # Basic one-obstacle rules
-        for i in range(num_obstacles):
+        # Basic one-obstacle rules (limit to a reasonable number)
+        for i in range(min(num_obstacles, 20)):
             keep_rule = [None] * num_obstacles
             keep_rule[i] = 1
             candidate_anchors.append(keep_rule)
@@ -73,115 +77,63 @@ class AnchorsExplainer:
             remove_rule[i] = 0
             candidate_anchors.append(remove_rule)
 
-        # Random multi-obstacle rules - adjust max rule size for path changes
-        max_rule_size = 5 if detect_changes else 3
-        for _ in range(min(40, num_obstacles * 2)):
-            rule_size = random.randint(2, min(max_rule_size, num_obstacles))
-            rule = [None] * num_obstacles
-            for _ in range(rule_size):
-                idx = random.randint(0, num_obstacles - 1)
-                rule[idx] = random.choice([0, 1])
-            candidate_anchors.append(rule)
+        # Random multi-obstacle rules - with limits
+        max_random_rules = min(20, num_obstacles)
+        for _ in range(max_random_rules):
+            # Fix: Ensure start is less than end for random.randint
+            min_rule_size = min(2, num_obstacles)
+            max_size = min(max_rule_size, num_obstacles)
             
-        # Add more specific combinations - especially useful for path changes
+            if min_rule_size >= max_size:
+                rule_size = min_rule_size
+            else:
+                rule_size = random.randint(min_rule_size, max_size)
+                
+            rule = [None] * num_obstacles
+            
+            # Ensure we don't try to sample more indices than available
+            if rule_size <= num_obstacles:
+                selected_indices = random.sample(range(num_obstacles), rule_size)
+                for idx in selected_indices:
+                    rule[idx] = random.choice([0, 1])
+                candidate_anchors.append(rule)
+            
+        # Add limited specific combinations
+        max_pairs = min(15, num_obstacles * (num_obstacles - 1) // 2)
+        pair_count = 0
+        
         for i in range(num_obstacles):
             for j in range(i+1, num_obstacles):
+                if pair_count >= max_pairs:
+                    break
+                    
                 # Try keep-keep combinations
                 rule = [None] * num_obstacles
                 rule[i] = 1
                 rule[j] = 1
                 candidate_anchors.append(rule)
+                pair_count += 1
                 
-                # Try remove-remove combinations
-                rule = [None] * num_obstacles
-                rule[i] = 0
-                rule[j] = 0
-                candidate_anchors.append(rule)
-                
-                # Try keep-remove combinations
-                rule = [None] * num_obstacles
-                rule[i] = 1
-                rule[j] = 0
-                candidate_anchors.append(rule)
-                
-                rule = [None] * num_obstacles
-                rule[i] = 0
-                rule[j] = 1
-                candidate_anchors.append(rule)
+                if pair_count >= max_pairs:
+                    break
         
-        # For path changes, add larger combinations - clusters of obstacles
-        if detect_changes and num_obstacles > 3:
-            # Try some larger combinations for more complex scenarios
-            for _ in range(min(20, num_obstacles)):
-                # Create larger rules (3-6 obstacles specified)
-                rule_size = random.randint(3, min(6, num_obstacles))
-                rule = [None] * num_obstacles
-                selected_indices = random.sample(range(num_obstacles), rule_size)
-                for idx in selected_indices:
-                    rule[idx] = random.choice([0, 1])
-                candidate_anchors.append(rule)
-                
-            # Try removing/keeping clusters of adjacent obstacles
-            # This is useful because path changes often happen when groups of obstacles are affected
-            obstacle_indices = list(range(num_obstacles))
-            random.shuffle(obstacle_indices)
-            for start_idx in range(0, min(20, num_obstacles), 3):
-                end_idx = min(start_idx + 3, num_obstacles)
-                selected_indices = obstacle_indices[start_idx:end_idx]
-                
-                # Keep all selected
-                rule = [None] * num_obstacles
-                for idx in selected_indices:
-                    rule[idx] = 1  # Keep
-                candidate_anchors.append(rule)
-                
-                # Remove all selected
-                rule = [None] * num_obstacles
-                for idx in selected_indices:
-                    rule[idx] = 0  # Remove
-                candidate_anchors.append(rule)
-
+        # Ensure we don't exceed maximum candidates
+        if len(candidate_anchors) > max_candidates:
+            candidate_anchors = candidate_anchors[:max_candidates]
+        
         anchor_results = {}
         original_obstacles = self.env.obstacles.copy()
         total_iterations = len(candidate_anchors) * num_samples
         iteration = 0
         
-        # If detecting path changes, run some initial tests to find promising obstacle combinations
-        promising_indices = []
-        if detect_changes and num_obstacles > 5:
-            # Check each obstacle's individual impact
-            for i in range(min(num_obstacles, 20)):
-                # Remove just this obstacle
-                temp_obstacles = original_obstacles.copy()
-                obstacle_id = obstacle_keys[i]
-                if obstacle_id in temp_obstacles:
-                    del temp_obstacles[obstacle_id]
-                    
-                    self.env.obstacles = temp_obstacles
-                    path = self.planner.plan()
-                    new_path_length = len(path) if path else float('inf')
-                    
-                    # If removing this obstacle causes a significant path change, it's promising
-                    if abs(new_path_length - baseline_path_length) > 1:
-                        promising_indices.append(i)
-                        
-                    self.env.obstacles = original_obstacles.copy()
-
         for anchor_idx, anchor_rule in enumerate(candidate_anchors):
-            if callback:
+            # Update progress less frequently
+            if callback and anchor_idx % 5 == 0:
                 callback(anchor_idx, len(candidate_anchors))
                 
-            # For path changes, prioritize rules that involve promising obstacles
-            if detect_changes and promising_indices and random.random() < 0.3:
-                # 30% chance to modify this rule to include promising obstacles
-                rule = list(anchor_rule)  # Copy the rule
-                promising_idx = random.choice(promising_indices)
-                rule[promising_idx] = random.choice([0, 1])  # Either keep or remove this promising obstacle
-                anchor_rule = rule
-
             samples_results = []
 
-            for _ in range(num_samples):
+            for sample_idx in range(num_samples):
                 # Build a perturbation that satisfies this anchor rule
                 combination = []
                 for i in range(num_obstacles):
@@ -192,12 +144,19 @@ class AnchorsExplainer:
 
                 original_state, _ = self.env.generate_perturbation(combination=combination, mode=perturbation_mode)
                 path = self.planner.plan()
-                path_length = len(path) if path else float('inf')
-
-                path_changed = abs(path_length - baseline_path_length) > 1
+                
+                # Handle path comparison more carefully
+                if original_path and path:
+                    path_changed = abs(len(path) - len(original_path)) > 1
+                elif bool(original_path) != bool(path):  # One exists and one doesn't
+                    path_changed = True
+                else:
+                    path_changed = False  # Both don't exist
+                    
                 samples_results.append(path_changed)
 
                 self.env.restore_from_perturbation(original_state)
+                
                 iteration += 1
                 if callback and iteration % 10 == 0:
                     callback(iteration, total_iterations)
