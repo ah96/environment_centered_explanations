@@ -492,20 +492,54 @@ def main():
             "Explanation_Time_s": "mean"
         }).reset_index()
         
-        # Save the averaged results
-        avg_df.to_csv(args.output, index=False)
-        print(f"Averaged results saved to {args.output}")
-        print(f"Averaged rows: {len(avg_df)}")
-        print(f"Averaged DataFrame shape: {avg_df.shape}")
+        # Check if output file exists and append if it does
+        if os.path.exists(args.output):
+            # Read existing results
+            existing_df = pd.read_csv(args.output)
+            # Combine with new results
+            combined_df = pd.concat([existing_df, avg_df], ignore_index=True)
+            # Remove duplicates if any (keeping the latest entry)
+            combined_df = combined_df.drop_duplicates(
+                subset=["Explanation", "Planner", "Num_Perturbations", "Perturbation_Type"], 
+                keep='last'
+            )
+            # Save combined results
+            combined_df.to_csv(args.output, index=False)
+            print(f"Results appended to existing file {args.output}")
+            print(f"Total rows in combined file: {len(combined_df)}")
+        else:
+            # Save as new file
+            avg_df.to_csv(args.output, index=False)
+            print(f"New results file created at {args.output}")
+        
+        print(f"Rows in current results: {len(avg_df)}")
+        print(f"DataFrame shape: {avg_df.shape}")
         
         # Display summary statistics
         print("\nSummary Statistics (Averaged):")
         print(avg_df.describe())
     else:
-        # Save the full results
-        df.to_csv(args.output, index=False)
-        print(f"Experiments complete. Results saved to {args.output}")
-        print(f"Total rows: {len(df)}")
+        # For full results (not averaged)
+        if os.path.exists(args.output):
+            # Read existing results
+            existing_df = pd.read_csv(args.output)
+            # Combine with new results
+            combined_df = pd.concat([existing_df, df], ignore_index=True)
+            # Remove duplicates if any (based on all fields except the metrics)
+            combined_df = combined_df.drop_duplicates(
+                subset=["Environment", "Explanation", "Planner", "Num_Perturbations", "Perturbation_Type"],
+                keep='last'
+            )
+            # Save combined results
+            combined_df.to_csv(args.output, index=False)
+            print(f"Results appended to existing file {args.output}")
+            print(f"Total rows in combined file: {len(combined_df)}")
+        else:
+            # Save as new file
+            df.to_csv(args.output, index=False)
+            print(f"New results file created at {args.output}")
+        
+        print(f"Rows in current results: {len(df)}")
         print(f"DataFrame shape: {df.shape}")
         
         # Display summary statistics

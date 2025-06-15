@@ -201,8 +201,13 @@ def main():
     
     # Set up experiment parameters
     explanations = ["SHAP", "LIME", "Anchors"]
-    planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First", "RRT", "RRT*", "PRM"]
-    
+    # planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First", "RRT", "RRT*", "PRM"]
+        # Set up experiment parameters
+    planners = ["A*", "Dijkstra"]
+    # planners = ["Theta*", "BFS"]
+    # planners = ["DFS", "Greedy Best-First"]
+    # planners = ["RRT", "RRT*", "PRM"] # These 3 take too much time and memory
+
     runner = BatchExperimentRunner()
     
     # Initialize results list for pandas DataFrame
@@ -292,18 +297,34 @@ def main():
             "Explanation_Time_s": "mean"
         }).reset_index()
         
-        # Save the averaged results
-        avg_df.to_csv(args.output, index=False)
-        print(f"Averaged results saved to {args.output}")
+        # Save the averaged results with append option
+        if os.path.exists(args.output):
+            # Read existing file and append new results
+            existing_df = pd.read_csv(args.output)
+            combined_df = pd.concat([existing_df, avg_df], ignore_index=True)
+            combined_df.to_csv(args.output, index=False)
+            print(f"Results appended to existing file {args.output}")
+        else:
+            avg_df.to_csv(args.output, index=False)
+            print(f"New results saved to {args.output}")
+        
         print(f"Averaged rows: {len(avg_df)}")
         
         # Display summary statistics
         print("\nSummary Statistics (Averaged):")
         print(avg_df.describe())
     else:
-        # Save the full results
-        df.to_csv(args.output, index=False)
-        print(f"Experiments complete. Results saved to {args.output}")
+        # Handle full results with append option
+        if os.path.exists(args.output):
+            # Read existing file and append new results
+            existing_df = pd.read_csv(args.output)
+            combined_df = pd.concat([existing_df, df], ignore_index=True)
+            combined_df.to_csv(args.output, index=False)
+            print(f"Results appended to existing file {args.output}")
+        else:
+            df.to_csv(args.output, index=False)
+            print(f"New results saved to {args.output}")
+            
         print(f"Total rows: {len(df)}")
         
         # Display summary statistics
