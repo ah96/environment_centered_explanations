@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools
 
 class ContrastiveExplainer:
     """
@@ -17,7 +18,7 @@ class ContrastiveExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
 
-    def is_close(self, shape, path_set, threshold=2):
+    def is_close(self, shape, path_set, threshold=0):
         return any(
             abs(x - px) + abs(y - py) <= threshold
             for (x, y) in shape
@@ -25,14 +26,6 @@ class ContrastiveExplainer:
         )
 
     def explain(self, factual_path, contrastive_path, minimal=False, proximity_threshold=0):
-        """
-        Compare two paths and identify obstacle shapes that explain the preference for A over B.
-
-        factual_path: list of (x, y) for trajectory A (taken)
-        contrastive_path: list of (x, y) for trajectory B (expected)
-        minimal: whether to return a minimal subset of obstacles responsible
-        proximity_threshold: how close an obstacle must be to a path to count as relevant
-        """
         if not factual_path or not contrastive_path:
             raise ValueError("Both factual_path and contrastive_path must be provided")
 
@@ -62,31 +55,28 @@ class ContrastiveExplainer:
                 })
 
         if minimal:
-            # Try to find smallest subset that explains A vs B
-            minimal_set = []
-            for c in candidates:
-                others = [o for o in candidates if o != c]
-                # Simulate removing just this one obstacle to see if A becomes B or vice versa
-                modified_env = self.env.clone()  # Assume you implement GridWorldEnv.clone()
-                modified_env.remove_obstacle_shape(c["id"])
+            candidates = self.compute_minimal_contrastive_set(candidates, factual_path, contrastive_path)
 
-                # Plan again using current planner
-                self.planner.set_environment(
-                    start=modified_env.agent_pos,
-                    goal=modified_env.goal_pos,
-                    grid_size=modified_env.grid_size,
-                    obstacles=modified_env.obstacles
-                )
-                new_path = self.planner.plan()
-
-                # Compare new path to both
-                if new_path and new_path != factual_path and new_path == contrastive_path:
-                    minimal_set.append(c)
-            contrastive["obstacles_affecting_choice"] = minimal_set
-        else:
-            contrastive["obstacles_affecting_choice"] = candidates
-
+        contrastive["obstacles_affecting_choice"] = candidates
         return contrastive
+
+    def compute_minimal_contrastive_set(self, candidates, factual_path, contrastive_path):
+        result = []
+        for c in candidates:
+            modified_env = self.env.clone()
+            modified_env.remove_obstacle_shape(c["id"])
+
+            self.planner.set_environment(
+                start=modified_env.agent_pos,
+                goal=modified_env.goal_pos,
+                grid_size=modified_env.grid_size,
+                obstacles=modified_env.obstacles
+            )
+            new_path = self.planner.plan()
+
+            if new_path and new_path != factual_path and new_path == contrastive_path:
+                result.append(c)
+        return result
 
     def visualize(self, contrastive_result):
         fig, ax = plt.subplots(figsize=(8, 8))
@@ -99,7 +89,6 @@ class ContrastiveExplainer:
         ax.set_yticklabels([])
         ax.grid(True, which='both', color='gray', linestyle='-', linewidth=0.5)
 
-        # Color code obstacles
         cmap = plt.cm.tab10
         for shape_id, shape in self.env.obstacle_shapes.items():
             color = cmap(shape_id % 10)
@@ -126,7 +115,6 @@ class ContrastiveExplainer:
                         fontsize=8, color='black',
                         bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
 
-        # Draw paths
         if contrastive_result["factual_path"]:
             xs, ys = zip(*contrastive_result["factual_path"])
             ax.plot(ys, xs, color='orange', linewidth=3, label='Factual Path')
@@ -135,15 +123,11 @@ class ContrastiveExplainer:
             xs, ys = zip(*contrastive_result["alt_path"])
             ax.plot(ys, xs, color='purple', linewidth=3, label='Expected Path')
 
-        # Draw start/goal
         if self.env.agent_pos:
-            ax.scatter(self.env.agent_pos[1], self.env.agent_pos[0],
-                       color='blue', s=150, marker='o', label='Start')
+            ax.scatter(self.env.agent_pos[1], self.env.agent_pos[0], color='blue', s=150, marker='o', label='Start')
         if self.env.goal_pos:
-            ax.scatter(self.env.goal_pos[1], self.env.goal_pos[0],
-                       color='green', s=150, marker='*', label='Goal')
+            ax.scatter(self.env.goal_pos[1], self.env.goal_pos[0], color='green', s=150, marker='*', label='Goal')
 
-        title = "Contrastive Explanation: Why A not B?"
-        ax.set_title(title)
+        ax.set_title("Contrastive Explanation: Why A not B?")
         ax.legend(loc='upper right')
         return fig
