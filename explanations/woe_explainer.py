@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import random
 
 class WoEExplainer:
     def __init__(self):
@@ -20,23 +21,49 @@ class WoEExplainer:
     def compute_woe(self, p_g, p_g_prime):
         return math.log(p_g / p_g_prime)
 
-    def explain(self, factual_path, contrastive_path, trials=10):
+    def explain(self, factual_path, contrastive_path, trials=10, perturbation_mode="remove"):
+        """
+        Generate WoE explanation by repeatedly perturbing obstacle shapes and observing their effects
+        on path outcomes. Supports 'remove' or 'move' perturbation modes.
+
+        Args:
+            factual_path: The actual trajectory taken (list of coordinates)
+            contrastive_path: The alternative user-expected trajectory (list of coordinates)
+            trials: Number of perturbation trials per obstacle
+            perturbation_mode: Either "remove" or "move"
+
+        Returns:
+            A dictionary with posterior probabilities, WoE values, and ranked obstacle influence
+        """
         if not factual_path or not contrastive_path:
             raise ValueError("Both factual_path and contrastive_path must be provided")
 
-        # Store original environment
         fp_set = set(tuple(p) for p in factual_path)
         cp_set = set(tuple(p) for p in contrastive_path)
 
         posterior_map = {}
 
-        for shape_id in self.env.obstacle_shapes:
+        for shape_id, original_shape in self.env.obstacle_shapes.items():
             success_A = 0
             success_B = 0
 
             for _ in range(trials):
                 mod_env = self.env.clone()
-                mod_env.remove_obstacle_shape(shape_id)
+
+                if perturbation_mode == "remove":
+                    mod_env.remove_obstacle_shape(shape_id)
+
+                elif perturbation_mode == "move":
+                    mod_env.remove_obstacle_shape(shape_id)
+                    dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+                    new_shape = [(x + dx, y + dy) for x, y in original_shape
+                                 if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size]
+                    new_id = max(mod_env.obstacle_shapes.keys(), default=0) + 1
+                    mod_env.obstacle_shapes[new_id] = new_shape
+                    mod_env.obstacles.update(new_shape)
+
+                else:
+                    raise ValueError("Unsupported perturbation_mode. Use 'remove' or 'move'.")
 
                 self.planner.set_environment(
                     start=mod_env.agent_pos,
@@ -46,7 +73,6 @@ class WoEExplainer:
                 )
 
                 new_path = self.planner.plan()
-
                 if not new_path:
                     continue
 
@@ -73,6 +99,7 @@ class WoEExplainer:
         }
 
     def rank_observations_by_woe(self, posterior_map):
+        """Rank obstacle shapes by their WoE scores."""
         woe_list = []
         for obs, (p_g, p_g_prime) in posterior_map.items():
             woe_val = self.compute_woe(p_g, p_g_prime)
@@ -81,6 +108,16 @@ class WoEExplainer:
         return woe_list
 
     def visualize(self, result, top_k=10):
+        """
+        Visualize WoE results on the grid, coloring obstacles by their influence.
+
+        Args:
+            result: Output dictionary from `explain` method
+            top_k: Number of top-ranked obstacles to normalize coloring
+
+        Returns:
+            A matplotlib figure object
+        """
         if not result:
             return None
 
@@ -92,7 +129,6 @@ class WoEExplainer:
         ax.set_yticks(np.arange(0, self.grid_size, 1))
         ax.grid(True, which='both', color='gray', linestyle='-', linewidth=0.5)
 
-        # Draw obstacles with WoE coloring
         cmap = plt.cm.RdYlBu
         max_woe = max(abs(w) for _, w in result["ranked"][:top_k]) if result["ranked"] else 1
 
@@ -114,7 +150,6 @@ class WoEExplainer:
                         fontsize=8, color='black',
                         bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
 
-        # Draw paths
         if result["factual_path"]:
             xs, ys = zip(*result["factual_path"])
             ax.plot(ys, xs, color='orange', linewidth=3, label='Factual Path')

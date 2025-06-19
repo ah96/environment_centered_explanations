@@ -461,3 +461,15 @@ class GridWorldEnv:
                 self.obstacles.append(cell)
         return sid
 
+    def generate_random_position(self):
+        """Generate a random free (non-obstacle) grid cell."""
+        import random
+        while True:
+            x = random.randint(0, self.grid_size - 1)
+            y = random.randint(0, self.grid_size - 1)
+            if [x, y] not in self.obstacles:
+                return [x, y]
+
+    def update_obstacles_from_shapes(self):
+        """Regenerate flat obstacle list from obstacle_shapes."""
+        self.obstacles = [cell for shape in self.obstacle_shapes.values() for cell in shape]

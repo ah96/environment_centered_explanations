@@ -6,26 +6,61 @@ class ContrastiveExplainer:
     """
     Contrastive explanation: Why trajectory A (factual) rather than B (expected)?
     Compares two planning outcomes and highlights obstacles responsible for the difference.
+    Supports both 'remove' and 'move' perturbation modes.
     """
 
     def __init__(self):
+        """Initialize internal references to environment and planner."""
         self.env = None
         self.planner = None
         self.grid_size = None
 
     def set_environment(self, env, planner):
+        """
+        Set the environment and planner for the explainer.
+
+        Args:
+            env: GridWorldEnv instance
+            planner: Planner instance with set_environment and plan methods
+        """
         self.env = env
         self.planner = planner
         self.grid_size = env.grid_size
 
     def is_close(self, shape, path_set, threshold=0):
+        """
+        Checks if any cell in a given obstacle shape is within a given
+        Manhattan distance (threshold) to any point on the given path.
+
+        Args:
+            shape: list of (x, y) obstacle coordinates
+            path_set: set of (x, y) path coordinates
+            threshold: maximum distance to consider "close"
+
+        Returns:
+            True if any obstacle point is close to the path
+        """
         return any(
             abs(x - px) + abs(y - py) <= threshold
             for (x, y) in shape
             for (px, py) in path_set
         )
 
-    def explain(self, factual_path, contrastive_path, minimal=False, proximity_threshold=0):
+    def explain(self, factual_path, contrastive_path, minimal=True, proximity_threshold=0, perturbation_mode="remove"):
+        """
+        Generate a contrastive explanation by identifying obstacles near
+        either the factual or contrastive path, but not both.
+
+        Args:
+            factual_path: path actually followed (Plan A)
+            contrastive_path: expected or alternative path (Plan B)
+            minimal: if True, filters obstacles down to minimal sufficient subset
+            proximity_threshold: distance from path within which obstacles are considered
+            perturbation_mode: perturbation type ('remove' or 'move')
+
+        Returns:
+            A dictionary with explanation data including affected obstacles
+        """
         if not factual_path or not contrastive_path:
             raise ValueError("Both factual_path and contrastive_path must be provided")
 
@@ -40,7 +75,7 @@ class ContrastiveExplainer:
             "obstacles_affecting_choice": []
         }
 
-        # Initial full set of differing obstacles
+        # Identify obstacle shapes that are close to one path but not the other
         candidates = []
         for shape_id, shape in self.env.obstacle_shapes.items():
             close_to_factual = self.is_close(shape, fp_set, threshold=proximity_threshold)
@@ -55,30 +90,74 @@ class ContrastiveExplainer:
                 })
 
         if minimal:
-            candidates = self.compute_minimal_contrastive_set(candidates, factual_path, contrastive_path)
+            candidates = self.compute_minimal_contrastive_set(
+                candidates, factual_path, contrastive_path, perturbation_mode=perturbation_mode
+            )
 
         contrastive["obstacles_affecting_choice"] = candidates
         return contrastive
 
-    def compute_minimal_contrastive_set(self, candidates, factual_path, contrastive_path):
-        result = []
-        for c in candidates:
-            modified_env = self.env.clone()
-            modified_env.remove_obstacle_shape(c["id"])
+    def compute_minimal_contrastive_set(self, candidates, factual_path, contrastive_path, perturbation_mode="remove"):
+        """
+        Identifies minimal subsets of obstacles (including joint combinations) that,
+        when perturbed (removed or moved), cause the planner to change its output
+        from the factual path to the contrastive path.
 
-            self.planner.set_environment(
-                start=modified_env.agent_pos,
-                goal=modified_env.goal_pos,
-                grid_size=modified_env.grid_size,
-                obstacles=modified_env.obstacles
-            )
-            new_path = self.planner.plan()
+        Args:
+            candidates: List of obstacle metadata dictionaries
+            factual_path: The path actually taken
+            contrastive_path: The contrastive/alternative path
+            perturbation_mode: Type of perturbation ('remove' or 'move')
 
-            if new_path and new_path != factual_path and new_path == contrastive_path:
-                result.append(c)
-        return result
+        Returns:
+            List of obstacle metadata dictionaries that minimally cause the path shift
+        """
+        minimal_subsets = []
+        n = len(candidates)
+
+        for r in range(1, n + 1):
+            found = False
+            for subset in itertools.combinations(candidates, r):
+                modified_env = self.env.clone()
+
+                # Apply perturbations
+                for c in subset:
+                    if perturbation_mode == "remove":
+                        modified_env.remove_obstacle_shape(c["id"])
+                    elif perturbation_mode == "move":
+                        modified_env.move_obstacle_shape_randomly(c["id"])
+                    else:
+                        raise ValueError("Unsupported perturbation mode")
+
+                self.planner.set_environment(
+                    start=modified_env.agent_pos,
+                    goal=modified_env.goal_pos,
+                    grid_size=modified_env.grid_size,
+                    obstacles=modified_env.obstacles
+                )
+                new_path = self.planner.plan()
+
+                if new_path and new_path != factual_path and new_path == contrastive_path:
+                    minimal_subsets.append(list(subset))
+                    found = True
+
+            if found:
+                break
+
+        flat_set = {c["id"]: c for subset in minimal_subsets for c in subset}
+        return list(flat_set.values())
 
     def visualize(self, contrastive_result):
+        """
+        Visualizes the factual and contrastive paths along with obstacle shapes
+        and highlights the differences that affected the planning decision.
+
+        Args:
+            contrastive_result: result dictionary from the explain() method
+
+        Returns:
+            A matplotlib figure object with the visual explanation
+        """
         fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_xlim(-0.5, self.grid_size - 0.5)
         ax.set_ylim(self.grid_size - 0.5, -0.5)
