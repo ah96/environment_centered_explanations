@@ -473,3 +473,23 @@ class GridWorldEnv:
     def update_obstacles_from_shapes(self):
         """Regenerate flat obstacle list from obstacle_shapes."""
         self.obstacles = [cell for shape in self.obstacle_shapes.values() for cell in shape]
+
+    @classmethod
+    def from_dict(cls, data):
+        """
+        Create a GridWorldEnv instance from a dictionary.
+        
+        Args:
+            data (dict): A dictionary with keys 'grid_size', 'agent_pos', 'goal_pos',
+                        'obstacle_shapes' (dict of shape_id -> list of [x, y])
+        
+        Returns:
+            GridWorldEnv: A new environment object initialized with the provided data.
+        """
+        env = cls(grid_size=data.get("grid_size", 10), num_obstacles=0)
+        env.agent_pos = data.get("agent_pos") or data.get("agent")  # support both keys
+        env.goal_pos = data.get("goal_pos") or data.get("goal")     # support both keys
+        env.obstacle_shapes = {int(k): v for k, v in data["obstacle_shapes"].items()}
+        env.update_obstacles_from_shapes()
+        return env
+

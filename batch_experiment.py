@@ -20,12 +20,6 @@ from explanations.lime_explainer import LimeExplainer
 from explanations.anchors_explainer import AnchorsExplainer
 from explanations.shap_explainer import SHAPExplainer
 from explanations.contrastive_explainer import ContrastiveExplainer
-from explanations.counterfactual_explainer import CounterfactualExplainer
-from explanations.goal_counterfactual_explainer import GoalCounterfactualExplainer
-from explanations.woe_explainer import WoEExplainer
-from explanations.bayesian_surprise_explainer import BayesianSurpriseExplainer
-from explanations.pse_explainer import PSEExplainer
-from explanations.responsibility_explainer import ResponsibilityExplainer
 
 from environment_generator import EnvironmentGenerator
 from gui import GridWorldEnv
@@ -50,13 +44,7 @@ class BatchExperimentRunner:
             "LIME": LimeExplainer,
             "Anchors": AnchorsExplainer,
             "SHAP": SHAPExplainer,
-            "Counterfactual": CounterfactualExplainer,
-            "GoalCounterfactual": GoalCounterfactualExplainer,
             "Contrastive": ContrastiveExplainer,
-            "WoE": WoEExplainer,
-            "BayesianSurprise": BayesianSurpriseExplainer,
-            "PSE": PSEExplainer,
-            "Responsibility": ResponsibilityExplainer
         }
         
     def load_environment(self, filepath):

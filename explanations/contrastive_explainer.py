@@ -6,14 +6,24 @@ class ContrastiveExplainer:
     """
     Contrastive explanation: Why trajectory A (factual) rather than B (expected)?
     Compares two planning outcomes and highlights obstacles responsible for the difference.
-    Supports both 'remove' and 'move' perturbation modes.
     """
 
-    def __init__(self):
-        """Initialize internal references to environment and planner."""
-        self.env = None
+    def __init__(self, env=None, alt_env=None, factual_path=None, contrastive_path=None):
+        """
+        Initialize with optional environments and paths.
+
+        Args:
+            env (GridWorldEnv): Original environment (for path A).
+            alt_env (GridWorldEnv): Contrastive environment (for path B).
+            factual_path (List[Tuple[int, int]]): Path A.
+            contrastive_path (List[Tuple[int, int]]): Path B.
+        """
+        self.env = env
+        self.alt_env = alt_env
+        self.factual_path = factual_path
+        self.contrastive_path = contrastive_path
         self.planner = None
-        self.grid_size = None
+        self.grid_size = env.grid_size if env else None
 
     def set_environment(self, env, planner):
         """
@@ -125,7 +135,7 @@ class ContrastiveExplainer:
                     if perturbation_mode == "remove":
                         modified_env.remove_obstacle_shape(c["id"])
                     elif perturbation_mode == "move":
-                        modified_env.move_obstacle_shape_randomly(c["id"])
+                        modified_env.move_obstacle_shape(c["id"])
                     else:
                         raise ValueError("Unsupported perturbation mode")
 
