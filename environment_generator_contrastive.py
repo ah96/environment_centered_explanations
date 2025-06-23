@@ -121,4 +121,4 @@ class ContrastiveEnvironmentGenerator:
 
 if __name__ == "__main__":
     gen = ContrastiveEnvironmentGenerator(grid_size=12, num_obstacles=10)
-    gen.generate(count=100)
+    gen.generate(count=10000)
