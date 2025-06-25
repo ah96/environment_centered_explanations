@@ -1,121 +1,84 @@
-import os
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
-import scipy.stats as stats
+import matplotlib.pyplot as plt
+import os
+from scipy.stats import f_oneway
 
-# Load and prepare
-input_csv = "contrastive_explanation_results.csv"
-output_dir = "contrastive_analysis_plots"
+# Load the results
+df = pd.read_csv("contrastive_explanation_results.csv")
+
+# Output folder
+output_dir = "contrastive_plots"
 os.makedirs(output_dir, exist_ok=True)
 
-df = pd.read_csv(input_csv)
-df.dropna(inplace=True)
-
-df["Planner"] = df["Planner"].astype(str)
-df["Perturbation_Mode"] = df["Perturbation_Mode"].astype(str)
-
+# Metrics to analyze
 metrics = [
-    "Faithfulness_Score", "Stability", "Explanation_Sparsity",
-    "Explanation_Asymmetry", "Relative_Path_Diff", "Path_Overlap"
+    "Faithfulness_Score",
+    "Stability",
+    "Explanation_Sparsity",
+    "Explanation_Asymmetry",
+    "Relative_Path_Diff",
+    "Path_Overlap"
 ]
 
-def save_fig(fig, name):
-    fig.savefig(os.path.join(output_dir, name), bbox_inches='tight')
-    plt.close(fig)
+# Summary statistics per planner + perturbation mode
+summary = df.groupby(["Planner", "Perturbation_Mode"])[metrics].agg(["mean", "std"]).reset_index()
+summary.columns = ['_'.join(col).strip("_") for col in summary.columns.values]
+summary_csv = os.path.join(output_dir, "contrastive_summary_table.csv")
+summary_tex = os.path.join(output_dir, "contrastive_summary_table.tex")
+summary.to_csv(summary_csv, index=False)
 
-# --- Summary statistics ---
-df.describe().to_csv(os.path.join(output_dir, "summary_statistics.csv"))
-df.groupby("Planner").mean(numeric_only=True).to_csv(os.path.join(output_dir, "grouped_by_planner.csv"))
-df.groupby("Perturbation_Mode").mean(numeric_only=True).to_csv(os.path.join(output_dir, "grouped_by_perturbation.csv"))
+# LaTeX summary table
+with open(summary_tex, "w") as f:
+    f.write(summary.to_latex(index=False,
+                              caption="Metric means and standard deviations grouped by planner and perturbation mode.",
+                              label="tab:contrastive-summary",
+                              column_format="ll" + "r@{\,±\,}r" * (len(metrics)),
+                              multicolumn_format='c',
+                              escape=False))
 
-# --- Distribution plots ---
-for metric in metrics:
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.histplot(df[metric], kde=True, ax=ax)
-    ax.set_title(f"Distribution of {metric}")
-    save_fig(fig, f"{metric}_distribution.png")
-
-# --- Boxplots + Violin plots ---
-for metric in metrics:
-    # By Planner
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.violinplot(x="Planner", y=metric, data=df, inner="box", ax=ax)
-    ax.set_title(f"{metric} by Planner (Violin + Box)")
-    save_fig(fig, f"{metric}_violin_by_planner.png")
-
-    # By Perturbation Mode
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.violinplot(x="Perturbation_Mode", y=metric, data=df, inner="box", ax=ax)
-    ax.set_title(f"{metric} by Perturbation Mode (Violin + Box)")
-    save_fig(fig, f"{metric}_violin_by_mode.png")
-
-# --- Correlation heatmap ---
-fig, ax = plt.subplots(figsize=(10, 8))
-sns.heatmap(df[metrics].corr(), annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
-ax.set_title("Correlation Heatmap")
-save_fig(fig, "correlation_heatmap.png")
-
-# --- Pairplots ---
-sns.pairplot(df, vars=metrics, hue="Planner", plot_kws={'alpha': 0.5}).savefig(os.path.join(output_dir, "pairplot_planner.png"))
-plt.close()
-sns.pairplot(df, vars=metrics, hue="Perturbation_Mode", plot_kws={'alpha': 0.5}).savefig(os.path.join(output_dir, "pairplot_mode.png"))
-plt.close()
-
-# --- Rank-based comparison ---
-rank_df = df.groupby("Planner")[metrics].mean(numeric_only=True).rank(ascending=True)
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.heatmap(rank_df, annot=True, cmap="YlGnBu", ax=ax)
-ax.set_title("Planner Rank Across Metrics")
-save_fig(fig, "planner_rank_heatmap.png")
-
-# --- Std Dev plot ---
-std_df = df.groupby("Planner")[metrics].std(numeric_only=True)
-fig, ax = plt.subplots(figsize=(10, 6))
-std_df.plot(kind="bar", ax=ax)
-ax.set_title("Standard Deviation of Metrics by Planner (Consistency)")
-save_fig(fig, "planner_stddev_bar.png")
-
-# --- ANOVA tests ---
+# ANOVA results
 anova_results = []
 for metric in metrics:
-    for mode in df["Perturbation_Mode"].unique():
-        subset = df[df["Perturbation_Mode"] == mode]
-        groups = [group[metric].values for _, group in subset.groupby("Planner")]
-        if len(groups) > 1:
-            f_val, p_val = stats.f_oneway(*groups)
-            anova_results.append({
-                "Metric": metric,
-                "Perturbation_Mode": mode,
-                "F_statistic": f_val,
-                "p_value": p_val
-            })
-pd.DataFrame(anova_results).to_csv(os.path.join(output_dir, "anova_results.csv"), index=False)
+    groups = [group[metric].dropna().values for _, group in df.groupby("Planner")]
+    if all(len(g) > 1 for g in groups):
+        f_stat, p_val = f_oneway(*groups)
+        anova_results.append({
+            "Metric": metric,
+            "F-statistic": round(f_stat, 3),
+            "p-value": round(p_val, 3)
+        })
 
-# --- Heatmap of means per Planner+Mode ---
-pivot_means = df.pivot_table(index="Planner", columns="Perturbation_Mode", values=metrics, aggfunc="mean")
+anova_df = pd.DataFrame(anova_results)
+anova_csv = os.path.join(output_dir, "anova_results_table.csv")
+anova_tex = os.path.join(output_dir, "anova_results_table.tex")
+anova_df.to_csv(anova_csv, index=False)
+
+# LaTeX ANOVA table
+with open(anova_tex, "w") as f:
+    f.write(anova_df.to_latex(index=False,
+                               caption="One-way ANOVA test results across planners for each explanation metric.",
+                               label="tab:anova-results",
+                               float_format="%.3f"))
+
+# Combined violin plots for each metric
 for metric in metrics:
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.heatmap(pivot_means[metric].unstack().to_frame().T, annot=True, cmap="Blues", ax=ax)
-    ax.set_title(f"Mean {metric} by Planner and Perturbation Mode")
-    save_fig(fig, f"heatmap_{metric}_by_planner_mode.png")
+    plt.figure(figsize=(12, 6))
+    sns.violinplot(
+        x="Planner",
+        y=metric,
+        hue="Perturbation_Mode",
+        data=df,
+        split=True,
+        inner="quartile"
+    )
+    plt.title(f"{metric.replace('_', ' ')} by Planner and Perturbation Mode")
+    plt.xlabel("Planner")
+    plt.ylabel(metric.replace("_", " "))
+    plt.legend(title="Perturbation Mode", loc="best")
+    plt.tight_layout()
+    plot_path = os.path.join(output_dir, f"{metric}_violin.png")
+    plt.savefig(plot_path)
+    plt.close()
 
-# --- Outlier detection (Tukey fences) ---
-outliers = []
-for metric in metrics:
-    Q1 = df[metric].quantile(0.25)
-    Q3 = df[metric].quantile(0.75)
-    IQR = Q3 - Q1
-    outlier_rows = df[(df[metric] < Q1 - 1.5 * IQR) | (df[metric] > Q3 + 1.5 * IQR)]
-    outliers.extend(outlier_rows.index.tolist())
-df.loc[sorted(set(outliers))].to_csv(os.path.join(output_dir, "detected_outliers.csv"))
-
-# --- Top-N scoring environments per metric ---
-top_n = 10
-top_envs = {}
-for metric in metrics:
-    top_df = df.sort_values(by=metric, ascending=False).head(top_n)
-    top_envs[metric] = top_df[["Pair", "Planner", "Perturbation_Mode", metric]]
-    top_df.to_csv(os.path.join(output_dir, f"top10_{metric}.csv"), index=False)
-
-print(f"[✓] Full analysis complete. All outputs saved to '{output_dir}'")
+print(f"✅ Analysis complete. Outputs saved in: {output_dir}")
