@@ -66,7 +66,7 @@ class PathPlanningApp:
         self.selected_algorithm = tk.StringVar(value=self.algorithms[0])
         
         # Explainability options
-        self.explainability_methods = ["LIME", "Anchors", "SHAP"]
+        self.explainability_methods = ["LIME", "Anchors", "SHAP", "Counterfactual", "Goal-Counterfactual", "Contrastive", "WoE", "Bayesian Surprise", "PSE", "Responsibility"]
         self.selected_explainability = tk.StringVar(value=self.explainability_methods[0])
 
         # Environment type
@@ -810,7 +810,7 @@ class PathPlanningApp:
         if not os.path.exists(json_dir):
             os.makedirs(json_dir)
         
-        filename = os.path.join(json_dir, f"path_planners_{algorithm_name}_{timestamp}.json")
+        filename = os.path.join(json_dir, f"path_planning_{algorithm_name}_{timestamp}.json")
         
         # Add execution time and final results
         summary = {
@@ -1079,6 +1079,20 @@ class PathPlanningApp:
             self.explain_with_anchors(planner)
         elif explanation_method == "SHAP":
             self.explain_with_shap(planner)
+        elif explanation_method == 'Contrastive':
+            self.explain_with_contrastive(planner)
+        elif explanation_method == 'Counterfactual':
+            self.explain_with_counterfactual(planner)
+        elif explanation_method == 'Goal-Counterfactual':
+            self.explain_with_goal_counterfactual(planner)
+        elif explanation_method == "WoE":
+            self.explain_with_woe(planner)
+        elif explanation_method == "Bayesian Surprise":
+            self.explain_with_bayesian_surprise(planner)
+        elif explanation_method == "PSE":
+            self.explain_with_pse(planner)
+        elif explanation_method == "Responsibility":
+            self.explain_with_responsibility(planner)
         else:
             self.status_var.set(f"Unknown explanation method: {explanation_method}")
 

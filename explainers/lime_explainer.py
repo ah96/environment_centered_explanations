@@ -1,7 +1,6 @@
 import numpy as np
 import random
 from sklearn.linear_model import Ridge
-import matplotlib.pyplot as plt
 
 class LimeExplainer:
     """
@@ -147,62 +146,3 @@ class LimeExplainer:
         self.env = original_env_state
         
         return importance
-    
-    def visualize(self, importance):
-        if importance is None or len(importance) == 0:
-            return None
-
-        grid = np.zeros((self.grid_size, self.grid_size))
-        obstacle_keys = list(self.env.obstacle_shapes.keys())
-
-        # Normalize importance values
-        max_abs_importance = max(abs(min(importance)), abs(max(importance))) if importance.any() else 1
-        if max_abs_importance == 0:
-            max_abs_importance = 1
-
-        for idx, shape_id in enumerate(obstacle_keys):
-            if shape_id in self.env.obstacle_shapes:
-                for pos in self.env.obstacle_shapes[shape_id]:
-                    x, y = pos
-                    if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
-                        grid[x, y] = importance[idx]
-
-        fig, ax = plt.subplots(figsize=(10, 8))
-        cmap = plt.cm.RdBu
-        heatmap = ax.imshow(grid, cmap=cmap, vmin=-max_abs_importance, vmax=max_abs_importance)
-
-        # Add grid lines
-        ax.set_xticks(np.arange(-0.5, self.grid_size, 1), minor=True)
-        ax.set_yticks(np.arange(-0.5, self.grid_size, 1), minor=True)
-        ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5)
-        ax.tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
-
-        # Annotate importance values
-        for idx, shape_id in enumerate(obstacle_keys):
-            if shape_id in self.env.obstacle_shapes and self.env.obstacle_shapes[shape_id]:
-                points = self.env.obstacle_shapes[shape_id]
-                if points:
-                    fx, fy = points[0]
-                    ax.annotate(f"#{shape_id}\n{importance[idx]:.2f}",
-                                (fy, fx),
-                                color='black', fontsize=8,
-                                ha='center', va='center',
-                                bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
-
-        ax.set_title('LIME Values: Impact of Obstacles on Path Length\n'
-                    'Blue = increases cost (obstructive), Red = decreases cost (helpful)')
-
-        # Plot start and goal
-        if self.env.agent_pos:
-            ax.scatter(self.env.agent_pos[1], self.env.agent_pos[0],
-                    color='blue', s=150, marker='o', label='Start')
-        if self.env.goal_pos:
-            ax.scatter(self.env.goal_pos[1], self.env.goal_pos[0],
-                    color='green', s=150, marker='*', label='Goal')
-
-        # Add colorbar
-        cbar = plt.colorbar(heatmap, ax=ax, shrink=0.8)
-        cbar.set_label("LIME Importance (Impact on Path Length)", fontsize=10)
-
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=2)
-        return fig

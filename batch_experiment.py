@@ -5,20 +5,27 @@ import json
 from datetime import datetime
 
 # Import path planning algorithms
-from path_planners.astar import AStarPlanner
-from path_planners.dijkstra import DijkstraPlanner
-from path_planners.theta_star import ThetaStarPlanner
-from path_planners.bfs import BFSPlanner
-from path_planners.greedy_best_first import GreedyBestFirstPlanner
-from path_planners.dfs import DFSPlanner
-from path_planners.rrt import RRTPlanner
-from path_planners.rrt_star import RRTStarPlanner
-from path_planners.prm import PRMPlanner
+from path_planning.astar import AStarPlanner
+from path_planning.dijkstra import DijkstraPlanner
+from path_planning.theta_star import ThetaStarPlanner
+from path_planning.bfs import BFSPlanner
+from path_planning.greedy_best_first import GreedyBestFirstPlanner
+from path_planning.dfs import DFSPlanner
+from path_planning.rrt import RRTPlanner
+from path_planning.rrt_star import RRTStarPlanner
+from path_planning.prm import PRMPlanner
 
 # Import explanation methods
-from explainers.lime_explainer import LimeExplainer
-from explainers.anchors_explainer import AnchorsExplainer
-from explainers.shap_explainer import SHAPExplainer
+from explanations.lime_explainer import LimeExplainer
+from explanations.anchors_explainer import AnchorsExplainer
+from explanations.shap_explainer import SHAPExplainer
+from explanations.contrastive_explainer import ContrastiveExplainer
+from explanations.counterfactual_explainer import CounterfactualExplainer
+from explanations.goal_counterfactual_explainer import GoalCounterfactualExplainer
+from explanations.woe_explainer import WoEExplainer
+from explanations.bayesian_surprise_explainer import BayesianSurpriseExplainer
+from explanations.pse_explainer import PSEExplainer
+from explanations.responsibility_explainer import ResponsibilityExplainer
 
 from environment_generator import EnvironmentGenerator
 from gui import GridWorldEnv
@@ -42,7 +49,14 @@ class BatchExperimentRunner:
         self.explainers = {
             "LIME": LimeExplainer,
             "Anchors": AnchorsExplainer,
-            "SHAP": SHAPExplainer
+            "SHAP": SHAPExplainer,
+            "Counterfactual": CounterfactualExplainer,
+            "GoalCounterfactual": GoalCounterfactualExplainer,
+            "Contrastive": ContrastiveExplainer,
+            "WoE": WoEExplainer,
+            "BayesianSurprise": BayesianSurpriseExplainer,
+            "PSE": PSEExplainer,
+            "Responsibility": ResponsibilityExplainer
         }
         
     def load_environment(self, filepath):
@@ -224,6 +238,32 @@ class BatchExperimentRunner:
                 counterfactuals = explainer.explain(goal_condition=True)
                 if counterfactuals and counterfactuals.get("counterfactuals"):
                     obstacles_removed = counterfactuals["counterfactuals"][0]
+
+            elif explainer_name == "Contrastive":
+                result = explainer.explain()
+                if result and result.get("critical_obstacles"):
+                    obstacles_removed = [result["critical_obstacles"][0]]
+
+            elif explainer_name == "WoE":
+                observation = explainer.explain()
+                if observation:
+                    # Example: interpret the result as a single obstacle ID
+                    obstacles_removed = [observation]
+
+            elif explainer_name == "BayesianSurprise":
+                surprise_result = explainer.explain()
+                if surprise_result and "important_obstacles" in surprise_result:
+                    obstacles_removed = [surprise_result["important_obstacles"][0]]
+
+            elif explainer_name == "PSE":
+                pse_result = explainer.explain()
+                if pse_result and "relevant_obstacles" in pse_result:
+                    obstacles_removed = [pse_result["relevant_obstacles"][0]]
+
+            elif explainer_name == "Responsibility":
+                resp = explainer.explain()
+                if resp and "responsible_obstacles" in resp:
+                    obstacles_removed = [resp["responsible_obstacles"][0]]
            
             # Remove the obstacles
             original_obstacles = env.obstacles.copy()
@@ -248,6 +288,13 @@ class BatchExperimentRunner:
             
             # Compute metrics
             metrics = compute_path_metrics(original_path, new_path, original_exec_time, new_exec_time, env.grid_size)
+            '''
+            original_path_length = metrics["original_length"]
+            new_path_length = metrics["new_length"]
+            path_length_diff = metrics["path_length_diff"]
+            path_length_change_pct = metrics["path_length_change_pct"]
+            exec_time_diff = metrics["exec_time_diff"]
+            '''
 
             # Write results to CSV
             with open(results_csv, 'a', newline='') as csvfile:
