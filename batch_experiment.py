@@ -5,27 +5,17 @@ import json
 from datetime import datetime
 
 # Import path planning algorithms
-from path_planning.astar import AStarPlanner
-from path_planning.dijkstra import DijkstraPlanner
-from path_planning.theta_star import ThetaStarPlanner
-from path_planning.bfs import BFSPlanner
-from path_planning.greedy_best_first import GreedyBestFirstPlanner
-from path_planning.dfs import DFSPlanner
-from path_planning.rrt import RRTPlanner
-from path_planning.rrt_star import RRTStarPlanner
-from path_planning.prm import PRMPlanner
+from path_planners.astar import AStarPlanner
+from path_planners.dijkstra import DijkstraPlanner
+from path_planners.theta_star import ThetaStarPlanner
+from path_planners.bfs import BFSPlanner
+from path_planners.greedy_best_first import GreedyBestFirstPlanner
+from path_planners.dfs import DFSPlanner
 
 # Import explanation methods
-from explanations.lime_explainer import LimeExplainer
-from explanations.anchors_explainer import AnchorsExplainer
-from explanations.shap_explainer import SHAPExplainer
-from explanations.contrastive_explainer import ContrastiveExplainer
-from explanations.counterfactual_explainer import CounterfactualExplainer
-from explanations.goal_counterfactual_explainer import GoalCounterfactualExplainer
-from explanations.woe_explainer import WoEExplainer
-from explanations.bayesian_surprise_explainer import BayesianSurpriseExplainer
-from explanations.pse_explainer import PSEExplainer
-from explanations.responsibility_explainer import ResponsibilityExplainer
+from explainers.lime_explainer import LimeExplainer
+from explainers.anchors_explainer import AnchorsExplainer
+from explainers.shap_explainer import SHAPExplainer
 
 from environment_generator import EnvironmentGenerator
 from gui import GridWorldEnv
@@ -40,23 +30,13 @@ class BatchExperimentRunner:
             "Theta*": ThetaStarPlanner,
             "BFS": BFSPlanner,
             "DFS": DFSPlanner,
-            "Greedy Best-First": GreedyBestFirstPlanner,
-            "RRT": RRTPlanner,
-            "RRT*": RRTStarPlanner,
-            "PRM": PRMPlanner
+            "Greedy Best-First": GreedyBestFirstPlanner
         }
         
         self.explainers = {
             "LIME": LimeExplainer,
             "Anchors": AnchorsExplainer,
-            "SHAP": SHAPExplainer,
-            "Counterfactual": CounterfactualExplainer,
-            "GoalCounterfactual": GoalCounterfactualExplainer,
-            "Contrastive": ContrastiveExplainer,
-            "WoE": WoEExplainer,
-            "BayesianSurprise": BayesianSurpriseExplainer,
-            "PSE": PSEExplainer,
-            "Responsibility": ResponsibilityExplainer
+            "SHAP": SHAPExplainer
         }
         
     def load_environment(self, filepath):
@@ -228,42 +208,6 @@ class BatchExperimentRunner:
                     if importance_values:
                         obstacle_to_remove = list(env.obstacle_shapes.keys())[importance_values[0][0]]
                         obstacles_removed = [obstacle_to_remove]
-            
-            elif explainer_name == "Counterfactual":
-                counterfactuals = explainer.explain(max_subset_size=1)
-                if counterfactuals and counterfactuals.get("counterfactuals"):
-                    obstacles_removed = counterfactuals["counterfactuals"][0]
-
-            elif explainer_name == "GoalCounterfactual":
-                counterfactuals = explainer.explain(goal_condition=True)
-                if counterfactuals and counterfactuals.get("counterfactuals"):
-                    obstacles_removed = counterfactuals["counterfactuals"][0]
-
-            elif explainer_name == "Contrastive":
-                result = explainer.explain()
-                if result and result.get("critical_obstacles"):
-                    obstacles_removed = [result["critical_obstacles"][0]]
-
-            elif explainer_name == "WoE":
-                observation = explainer.explain()
-                if observation:
-                    # Example: interpret the result as a single obstacle ID
-                    obstacles_removed = [observation]
-
-            elif explainer_name == "BayesianSurprise":
-                surprise_result = explainer.explain()
-                if surprise_result and "important_obstacles" in surprise_result:
-                    obstacles_removed = [surprise_result["important_obstacles"][0]]
-
-            elif explainer_name == "PSE":
-                pse_result = explainer.explain()
-                if pse_result and "relevant_obstacles" in pse_result:
-                    obstacles_removed = [pse_result["relevant_obstacles"][0]]
-
-            elif explainer_name == "Responsibility":
-                resp = explainer.explain()
-                if resp and "responsible_obstacles" in resp:
-                    obstacles_removed = [resp["responsible_obstacles"][0]]
            
             # Remove the obstacles
             original_obstacles = env.obstacles.copy()

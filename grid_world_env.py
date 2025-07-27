@@ -252,9 +252,9 @@ class GridWorldEnv:
             combination = [random.randint(0, 1) for _ in range(n)]
             return [combination]  # Return as a list of combinations
             
-        elif strategy == "remove_each_obstacle_once":
+        elif strategy == "each_obstacle_once":
             # Generate n combinations, each removing exactly one obstacle
-            combinations = []
+            combinations = [[1] * n] # Start with all obstacles kept (original environment)
             for i in range(n):
                 combination = [1] * n  # Start with all obstacles kept
                 combination[i] = 0     # Remove just one obstacle
@@ -272,7 +272,7 @@ class GridWorldEnv:
                 strategy (str): The perturbation strategy.
                 combination (list, optional): A specific combination to apply (list of 0s and 1s).
                     If provided, this overrides the strategy.
-                mode (str): The perturbation mode ("remove", "move", "random", "minimal_move").
+                mode (str): The affordance mode ("remove", "move", "random", "minimal_move").
                     
             Returns:
                 tuple: (original_state, shapes_removed_ids)
@@ -434,15 +434,14 @@ class GridWorldEnv:
         return False
 
     def clone(self):
-        new_env = GridWorldEnv(grid_size=self.grid_size)
-        new_env.agent_pos = self.agent_pos[:]
-        new_env.goal_pos = self.goal_pos[:]
-        new_env.obstacles = [tuple(o) for o in self.obstacles]  # ensure deep copy
-        new_env.obstacle_shapes = {
-            sid: [tuple(cell) for cell in shape]
-            for sid, shape in self.obstacle_shapes.items()
-        }
-        return new_env
+        """Deep copy the environment, including obstacle shapes."""
+        import copy
+        cloned = GridWorldEnv(grid_size=self.grid_size, num_obstacles=self.num_obstacles)
+        cloned.agent_pos = copy.deepcopy(self.agent_pos)
+        cloned.goal_pos = copy.deepcopy(self.goal_pos)
+        cloned.obstacle_shapes = copy.deepcopy(self.obstacle_shapes)
+        cloned.obstacles = copy.deepcopy(self.obstacles)
+        return cloned
 
     def remove_obstacle_shape(self, shape_id):
         """Remove an obstacle shape and update obstacle list."""
@@ -451,12 +450,3 @@ class GridWorldEnv:
                 if pt in self.obstacles:
                     self.obstacles.remove(pt)
             del self.obstacle_shapes[shape_id]
-
-    def add_obstacle_shape(self, shape_cells):
-        """Adds a list of (x, y) cells as a new shape to the environment."""
-        sid = max(self.obstacle_shapes.keys(), default=0) + 1
-        self.obstacle_shapes[sid] = shape_cells
-        for cell in shape_cells:
-            if cell not in self.obstacles:
-                self.obstacles.append(cell)
-        return sid

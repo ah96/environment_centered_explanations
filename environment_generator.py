@@ -219,7 +219,7 @@ def main():
     random.seed(seed)
     
     # Parameters for complex environments with many obstacles
-    n = 1000  # Number of environments to generate
+    n = 10000  # Number of environments to generate
     grid_size = 15  # Larger grid to accommodate more obstacles
     num_obstacles = 15  # Many obstacles for complex explanations
     
@@ -294,5 +294,92 @@ def main():
     print(f"  - Infeasible: {infeasible_dir}")
     print(f"  - Feasible: {feasible_dir}")
 
+def main_loop():
+    grid_sizes = list(range(10, 16))
+    obstacle_numbers = list(range(5, 16))
+
+    for grid_size in grid_sizes:
+        for num_obstacles in obstacle_numbers:
+            print(f"Generating environments with grid_size={grid_size}, num_obstacles={num_obstacles}")
+            
+            # Set master seed for reproducible generation
+            seed = 42
+            random.seed(seed)
+            
+            # Parameters for complex environments with many obstacles
+            n = 10000  # Number of environments to generate
+            
+            # Create output directories
+            base_dir = os.path.join("environments/", f"grid_{grid_size}_obstacles_{num_obstacles}")
+            infeasible_dir = os.path.join(base_dir, "infeasible")
+            feasible_dir = os.path.join(base_dir, "feasible")
+            
+            os.makedirs(infeasible_dir, exist_ok=True)
+            os.makedirs(feasible_dir, exist_ok=True)
+            
+            # Initialize generator with seed
+            generator = EnvironmentGenerator(grid_size=grid_size, num_obstacles=num_obstacles, seed=seed)
+            
+            print(f"Generating environments with grid_size={grid_size}, num_obstacles={num_obstacles}")
+            print(f"Using seed: {seed}")
+            print("=" * 60)
+            
+            # Generate infeasible environments with deterministic seeds
+            print("Generating 10000 infeasible environments...")
+            infeasible_envs, infeasible_count = generator.generate_environments_batch(
+                n=n,
+                feasible=False,
+                max_attempts_per_env=200,
+                max_total_attempts=50000,
+                infeasibility_mode="block_path",
+                planner_class=AStarPlanner,
+                start_seed=seed 
+            )
+            
+            # Save infeasible environments
+            print(f"\nSaving {infeasible_count} infeasible environments...")
+            for i, env in enumerate(infeasible_envs):
+                filename = os.path.join(infeasible_dir, f"infeasible_env_{i+1:05d}.json")
+                generator.save_environment(env, filename)
+                if (i + 1) % 1000 == 0:
+                    print(f"Saved {i+1}/{infeasible_count} infeasible environments")
+            
+            print(f"Completed saving {infeasible_count} infeasible environments to {infeasible_dir}")
+            print("=" * 60)
+            
+            # Generate feasible environments with deterministic seeds
+            print("Generating 10000 feasible environments...")
+            feasible_envs, feasible_count = generator.generate_environments_batch(
+                n=n,
+                feasible=True,
+                max_attempts_per_env=200,
+                max_total_attempts=50000,
+                start_seed=seed
+            )
+            
+            # Save feasible environments
+            print(f"\nSaving {feasible_count} feasible environments...")
+            for i, env in enumerate(feasible_envs):
+                filename = os.path.join(feasible_dir, f"feasible_env_{i+1:05d}.json")
+                generator.save_environment(env, filename)
+                if (i + 1) % 1000 == 0:
+                    print(f"Saved {i+1}/{feasible_count} feasible environments")
+            
+            print(f"Completed saving {feasible_count} feasible environments to {feasible_dir}")
+            print("=" * 60)
+            
+            # Summary
+            print("GENERATION SUMMARY:")
+            print(f"Seed used: {seed}")
+            print(f"Infeasible environments: {infeasible_count}/10000")
+            print(f"Feasible environments: {feasible_count}/10000")
+            print(f"Total environments generated: {infeasible_count + feasible_count}")
+            print(f"Grid size: {grid_size}x{grid_size}")
+            print(f"Obstacles per environment: {num_obstacles}")
+            print(f"Output directories:")
+            print(f"  - Infeasible: {infeasible_dir}")
+            print(f"  - Feasible: {feasible_dir}")
+
 if __name__ == "__main__":
-    main()
+    #main()
+    main_loop()

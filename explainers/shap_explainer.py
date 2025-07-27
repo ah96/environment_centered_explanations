@@ -1,9 +1,10 @@
 import numpy as np
 import random
-import itertools
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import copy
+from math import factorial
+import itertools
 
 class SHAPExplainer:
     def __init__(self):
@@ -20,77 +21,123 @@ class SHAPExplainer:
         self.baseline_path = planner.plan()
         self.baseline_path_length = len(self.baseline_path) if self.baseline_path else self.get_penalty_value()
 
-    def explain(self, num_samples=100, callback=None, perturbation_mode="remove"):
-        # Save original obstacle state at the beginning
-        original_obstacles = copy.deepcopy(self.env.obstacles)
-        original_obstacle_shapes = copy.deepcopy(self.env.obstacle_shapes)
-        
-        # Get fixed obstacle keys that won't change during computation
-        obstacle_keys = list(original_obstacle_shapes.keys())
-        num_obstacles = len(obstacle_keys)
+    def explain(self, num_samples=100, callback=None, affordance_mode="remove", shap_mode="monte-carlo"):
+        if shap_mode == "monte-carlo":
+            # Save original obstacle state at the beginning
+            original_obstacles = copy.deepcopy(self.env.obstacles)
+            original_obstacle_shapes = copy.deepcopy(self.env.obstacle_shapes)
+            
+            # Get fixed obstacle keys that won't change during computation
+            obstacle_keys = list(original_obstacle_shapes.keys())
+            num_obstacles = len(obstacle_keys)
 
-        if num_obstacles == 0:
-            return {}
+            if num_obstacles == 0:
+                return {}
 
-        # Initialize SHAP values with fixed obstacle keys
-        shap_values = {shape_id: 0 for shape_id in obstacle_keys}
-        evaluated_combinations = {}
+            # Initialize SHAP values with fixed obstacle keys
+            shap_values = {shape_id: 0 for shape_id in obstacle_keys}
+            evaluated_combinations = {}
 
-        baseline_path_length = self.compute_path_length([1] * num_obstacles, evaluated_combinations, perturbation_mode)
+            baseline_path_length = self.compute_path_length([1] * num_obstacles, evaluated_combinations, affordance_mode)
 
-        for sample in range(num_samples):
-            if callback:
-                callback(sample, num_samples)
+            for sample in range(num_samples):
+                if callback:
+                    callback(sample, num_samples)
 
-            #-----DEBUGGING-----
-            if len(shap_values) > 15: # len(self.env.obstacle_shapes):
-                raise ValueError(f"shape_id {shape_id} is out of range for obstacle_shapes (len={len(self.env.obstacle_shapes)})")
-            #-------------------
-                
-            # Reset environment to original state for each sample
+                #-----DEBUGGING-----
+                #if len(shap_values) > 15: # len(self.env.obstacle_shapes):
+                #    raise ValueError(f"shape_id {shape_id} is out of range for obstacle_shapes (len={len(self.env.obstacle_shapes)})")
+                #-------------------
+                    
+                # Reset environment to original state for each sample
+                self.env.obstacles = copy.deepcopy(original_obstacles)
+                self.env.obstacle_shapes = copy.deepcopy(original_obstacle_shapes)
+
+                obstacle_order = list(range(num_obstacles))
+                random.shuffle(obstacle_order)
+                #print('\nSHAP DEBUG Sample:', sample + 1)
+                #print("obstacle_order: ", obstacle_order)
+                #print("evaluated_combinations: ", evaluated_combinations)
+
+                current_combination = [1] * num_obstacles
+                prev_path_length = baseline_path_length
+
+                for obs_idx in obstacle_order:
+                    current_combination[obs_idx] = 0
+                    new_path_length = self.compute_path_length(current_combination, evaluated_combinations, affordance_mode)
+                    marginal_contribution = prev_path_length - new_path_length
+                    shap_values[obstacle_keys[obs_idx]] += marginal_contribution
+                    prev_path_length = new_path_length
+
+            # Calculate average SHAP values using original obstacle keys
+            for shape_id in obstacle_keys:
+                shap_values[shape_id] /= num_samples
+
+            # Restore environment to original state
             self.env.obstacles = copy.deepcopy(original_obstacles)
             self.env.obstacle_shapes = copy.deepcopy(original_obstacle_shapes)
 
-            obstacle_order = list(range(num_obstacles))
-            random.shuffle(obstacle_order)
+            if shap_values:
+                all_vals = list(shap_values.values())
+                print(f"SHAP value range: min={min(all_vals)}, max={max(all_vals)}")
 
-            current_combination = [1] * num_obstacles
-            prev_path_length = baseline_path_length
+            '''
+            print("\n[SHAP DEBUG] Baseline path length (all obstacles):", baseline_path_length)
+            for shape_id in obstacle_keys:
+                combo = [1] * num_obstacles
+                idx = obstacle_keys.index(shape_id)
+                combo[idx] = 0
+                length = self.compute_path_length(combo, None, affordance_mode)
+                print(f"Removing obstacle #{shape_id}: path length = {length}")
+            '''        
 
-            for obs_idx in obstacle_order:
-                current_combination[obs_idx] = 0
-                new_path_length = self.compute_path_length(current_combination, evaluated_combinations, perturbation_mode)
-                marginal_contribution = prev_path_length - new_path_length
-                shap_values[obstacle_keys[obs_idx]] += marginal_contribution
-                prev_path_length = new_path_length
+            #for k, v in shap_values.items():
+            #    print(f"Obstacle #{k}: SHAP value = {v:.2f}")
 
-        # Calculate average SHAP values using original obstacle keys
-        for shape_id in obstacle_keys:
-            shap_values[shape_id] /= num_samples
+            return shap_values
+        elif shap_mode == "full":
+            original_obstacles = copy.deepcopy(self.env.obstacles)
+            original_obstacle_shapes = copy.deepcopy(self.env.obstacle_shapes)
+            
+            obstacle_keys = list(original_obstacle_shapes.keys())
+            num_obstacles = len(obstacle_keys)
+            shap_values = {i: 0.0 for i in obstacle_keys}
+            cache = {}
 
-        # Restore environment to original state
-        self.env.obstacles = copy.deepcopy(original_obstacles)
-        self.env.obstacle_shapes = copy.deepcopy(original_obstacle_shapes)
+            N_fact = factorial(num_obstacles)
+            print("N_fact:", N_fact)
+            ctr=0
+            for i in range(num_obstacles):
+                rest_indices = [j for j in range(num_obstacles) if j != i]
 
-        if shap_values:
-            all_vals = list(shap_values.values())
-            print(f"SHAP value range: min={min(all_vals)}, max={max(all_vals)}")
+                for r in range(num_obstacles):  # coalition sizes from 0 to N-1
+                    for subset in itertools.combinations(rest_indices, r):
+                        ctr += 1
+                        print(subset, ctr)
+                        coalition = [0] * num_obstacles
+                        for j in subset:
+                            coalition[j] = 1
 
-        print("\n[SHAP DEBUG] Baseline path length (all obstacles):", baseline_path_length)
-        for shape_id in obstacle_keys:
-            combo = [1] * num_obstacles
-            idx = obstacle_keys.index(shape_id)
-            combo[idx] = 0
-            length = self.compute_path_length(combo, None, perturbation_mode)
-            print(f"Removing obstacle #{shape_id}: path length = {length}")
-                
+                        coalition_with_i = coalition.copy()
+                        coalition_with_i[i] = 1
 
-        for k, v in shap_values.items():
-            print(f"Obstacle #{k}: SHAP value = {v:.2f}")
+                        f_S = self.compute_path_length(coalition, cache, affordance_mode)
+                        f_Si = self.compute_path_length(coalition_with_i, cache, affordance_mode)
 
-        return shap_values
+                        weight = (factorial(len(subset)) * factorial(num_obstacles - len(subset) - 1)) / N_fact
+                        shap_values[obstacle_keys[i]] += weight * (f_Si - f_S)
 
-    def compute_path_length(self, combination, cache=None, perturbation_mode="remove"):
+                    if callback:
+                        callback(r, num_obstacles)
+
+            # Restore original environment
+            self.env.obstacles = original_obstacles
+            self.env.obstacle_shapes = original_obstacle_shapes
+            return shap_values
+        else:
+            raise ValueError(f"Unknown SHAP mode: {shap_mode}")
+
+    def compute_path_length(self, combination, cache=None, affordance_mode="remove"):
         if cache is not None:
             key = tuple(combination)
             if key in cache:
@@ -110,6 +157,13 @@ class SHAPExplainer:
                 combination = combination + [1] * (len(all_shape_ids) - len(combination))
 
         # Apply the perturbation to the clone
+        env_clone.generate_perturbation(
+            strategy="custom",
+            combination=combination,
+            mode=affordance_mode
+        )
+
+        '''
         for i, val in enumerate(combination):
             if i < len(all_shape_ids) and val == 0:  # Remove this obstacle
                 shape_id = all_shape_ids[i]
@@ -117,6 +171,7 @@ class SHAPExplainer:
                     points_to_remove = env_clone.obstacle_shapes[shape_id]
                     env_clone.obstacles = [p for p in env_clone.obstacles if p not in points_to_remove]
                     del env_clone.obstacle_shapes[shape_id]
+        '''        
 
         # Use the cloned environment for path calculation
         planner_class = type(self.planner)
@@ -129,7 +184,7 @@ class SHAPExplainer:
         )
         path = planner.plan()
 
-        path_length = len(path) if path else self.get_penalty_value()
+        path_length = len(path) if path else 0.0 #len(path) if path else self.get_penalty_value()
         
         # No need to restore - we used a clone
         

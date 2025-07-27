@@ -1,6 +1,7 @@
 import heapq
 import time
 import numpy as np
+import copy
 
 class AStarPlanner:
     """A* path planning algorithm implementation"""
@@ -44,10 +45,15 @@ class AStarPlanner:
         if goal is not None:
             self.goal = goal
         if obstacles is not None:
-            self.obstacles = obstacles
+            self.obstacles = copy.deepcopy(obstacles)
+
+        #print('\nPlanner obstacles:', self.obstacles)
+        #print("Planner start:", self.start)
+        #print("Planner goal:", self.goal)
             
         # Verify we have valid start and goal
         if not self.start or not self.goal:
+            print("\nStart or goal not set.")
             return None if not return_steps else (None, [])
             
         # Start timer
@@ -111,7 +117,7 @@ class AStarPlanner:
                     steps.append(step_data)
                 
                 self.execution_time = time.time() - start_time
-                
+                #print(f"\nPath found in {self.execution_time:.4f} seconds.")
                 return path if not return_steps else (path, steps)
             
             # Add current to visited
@@ -162,4 +168,5 @@ class AStarPlanner:
         
         # If we get here, no path was found
         self.execution_time = time.time() - start_time
+        #print("\nNo path found.")
         return None if not return_steps else (None, steps)

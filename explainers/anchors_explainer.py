@@ -30,7 +30,7 @@ class AnchorsExplainer:
         self.planner = planner
         self.grid_size = env.grid_size
         
-    def explain(self, num_samples=100, precision_threshold=0.95, min_coverage=0.1, callback=None, detect_changes=False, perturbation_mode="remove"):
+    def explain(self, num_samples=100, precision_threshold=0.95, min_coverage=0.1, callback=None, detect_changes=False, affordance_mode="remove"):
         """
         Generate Anchors-based explanations for the path planning problem.
         
@@ -54,8 +54,9 @@ class AnchorsExplainer:
         # Set a reasonable maximum for candidate rules
         max_candidates = min(500, num_obstacles * 20)
         
+        # save the original path and its length    
         original_path = self.planner.plan()
-        baseline_path_length = len(original_path) if original_path else float('inf')
+        baseline_path_length = len(original_path) if original_path else 0 #float('inf')
         
         # Limit rule size based on obstacle count
         max_rule_size = min(3, max(2, num_obstacles // 2)) if detect_changes else min(2, max(1, num_obstacles // 3))
@@ -142,13 +143,13 @@ class AnchorsExplainer:
                     else:
                         combination.append(random.randint(0, 1))
 
-                original_state, _ = self.env.generate_perturbation(combination=combination, mode=perturbation_mode)
+                original_state, _ = self.env.generate_perturbation(combination=combination, mode=affordance_mode)
                 path = self.planner.plan()
                 
                 # Handle path comparison more carefully
-                if original_path and path:
-                    path_changed = abs(len(path) - len(original_path)) > 1
-                elif bool(original_path) != bool(path):  # One exists and one doesn't
+                #if original_path and path:
+                #    path_changed = abs(len(path) - len(original_path)) > 100 #1
+                if bool(original_path) != bool(path):  # One exists and one doesn't
                     path_changed = True
                 else:
                     path_changed = False  # Both don't exist
@@ -219,29 +220,23 @@ class AnchorsExplainer:
         
     def visualize(self, anchors, max_anchors=5):
         """
-        Visualize the found anchors with clear obstacle labels and distinct colors.
+        Visualize the found anchors, each in its own separate plot.
 
         Args:
             anchors: Dictionary of anchor rules from explain()
             max_anchors: Maximum number of anchors to visualize
         """
         if not anchors:
-            return None
+            return
 
         top_anchors = list(anchors.items())[:max_anchors]
-        fig, axes = plt.subplots(len(top_anchors), 1, figsize=(10, 4 * len(top_anchors)))
-
-        if len(top_anchors) == 1:
-            axes = [axes]
-
         cmap = colormaps['tab10']
         obstacle_keys = list(self.env.obstacle_shapes.keys())
 
         for i, (rule_str, anchor_data) in enumerate(top_anchors):
-            ax = axes[i]
+            fig, ax = plt.subplots(figsize=(10, 4))
             ax.set_xlim(-0.5, self.grid_size - 0.5)
-            # ax.set_ylim(-0.5, self.grid_size - 0.5)  # Fixed: Don't invert y-axis
-            ax.set_ylim(self.grid_size - 0.5, -0.5)  # Invert y axis for correct orientation
+            ax.set_ylim(self.grid_size - 0.5, -0.5)  # Invert y axis
             ax.set_aspect('equal')
             ax.set_xticks(np.arange(0, self.grid_size, 1))
             ax.set_yticks(np.arange(0, self.grid_size, 1))
@@ -257,7 +252,6 @@ class AnchorsExplainer:
                     color = cmap(idx % 10)
                     shape = self.env.obstacle_shapes[shape_id]
 
-                    # Draw each cell in the shape
                     for pos in shape:
                         x, y = pos
                         if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
@@ -270,14 +264,14 @@ class AnchorsExplainer:
                                 hatch='//' if action == 0 else None
                             ))
 
-                    # Annotate the first cell with ID and action
+                    # Annotate the first cell
                     fx, fy = shape[0]
                     ax.text(fy, fx, f"#{shape_id}\n{'Keep' if action == 1 else 'Remove'}",
                             ha='center', va='center', fontsize=8,
                             color='black', weight='bold',
                             bbox=dict(facecolor='white', edgecolor='none', alpha=0.75))
 
-            # Mark agent and goal positions
+            # Mark agent and goal
             if self.env.agent_pos:
                 ax.scatter(self.env.agent_pos[1], self.env.agent_pos[0],
                         color='blue', s=150, marker='o', label='Start')
@@ -287,8 +281,8 @@ class AnchorsExplainer:
 
             ax.set_title(f"Anchor #{i+1}: {anchor_data['description']}", fontsize=10)
 
-            if i == 0:
-                ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=2)
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=2)
 
-        plt.tight_layout()
-        return fig
+            # Show the plot
+            plt.tight_layout()
+            plt.show()

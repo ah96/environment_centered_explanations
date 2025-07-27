@@ -20,9 +20,6 @@ from path_planners.theta_star import ThetaStarPlanner
 from path_planners.bfs import BFSPlanner
 from path_planners.greedy_best_first import GreedyBestFirstPlanner
 from path_planners.dfs import DFSPlanner
-from path_planners.rrt import RRTPlanner
-from path_planners.rrt_star import RRTStarPlanner
-from path_planners.prm import PRMPlanner
 
 from explainers.lime_explainer import LimeExplainer
 from explainers.anchors_explainer import AnchorsExplainer
@@ -62,11 +59,11 @@ class PathPlanningApp:
         self.selected_shape_id = None
         
         # Algorithm options
-        self.algorithms = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First", "RRT", "RRT*", "PRM"]
+        self.algorithms = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First"]
         self.selected_algorithm = tk.StringVar(value=self.algorithms[0])
         
         # Explainability options
-        self.explainability_methods = ["LIME", "Anchors", "SHAP", "Counterfactual", "Goal-Counterfactual", "Contrastive", "WoE", "Bayesian Surprise", "PSE", "Responsibility"]
+        self.explainability_methods = ["LIME", "Anchors", "SHAP"]
         self.selected_explainability = tk.StringVar(value=self.explainability_methods[0])
 
         # Environment type
@@ -659,10 +656,7 @@ class PathPlanningApp:
             "Theta*": ThetaStarPlanner,
             "BFS": BFSPlanner,
             "DFS": DFSPlanner,
-            "Greedy Best-First": GreedyBestFirstPlanner,
-            "RRT": RRTPlanner,
-            "RRT*": RRTStarPlanner,
-            "PRM": PRMPlanner
+            "Greedy Best-First": GreedyBestFirstPlanner
         }
         planner_class = planner_map.get(self.selected_algorithm.get())
         if planner_class:
@@ -681,6 +675,7 @@ class PathPlanningApp:
             obstacles=state["obstacles"]
         )
         path, steps = planner.plan(return_steps=True)
+        print("\npath: ", path)
         execution_time = time.time() - self.start_time
 
         self.algorithm_steps = steps
@@ -1056,10 +1051,7 @@ class PathPlanningApp:
             "Theta*": ThetaStarPlanner,
             "BFS": BFSPlanner,
             "DFS": DFSPlanner,
-            "Greedy Best-First": GreedyBestFirstPlanner,
-            "RRT": RRTPlanner,
-            "RRT*": RRTStarPlanner,
-            "PRM": PRMPlanner
+            "Greedy Best-First": GreedyBestFirstPlanner
         }
         planner_class = planner_map.get(self.selected_algorithm.get(), AStarPlanner)
         planner = planner_class()
@@ -1079,20 +1071,6 @@ class PathPlanningApp:
             self.explain_with_anchors(planner)
         elif explanation_method == "SHAP":
             self.explain_with_shap(planner)
-        elif explanation_method == 'Contrastive':
-            self.explain_with_contrastive(planner)
-        elif explanation_method == 'Counterfactual':
-            self.explain_with_counterfactual(planner)
-        elif explanation_method == 'Goal-Counterfactual':
-            self.explain_with_goal_counterfactual(planner)
-        elif explanation_method == "WoE":
-            self.explain_with_woe(planner)
-        elif explanation_method == "Bayesian Surprise":
-            self.explain_with_bayesian_surprise(planner)
-        elif explanation_method == "PSE":
-            self.explain_with_pse(planner)
-        elif explanation_method == "Responsibility":
-            self.explain_with_responsibility(planner)
         else:
             self.status_var.set(f"Unknown explanation method: {explanation_method}")
 
@@ -1110,10 +1088,10 @@ class PathPlanningApp:
         # Generate explanations
         affordance_mode = self.selected_affordance.get()
         importance = explainer.explain(
-            num_samples=len(self.env.obstacle_shapes.keys()) + 10,
+            num_samples=len(self.env.obstacle_shapes.keys()), # + 10,
             callback=update_progress,
-            strategy="remove_each_obstacle_once", # "remove_each_obstacle_once", "random", "full_combinations"
-            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
+            perturbation_strategy="full_combinations", # "each_obstacle_once", "random", "full_combinations"
+            affordance_mode=affordance_mode  # "move" or "remove" or "random"
         )
         
         if len(importance) == 0:
@@ -1267,7 +1245,7 @@ class PathPlanningApp:
                 min_coverage=0.1,
                 callback=update_progress,
                 detect_changes=detect_changes,
-                perturbation_mode=affordance_mode
+                affordance_mode=affordance_mode
             )
             
             if not anchors:
@@ -1275,7 +1253,7 @@ class PathPlanningApp:
                 return
             
             # Visualize the anchors
-            fig = explainer.visualize(anchors)
+            fig = explainer.visualize(anchors, max_anchors=5)
             
             if fig:
                 # Save explanation
@@ -1309,9 +1287,10 @@ class PathPlanningApp:
         # Generate explanations
         affordance_mode = self.selected_affordance.get()
         shap_values = explainer.explain(
-            num_samples=150,  # Less samples for faster computation
+            num_samples=15,  # Less samples for faster computation
             callback=update_progress,
-            perturbation_mode=affordance_mode  # "move" or "remove" or "random"
+            affordance_mode=affordance_mode,  # "move" or "remove" or "random"
+            shap_mode="full"  # "full" for full SHAP values, "monte-carlo" for faster computation
         )
         
         if not shap_values:

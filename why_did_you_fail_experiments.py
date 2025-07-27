@@ -308,7 +308,7 @@ def main():
     
     # Set up experiment parameters
     explanations = ["SHAP", "LIME", "Anchors"]
-    planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First", "RRT", "RRT*", "PRM"]
+    planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First"]
     perturbation_counts = [10, 50, 100]
     perturbation_types = ["remove", "move"] #, "random"] # random doesn't make sense, remove and move cover all cases
     
@@ -449,7 +449,7 @@ def main():
                             # Update the progress bar
                             pbar.update(1)
     
-        # Create DataFrame from results
+    # Create DataFrame from results
     df = pd.DataFrame(results_data)
     
     # Calculate planner robustness for each environment and explainer
@@ -546,5 +546,270 @@ def main():
         print("\nSummary Statistics:")
         print(df.describe())
 
+def main_loop():
+    parser = argparse.ArgumentParser(description="Run comparison experiments for path planning explanations")
+    parser.add_argument("--env_dir", type=str, default="environments/infeasible",
+                        help="Directory with existing environments")
+    parser.add_argument("--num_envs", type=int, default=100,
+                        help="Number of environments to load")
+    parser.add_argument("--output", type=str, default="why_did_you_fail_results.csv",
+                        help="Output CSV file for results")
+    parser.add_argument("--top_k", type=int, default=3,
+                        help="Number of top features to consider")
+    parser.add_argument("--average_only", default=True, action="store_true",
+                        help="When set, only save average results across all environments")
+    
+    args = parser.parse_args()
+    
+    # Set up experiment parameters
+    explanations = ["SHAP", "LIME"] #, "Anchors"]
+    planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First"]
+    perturbation_counts = [10, 25, 50, 75, 100, 125, 150, 175, 200]
+    perturbation_types = ["remove", "move"] #, "random"] # random doesn't make sense, remove and move cover all cases
+    
+    MAX_PERTURBATION_RETRIES = 100  # Maximum attempts to find an infeasible perturbation
+    NUM_ENVS = 10000
+
+    for env_size in range(10, 11):
+        for obstacle_num in range(10, 11):
+
+            # Initialize the experiment runner
+            runner = BatchExperimentRunner()
+            
+            # Initialize results list for pandas DataFrame
+            results_data = []
+
+            OUTPUT = f"why_did_you_fail_results_grid_{env_size}_obstacles_{obstacle_num}.csv"
+            
+            # Load environments
+            #env_files = [f for f in os.listdir(args.env_dir) if f.endswith('.json') and 'infeasible' in f]
+            ENV_DIR = "environments/"+f"grid_{env_size}_obstacles_{obstacle_num}"+"/infeasible"
+            env_files = [f for f in os.listdir(ENV_DIR) if f.endswith('.json') and 'infeasible' in f]
+            if not env_files:
+                print(f"No infeasible environments found in environments/grid_{env_size}_obstacles_{obstacle_num}/infeasible")
+                return
+            
+            # Take the first num_envs environments or all if fewer available
+            env_files = env_files[:NUM_ENVS]
+            env_paths = [os.path.join(ENV_DIR, f) for f in env_files]
+            
+            print(f"Loaded {len(env_paths)} infeasible environments")
+            
+            # For storing planner robustness data
+            planner_features = {}
+            
+            # Calculate total number of iterations for progress tracking
+            total_iterations = len(env_paths) * len(planners) * len(explanations) * len(perturbation_types) * len(perturbation_counts)
+            
+            # Run experiments with a single progress bar
+            with tqdm(total=total_iterations, desc="Overall Progress") as pbar:
+                for env_path in env_paths:
+                    env_name = os.path.basename(env_path)
+                    env = runner.load_environment(env_path)
+                    
+                    # Store features for each planner for this environment
+                    planner_features[env_name] = {}
+                    
+                    # For each planner
+                    for planner_name in planners:
+                        planner_class = runner.planners[planner_name]
+                        planner_instance = planner_class()
+                        planner_instance.set_environment(
+                            start=env.agent_pos,
+                            goal=env.goal_pos,
+                            grid_size=env.grid_size,
+                            obstacles=env.obstacles
+                        )
+                        
+                        # Get original path (should be None/empty for infeasible environments)
+                        result = planner_instance.plan(return_steps=False)
+                        original_path = result[0] if isinstance(result, tuple) else result
+                        # for infeasible environments path length is 0
+                        path_length = len(original_path) if original_path else 0
+                        
+                        # For each explanation method
+                        for explainer_name in explanations:
+                            explainer_class = runner.explainers[explainer_name]
+                            explainer = explainer_class()
+                            explainer.set_environment(env, planner_instance)
+                            
+                            # Get important features for original environment
+                            original_features, explanation_time = get_important_features(
+                                explainer, explainer_name, env, planner_instance, top_k=args.top_k
+                            )
+                            
+                            # Store features for planner robustness calculation
+                            planner_features[env_name][f"{planner_name}_{explainer_name}"] = original_features
+                            
+                            # Get ranked list of all obstacles for faithfulness calculation
+                            ranked_obstacles = get_ranked_obstacles_from_explanation(explainer, explainer_name, env)
+                            
+                            # Calculate faithfulness score
+                            faithfulness_score = calculate_faithfulness_score(env, planner_class, explainer, ranked_obstacles)
+                            
+                            # For each perturbation type and count
+                            for perturbation_type in perturbation_types:
+                                for num_perturbations in perturbation_counts:
+                                    
+                                    current_perturbed_env = None
+                                    final_planner_check_for_perturbed = None
+                                    found_infeasible_perturbation = False
+
+                                    for attempt in range(MAX_PERTURBATION_RETRIES):
+                                        # Create perturbed environment
+                                        perturbed_env_candidate = perturb_environment(env, perturbation_type, num_perturbations)
+                                        
+                                        # Check if perturbed environment is still infeasible
+                                        planner_check = planner_class()
+                                        planner_check.set_environment(
+                                            start=perturbed_env_candidate.agent_pos,
+                                            goal=perturbed_env_candidate.goal_pos,
+                                            grid_size=perturbed_env_candidate.grid_size,
+                                            obstacles=perturbed_env_candidate.obstacles
+                                        )
+                                        result_check = planner_check.plan(return_steps=False)
+                                        path_check = result_check[0] if isinstance(result_check, tuple) else result_check
+                                        
+                                        if not (path_check and len(path_check) > 0): # Path NOT found (still infeasible)
+                                            current_perturbed_env = perturbed_env_candidate
+                                            final_planner_check_for_perturbed = planner_check
+                                            found_infeasible_perturbation = True
+                                            break # Exit retry loop, we found a suitable environment
+                                        # else: environment became feasible, try perturbing again in the next attempt
+                                    
+                                    if not found_infeasible_perturbation:
+                                        print(f"Warning: Max retries ({MAX_PERTURBATION_RETRIES}) reached for {env_name}, {planner_name}, {explainer_name}, {perturbation_type}, {num_perturbations}. "
+                                            f"Could not generate an infeasible perturbed environment. Skipping this combination.")
+                                        pbar.update(1)  # Update progress bar even when skipped
+                                        continue # Skip to the next num_perturbations or perturbation_type
+                                    
+                                    # Now, current_perturbed_env is an infeasible perturbed environment
+                                    # and final_planner_check_for_perturbed is the planner instance that confirmed it.
+                                    
+                                    # Get explanation for perturbed environment
+                                    explainer_perturbed = explainer_class()
+                                    explainer_perturbed.set_environment(current_perturbed_env, final_planner_check_for_perturbed)
+                                    perturbed_features, _ = get_important_features(
+                                        explainer_perturbed, explainer_name, current_perturbed_env, final_planner_check_for_perturbed, top_k=args.top_k
+                                    )
+                                    
+                                    # Calculate explanation stability (Jaccard similarity)
+                                    stability = calculate_explanation_stability(original_features, perturbed_features)
+                                    
+                                    # Add results to list
+                                    results_data.append({
+                                        "Environment": env_name,
+                                        "Explanation": explainer_name,
+                                        "Planner": planner_name,
+                                        "Num_Perturbations": num_perturbations,
+                                        "Perturbation_Type": perturbation_type,
+                                        "Explanation_Stability": stability,
+                                        "Faithfulness_Score": faithfulness_score,
+                                        "Planner_Robustness": None,  # Will be filled later
+                                        "Path_Length": path_length,
+                                        "Explanation_Time_s": explanation_time
+                                    })
+                                    
+                                    # Update the progress bar
+                                    pbar.update(1)
+            
+            # Create DataFrame from results
+            df = pd.DataFrame(results_data)
+            
+            # Calculate planner robustness for each environment and explainer
+            for env_name in planner_features:
+                for explainer_name in explanations:
+                    # Get features for each planner with this explainer
+                    planner_feature_sets = []
+                    for planner_name in planners:
+                        key = f"{planner_name}_{explainer_name}"
+                        if key in planner_features[env_name]:
+                            planner_feature_sets.append((planner_name, planner_features[env_name][key]))
+                    
+                    # Calculate pairwise Jaccard similarities
+                    similarities = []
+                    for i in range(len(planner_feature_sets)):
+                        for j in range(i+1, len(planner_feature_sets)):
+                            p1_name, p1_features = planner_feature_sets[i]
+                            p2_name, p2_features = planner_feature_sets[j]
+                            sim = jaccard_similarity(p1_features, p2_features)
+                            similarities.append(sim)
+                    
+                    # Calculate average similarity (robustness)
+                    robustness = sum(similarities) / len(similarities) if similarities else 0
+                    
+                    # Update DataFrame with robustness values
+                    mask = (df["Environment"] == env_name) & (df["Explanation"] == explainer_name)
+                    df.loc[mask, "Planner_Robustness"] = robustness
+            
+            # Save results to CSV using pandas
+            if args.average_only:
+                # Group by all columns except Environment and compute averages
+                avg_df = df.groupby([
+                    "Explanation", "Planner", "Num_Perturbations", 
+                    "Perturbation_Type"
+                ]).agg({
+                    "Explanation_Stability": "mean",
+                    "Faithfulness_Score": "mean",
+                    "Planner_Robustness": "mean",
+                    "Path_Length": "mean",
+                    "Explanation_Time_s": "mean"
+                }).reset_index()
+                
+                # Check if output file exists and append if it does
+                if os.path.exists(OUTPUT):
+                    # Read existing results
+                    existing_df = pd.read_csv(OUTPUT)
+                    # Combine with new results
+                    combined_df = pd.concat([existing_df, avg_df], ignore_index=True)
+                    # Remove duplicates if any (keeping the latest entry)
+                    combined_df = combined_df.drop_duplicates(
+                        subset=["Explanation", "Planner", "Num_Perturbations", "Perturbation_Type"], 
+                        keep='last'
+                    )
+                    # Save combined results
+                    combined_df.to_csv(OUTPUT, index=False)
+                    print(f"Results appended to existing file {OUTPUT}")
+                    print(f"Total rows in combined file: {len(combined_df)}")
+                else:
+                    # Save as new file
+                    avg_df.to_csv(OUTPUT, index=False)
+                    print(f"New results file created at {OUTPUT}")
+                
+                print(f"Rows in current results: {len(avg_df)}")
+                print(f"DataFrame shape: {avg_df.shape}")
+                
+                # Display summary statistics
+                print("\nSummary Statistics (Averaged):")
+                print(avg_df.describe())
+            else:
+                # For full results (not averaged)
+                if os.path.exists(OUTPUT):
+                    # Read existing results
+                    existing_df = pd.read_csv(OUTPUT)
+                    # Combine with new results
+                    combined_df = pd.concat([existing_df, df], ignore_index=True)
+                    # Remove duplicates if any (based on all fields except the metrics)
+                    combined_df = combined_df.drop_duplicates(
+                        subset=["Environment", "Explanation", "Planner", "Num_Perturbations", "Perturbation_Type"],
+                        keep='last'
+                    )
+                    # Save combined results
+                    combined_df.to_csv(OUTPUT, index=False)
+                    print(f"Results appended to existing file {OUTPUT}")
+                    print(f"Total rows in combined file: {len(combined_df)}")
+                else:
+                    # Save as new file
+                    df.to_csv(OUTPUT, index=False)
+                    print(f"New results file created at {OUTPUT}")
+                
+                print(f"Rows in current results: {len(df)}")
+                print(f"DataFrame shape: {df.shape}")
+                
+                # Display summary statistics
+                print("\nSummary Statistics:")
+                print(df.describe())
+
 if __name__ == "__main__":
-    main()
+    #main()
+    main_loop()

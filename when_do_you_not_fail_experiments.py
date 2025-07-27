@@ -331,5 +331,160 @@ def main():
         print("\nSummary Statistics:")
         print(df.describe())
 
+def main_loop():
+    parser = argparse.ArgumentParser(description="Run experiments to evaluate when plans become possible")
+    parser.add_argument("--env_dir", type=str, default="environments/infeasible",
+                        help="Directory with existing environments")
+    parser.add_argument("--num_envs", type=int, default=100,
+                        help="Number of environments to load")
+    parser.add_argument("--output", type=str, default="when_do_you_not_fail_results.csv",
+                        help="Output CSV file for results")
+    parser.add_argument("--average_only", default=True, action="store_true",
+                        help="When set, only save average results across all environments")
+    
+    args = parser.parse_args()
+    
+    # Set up experiment parameters
+    explanations = ["SHAP", "LIME"] #, "Anchors"]
+    # planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First", "RRT", "RRT*", "PRM"]
+    # Set up experiment parameters
+    planners = ["A*", "Dijkstra", "Theta*", "BFS", "DFS", "Greedy Best-First"]
+    #planners = ["A*"]
+    #planners = ["A*", "Dijkstra"]
+    # planners = ["Theta*", "BFS"]
+    # planners = ["DFS", "Greedy Best-First"]
+
+    NUM_ENVS = 10000
+
+    for env_size in range(10, 11):
+        for obstacle_num in range(10, 11):
+
+            runner = BatchExperimentRunner()
+            
+            # Initialize results list for pandas DataFrame
+            results_data = []
+
+            OUTPUT = f"when_do_you_not_fail_results_grid_{env_size}_obstacles_{obstacle_num}.csv"
+            
+            # Load environments
+            ENV_DIR = "environments/"+f"grid_{env_size}_obstacles_{obstacle_num}"+"/infeasible"
+            env_files = [f for f in os.listdir(ENV_DIR) if f.endswith('.json') and 'infeasible' in f]
+            if not env_files:
+                print(f"No infeasible environments found in {ENV_DIR}")
+                return
+            
+            # Take the first num_envs environments or all if fewer available
+            env_files = env_files[:NUM_ENVS]
+            env_paths = [os.path.join(ENV_DIR, f) for f in env_files]
+            
+            print(f"Loaded {len(env_paths)} infeasible environments")
+            
+            # Calculate total number of iterations for progress tracking
+            total_iterations = len(env_paths) * len(planners) * len(explanations)
+            
+            # Run experiments with a progress bar
+            with tqdm(total=total_iterations, desc="Overall Progress") as pbar:
+                for env_path in env_paths:
+                    env_name = os.path.basename(env_path)
+                    env = runner.load_environment(env_path)
+                    
+                    # For each planner
+                    for planner_name in planners:
+                        planner_class = runner.planners[planner_name]
+                        planner_instance = planner_class()
+                        planner_instance.set_environment(
+                            start=env.agent_pos,
+                            goal=env.goal_pos,
+                            grid_size=env.grid_size,
+                            obstacles=env.obstacles
+                        )
+                        
+                        # For each explanation method
+                        for explainer_name in explanations:
+                            explainer_class = runner.explainers[explainer_name]
+                            explainer = explainer_class()
+                            explainer.set_environment(env, planner_instance)
+                            
+                            # Start timing
+                            start_time = time.time()
+                            
+                            # Run the obstacle removal evaluation
+                            metrics = evaluate_path_after_obstacle_removal(env, planner_class, explainer, explainer_name)
+                            
+                            # End timing
+                            explanation_time = time.time() - start_time
+                            
+                            # Add results to list
+                            results_data.append({
+                                "Environment": env_name,
+                                "Explanation": explainer_name,
+                                "Planner": planner_name,
+                                "Obstacles_Removed": metrics["obstacles_removed"],
+                                "Obstacles_Removed_Percentage": metrics["obstacles_removed_percentage"],
+                                "Obstacle_Removal_Efficiency": metrics["obstacle_removal_efficiency"],
+                                "Path_Length": metrics["path_length"],
+                                "Optimal_Path_Length": metrics["optimal_path_length"],
+                                "Path_Optimality": metrics["path_optimality"],
+                                "Success": metrics["success"],
+                                "Explanation_Time_s": explanation_time
+                            })
+                            
+                            # Update the progress bar
+                            pbar.update(1)
+            
+            # Create DataFrame from results
+            df = pd.DataFrame(results_data)
+            
+            # Save results to CSV using pandas
+            if args.average_only:
+                # Group by all columns except Environment and compute averages
+                avg_df = df.groupby([
+                    "Explanation", "Planner"
+                ]).agg({
+                    "Obstacles_Removed": "mean",
+                    "Obstacles_Removed_Percentage": "mean",
+                    "Obstacle_Removal_Efficiency": "mean",
+                    "Path_Length": "mean",
+                    "Optimal_Path_Length": "mean",
+                    "Path_Optimality": "mean",
+                    "Success": "mean",  # This gives success rate
+                    "Explanation_Time_s": "mean"
+                }).reset_index()
+                
+                # Save the averaged results with append option
+                if os.path.exists(OUTPUT):
+                    # Read existing file and append new results
+                    existing_df = pd.read_csv(OUTPUT)
+                    combined_df = pd.concat([existing_df, avg_df], ignore_index=True)
+                    combined_df.to_csv(OUTPUT, index=False)
+                    print(f"Results appended to existing file {OUTPUT}")
+                else:
+                    avg_df.to_csv(OUTPUT, index=False)
+                    print(f"New results saved to {OUTPUT}")
+                
+                print(f"Averaged rows: {len(avg_df)}")
+                
+                # Display summary statistics
+                print("\nSummary Statistics (Averaged):")
+                print(avg_df.describe())
+            else:
+                # Handle full results with append option
+                if os.path.exists(OUTPUT):
+                    # Read existing file and append new results
+                    existing_df = pd.read_csv(OUTPUT)
+                    combined_df = pd.concat([existing_df, df], ignore_index=True)
+                    combined_df.to_csv(OUTPUT, index=False)
+                    print(f"Results appended to existing file {OUTPUT}")
+                else:
+                    df.to_csv(OUTPUT, index=False)
+                    print(f"New results saved to {OUTPUT}")
+                    
+                print(f"Total rows: {len(df)}")
+                
+                # Display summary statistics
+                print("\nSummary Statistics:")
+                print(df.describe())
+
 if __name__ == "__main__":
-    main()
+    #main()
+    main_loop()
