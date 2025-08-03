@@ -212,14 +212,14 @@ class EnvironmentGenerator:
 def main():
     """
     Main function to generate environments and save them to folders.
-    Generates 10000 infeasible and 10000 feasible environments with many obstacles.
+    Generates n infeasible and n feasible environments with many obstacles.
     """
     # Set master seed for reproducible generation
     seed = 42
     random.seed(seed)
     
     # Parameters for complex environments with many obstacles
-    n = 10000  # Number of environments to generate
+    n = 1000  # Number of environments to generate
     grid_size = 15  # Larger grid to accommodate more obstacles
     num_obstacles = 15  # Many obstacles for complex explanations
     
@@ -239,7 +239,7 @@ def main():
     print("=" * 60)
     
     # Generate infeasible environments with deterministic seeds
-    print("Generating 10000 infeasible environments...")
+    print(f"Generating {n} infeasible environments...")
     infeasible_envs, infeasible_count = generator.generate_environments_batch(
         n=n,
         feasible=False,
@@ -262,7 +262,7 @@ def main():
     print("=" * 60)
     
     # Generate feasible environments with deterministic seeds
-    print("Generating 10000 feasible environments...")
+    print(f"Generating {n} feasible environments...")
     feasible_envs, feasible_count = generator.generate_environments_batch(
         n=n,
         feasible=True,
@@ -285,8 +285,8 @@ def main():
     # Summary
     print("GENERATION SUMMARY:")
     print(f"Seed used: {seed}")
-    print(f"Infeasible environments: {infeasible_count}/10000")
-    print(f"Feasible environments: {feasible_count}/10000")
+    print(f"Infeasible environments: {infeasible_count}/{n}")
+    print(f"Feasible environments: {feasible_count}/{n}")
     print(f"Total environments generated: {infeasible_count + feasible_count}")
     print(f"Grid size: {grid_size}x{grid_size}")
     print(f"Obstacles per environment: {num_obstacles}")
@@ -295,8 +295,8 @@ def main():
     print(f"  - Feasible: {feasible_dir}")
 
 def main_loop():
-    grid_sizes = [10, 12, 14, 16] #list(range(10, 16))
-    obstacle_numbers = [5, 10, 15] #list(range(5, 16))
+    grid_sizes = list(range(10, 21, 2))
+    obstacle_numbers = list(range(5, 21, 2))
 
     for grid_size in grid_sizes:
         for num_obstacles in obstacle_numbers:
@@ -307,7 +307,7 @@ def main_loop():
             random.seed(seed)
             
             # Parameters for complex environments with many obstacles
-            n = 10000  # Number of environments to generate
+            n = 1000  # Number of environments to generate
             
             # Create output directories
             base_dir = os.path.join("environments/", f"grid_{grid_size}_obstacles_{num_obstacles}")
@@ -325,7 +325,7 @@ def main_loop():
             print("=" * 60)
             
             # Generate infeasible environments with deterministic seeds
-            print("Generating 10000 infeasible environments...")
+            print(f"Generating {n} infeasible environments...")
             infeasible_envs, infeasible_count = generator.generate_environments_batch(
                 n=n,
                 feasible=False,
@@ -348,7 +348,7 @@ def main_loop():
             print("=" * 60)
             
             # Generate feasible environments with deterministic seeds
-            print("Generating 10000 feasible environments...")
+            print(f"Generating {n} feasible environments...")
             feasible_envs, feasible_count = generator.generate_environments_batch(
                 n=n,
                 feasible=True,
@@ -371,8 +371,8 @@ def main_loop():
             # Summary
             print("GENERATION SUMMARY:")
             print(f"Seed used: {seed}")
-            print(f"Infeasible environments: {infeasible_count}/10000")
-            print(f"Feasible environments: {feasible_count}/10000")
+            print(f"Infeasible environments: {infeasible_count}/{n}")
+            print(f"Feasible environments: {feasible_count}/{n}")
             print(f"Total environments generated: {infeasible_count + feasible_count}")
             print(f"Grid size: {grid_size}x{grid_size}")
             print(f"Obstacles per environment: {num_obstacles}")

@@ -354,10 +354,10 @@ def main_loop():
     # planners = ["Theta*", "BFS"]
     # planners = ["DFS", "Greedy Best-First"]
 
-    NUM_ENVS = 10000
+    NUM_ENVS = 1000
 
-    for env_size in range(10, 17, 2):
-        for obstacle_num in range(5, 16, 5):
+    for env_size in range(10, 21, 2):
+        for obstacle_num in range(5, 21, 2):
 
             runner = BatchExperimentRunner()
             

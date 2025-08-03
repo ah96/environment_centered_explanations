@@ -568,10 +568,10 @@ def main_loop():
     perturbation_types = ["remove", "move"] #, "random"] # random doesn't make sense, remove and move cover all cases
     
     MAX_PERTURBATION_RETRIES = 100  # Maximum attempts to find an infeasible perturbation
-    NUM_ENVS = 10000
+    NUM_ENVS = 1000
 
-    for env_size in range(10, 17, 2):
-        for obstacle_num in range(5, 16, 5):
+    for env_size in range(10, 21, 2):
+        for obstacle_num in range(5, 21, 2):
             print(f"\nRunning experiments for grid size {env_size} with {obstacle_num} obstacles")
 
             # Initialize the experiment runner
