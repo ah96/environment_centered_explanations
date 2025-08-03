@@ -356,8 +356,8 @@ def main_loop():
 
     NUM_ENVS = 10000
 
-    for env_size in range(15, 16):
-        for obstacle_num in range(5, 16, 2):
+    for env_size in range(10, 17, 2):
+        for obstacle_num in range(5, 16, 5):
 
             runner = BatchExperimentRunner()
             

@@ -570,8 +570,9 @@ def main_loop():
     MAX_PERTURBATION_RETRIES = 100  # Maximum attempts to find an infeasible perturbation
     NUM_ENVS = 10000
 
-    for env_size in range(15, 16):
-        for obstacle_num in range(5, 16, 2):
+    for env_size in range(10, 17, 2):
+        for obstacle_num in range(5, 16, 5):
+            print(f"\nRunning experiments for grid size {env_size} with {obstacle_num} obstacles")
 
             # Initialize the experiment runner
             runner = BatchExperimentRunner()

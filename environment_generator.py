@@ -295,8 +295,8 @@ def main():
     print(f"  - Feasible: {feasible_dir}")
 
 def main_loop():
-    grid_sizes = list(range(10, 16))
-    obstacle_numbers = list(range(5, 16))
+    grid_sizes = [10, 12, 14, 16] #list(range(10, 16))
+    obstacle_numbers = [5, 10, 15] #list(range(5, 16))
 
     for grid_size in grid_sizes:
         for num_obstacles in obstacle_numbers:
