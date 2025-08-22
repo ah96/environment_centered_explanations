@@ -1,6 +1,5 @@
 numpy
-matplotlib
+scipy
 pandas
-scikit-learn
-tqdm
-python3-tk
+matplotlib
+pulp

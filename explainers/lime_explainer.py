@@ -1,196 +1,172 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+LIME-style local surrogate explainer for obstacle-level attribution.
+
+This is a lightweight, dependency-free adaptation of Kernel LIME for binary
+features (obstacle presence). It fits a *weighted ridge regression* on
+synthetic perturbations around the current environment and interprets the
+coefficients as local importance scores.
+
+Key choices here are tailored for grid navigation:
+- Features z \in {0,1}^m (1 = obstacle present).
+- Proximity kernel = exp(-(d_H(z, z0)/m)^2 / sigma^2), where z0 = all-ones.
+- Labels are binary {0,1}: planner success (1) or failure (0).
+- We report "harmfulness" = -coef, so higher score => obstacle more *responsible for failure*.
+
+Returns:
+    {
+      'ranking': [(obs_id, score), ...]  # descending by score (harmfulness)
+      'weights': np.ndarray[m],          # raw coefficients (positive helps success)
+      'calls': int,
+      'time_sec': float
+    }
+"""
+
+from __future__ import annotations
+from typing import Dict, List, Tuple, Optional
 import numpy as np
-import random
-from sklearn.linear_model import Ridge
-import matplotlib.pyplot as plt
-import os
+import time
+from explainers.baselines import geodesic_line_ranking
+
+
+def _planner_to_int_success(res) -> int:
+    """Normalize various planner return formats to {0,1}."""
+    if isinstance(res, dict):
+        return int(bool(res.get('success', False)))
+    return int(bool(res))
+
+
+def _build_grid_from_mask(base_grid: np.ndarray,
+                          obstacles: List,
+                          present_mask: np.ndarray) -> np.ndarray:
+    """
+    Construct a grid where only obstacles with present_mask[i]==1 are present.
+    We *start from the full grid* and remove absences for speed.
+    """
+    grid = base_grid.copy()
+    # Remove any obstacle whose bit is 0
+    for i, ob in enumerate(obstacles, start=1):
+        if present_mask[i - 1] == 0 and ob.coords.size > 0:
+            rr, cc = ob.coords[:, 0], ob.coords[:, 1]
+            grid[rr, cc] = False
+    return grid
+
+
+def _hamming_kernel(z: np.ndarray, z0: np.ndarray, sigma: float) -> np.ndarray:
+    """RBF on normalized Hamming distances."""
+    m = z0.size
+    # d = fraction of bits that differ from z0
+    d = np.mean(z != z0, axis=1)
+    w = np.exp(- (d ** 2) / (sigma ** 2))
+    return w
+
+
+def _weighted_ridge(X: np.ndarray, y: np.ndarray, w: np.ndarray, l2: float) -> np.ndarray:
+    """
+    Solve (X^T W X + l2 I) beta = X^T W y  for beta.
+    X: (n_samples, m), y: (n_samples,), w: (n_samples,)
+    """
+    # Apply weights via sqrt(W) to stabilize numerics
+    sw = np.sqrt(w).reshape(-1, 1)
+    Xw = X * sw
+    yw = y * sw.ravel()
+    # Regularized normal equations
+    XT_X = Xw.T @ Xw
+    m = X.shape[1]
+    beta = np.linalg.solve(XT_X + l2 * np.eye(m), Xw.T @ yw)
+    return beta
+
 
 class LimeExplainer:
     """
-    LIME-based explanation for path planning.
-    Explains the importance of obstacles by removing them and observing path changes.
+    LIME for binary obstacle presence with Hamming RBF kernel + ridge.
+    Optional focus_top_m: restrict perturbations to top-M obstacles from a cheap heuristic.
     """
-    
-    def __init__(self):
-        """Initialize the LIME explainer"""
-        self.grid_size = None
-        self.planner = None
-        self.env = None
-    
-    def set_environment(self, env, planner):
-        """
-        Set the environment and planner to be explained
-        
-        Args:
-            env: Environment object with grid_size and obstacles
-            planner: Path planner that has a plan() method
-        """
-        self.env = env.clone()
-        self.planner = planner
-        self.grid_size = env.grid_size
-    
-    def explain(self, num_samples=100, callback=None, perturbation_strategy="each_obstacle_once", affordance_mode="remove"):
-        """
-        Generate LIME-based explanations for the path planning problem
-        
-        Args:
-            num_samples: Number of perturbation samples to generate
-            callback: Optional callback function to update progress
-            
-        Returns:
-            importance: Array of importance values for each obstacle shape
-        """
-        # Make a deep copy of the original environment state to restore later
-        original_env_state = self.env.clone()
-        
-        # Get obstacle keys and store them to maintain consistency
-        obstacle_keys = list(self.env.obstacle_shapes.keys())
-        num_obstacles = len(obstacle_keys)
-        
-        if num_obstacles == 0:
-            return []
-        
-        combinations = []
-        random_combinations = []
-        # Generate perturbation combinations based on perturbation strategy
-        if perturbation_strategy == "each_obstacle_once":
-            combinations = self.env.generate_perturbation_combinations("each_obstacle_once")
-        
-            # Also generate some random combinations (but limit total to avoid long processing)
-            max_random = min(20, num_samples - len(combinations))
-            for _ in range(max_random):
-                combo = [random.randint(0, 1) for _ in range(num_obstacles)]
-                random_combinations.append(combo)
+    def __init__(self, num_samples: int = 500, flip_prob: float = 0.3,
+                 random_state: int = None, alpha: float = 1e-2,
+                 focus_top_m: int = None):
+        self.num_samples = int(num_samples)
+        self.flip_prob = float(flip_prob)
+        self.rng = np.random.default_rng(random_state)
+        self.alpha = float(alpha)
+        self.focus_top_m = int(focus_top_m) if focus_top_m else None
 
-        elif perturbation_strategy == "random":
-            combinations = []
-            for _ in range(num_samples):
-                combo = [random.randint(0, 1) for _ in range(num_obstacles)]
-                combinations.append(combo)
+    def explain(self, env, planner):
+        import time
+        t0 = time.perf_counter()
+        n = len(env.obstacles)
+        all_ids = np.arange(1, n + 1, dtype=int)
 
-        elif perturbation_strategy == "full_combinations":
-            combinations = self.env.generate_perturbation_combinations("full_combinations")
-        
-        # Combine all the combinations
-        all_combinations = combinations + random_combinations
-        
-        X = []  # Perturbations (binary mask per sample)
-        y = []  # Path costs per sample
-        
-        # Store original obstacles to restore after each perturbation
-        original_obstacles = self.env.obstacles.copy()
-        original_obstacle_shapes = {k: v.copy() for k, v in self.env.obstacle_shapes.items()}
-        
-        # Process each combination
-        total_combinations = len(all_combinations)
-        
-        for i, combination in enumerate(all_combinations):
-            # Update progress if callback provided
-            if callback:
-                callback(i, total_combinations)
-            
-            # Ensure combination length matches original obstacle count
-            if len(combination) != num_obstacles:
-                if len(combination) > num_obstacles:
-                    # Trim combination if too long
-                    combination = combination[:num_obstacles]
-                else:
-                    # Extend combination if too short
-                    combination = combination + [1] * (num_obstacles - len(combination))
-            
-            # Reset environment to original state before each perturbation
-            self.env.obstacles = original_obstacles.copy()
-            self.env.obstacle_shapes = {k: v.copy() for k, v in original_obstacle_shapes.items()}
-            
-            # Apply perturbation using the fixed-length combination
-            original_state, _ = self.env.generate_perturbation(
-                combination=combination,
-                mode=affordance_mode
-            )
-            
-            # Run path planning
-            path = self.planner.plan(
-                self.env.agent_pos, 
-                self.env.goal_pos, 
-                self.env.obstacles
-            )
-            
-            # Measure outcome: path length or failure penalty
-            if path:
-                path_length = len(path)
-                success = True
-            else:
-                path_length = 0.0 #self.grid_size * 2  # Penalty for no path
-                success = False
-            
-            # Record results (ensuring consistent length)
-            X.append(combination)
-            y.append(path_length)
+        # ---- Focus subset (optional)
+        if self.focus_top_m and self.focus_top_m < n:
+            geo = geodesic_line_ranking(env)["ranking"]
+            subset_ids = np.array([oid for oid, _ in geo[: self.focus_top_m]], dtype=int)
+        else:
+            subset_ids = all_ids
 
-            ###########################################
-            '''
-            """Save visualization of a single step"""
-            fig, ax = plt.subplots(figsize=(8, 8))
-            
-            ax.set_xlim(-0.5, self.env.grid_size - 0.5)
-            ax.set_ylim(-0.5, self.env.grid_size - 0.5)
-            ax.set_aspect('equal')
-            ax.grid(True, which='both', color='gray', linestyle='-', linewidth=0.5)
-            ax.set_title("Perturbation Visualization " + str(i+1))
-            
-            cmap = plt.colormaps['tab10']
-            for shape_id, points in self.env.obstacle_shapes.items():
-                color = cmap(shape_id % 10)
-                for obs in points:
-                    # Add label only for the first point of the first shape
-                    label = "Obstacle" if shape_id == 0 and obs == points[0] else ""
-                    ax.scatter(obs[1], obs[0], color=color, s=100, marker='s', label=label)
-            
-            # Plot agent
-            ax.scatter(self.env.agent_pos[1], self.env.agent_pos[0], color='blue', s=150, marker='o', label="Start")
-            
-            # Plot goal
-            ax.scatter(self.env.goal_pos[1], self.env.goal_pos[0], color='green', s=150, marker='*', label="Goal")
-            
-            # Plot path
-            if path:
-                path_x = [pos[1] for pos in path]
-                path_y = [pos[0] for pos in path]
-                ax.plot(path_x, path_y, color='orange', linewidth=2, label=f"Path (length: {len(path)-1})")
-            
-            # Add legend
-            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
-            
-            # Invert y-axis to match the main visualization
-            ax.invert_yaxis()
-            
-            plt.tight_layout()
-            images_dir = "output_images"
-            save_path = os.path.join(images_dir, f"step_"+str(i)+".png")
-            plt.savefig(save_path)
-            plt.close(fig)
-            '''
-            ###########################################
-            
-            # Restore environment to original state
-            self.env.restore_from_perturbation(original_state)
-        
-        # Convert to numpy arrays
-        X = np.array(X, dtype=np.int32)  # Specify dtype to ensure consistent types
-        y = np.array(y)
-        
-        # Fit a Ridge regression model to explain obstacle importance
-        explainer = Ridge(alpha=1.0)
-        explainer.fit(X, y)
-        
-        # Get coefficients - positive means removing obstacle increases cost (important)
-        # Negative means removing obstacle decreases cost (harmful for path planning)
-        importance = explainer.coef_
-        
-        # Replace any infinite values with large finite values to avoid rendering errors
-        importance = np.nan_to_num(importance, nan=0.0, posinf=1000.0, neginf=-1000.0)
-        #print("Importance values:", importance)
-        
-        # Restore the original environment completely
-        self.env = original_env_state
-        
-        return importance
+        m = len(subset_ids)
+        id_from_local = subset_ids
+        obj_map = env.obj_map
+        base_grid = env.grid.copy()
+
+        # Sample Z in {0,1}^m, where 1 = obstacle present (relative to original)
+        Z = self.rng.binomial(1, 1.0 - self.flip_prob, size=(self.num_samples, m)).astype(bool)
+        # ensure the original point appears at least once (all 1s)
+        if self.num_samples > 0:
+            Z[0, :] = True
+
+        # Evaluate planner on each perturbation
+        Y = np.empty(self.num_samples, dtype=float)
+        calls = 0
+        for i in range(self.num_samples):
+            grid = base_grid.copy()
+            # turn OFF any subset obstacle with Z[i,j] == 0
+            for j in range(m):
+                if not Z[i, j]:
+                    oid = int(id_from_local[j])
+                    grid[obj_map == oid] = False
+            res = planner.plan(grid, env.start, env.goal)
+            Y[i] = 1.0 if (res["success"] if isinstance(res, dict) else bool(res)) else 0.0
+            calls += 1
+
+        # Hamming distance kernel around the origin (all ones)
+        # distance = number of flips from the original
+        d = (1.0 - Z).sum(axis=1).astype(float)
+        # RBF on Hamming with bandwidth = max(1, m/4) (can be tuned)
+        sigma = max(1.0, m / 4.0)
+        W = np.exp(-(d ** 2) / (2.0 * sigma * sigma))
+
+        # Weighted ridge solve for linear model: Y ≈ w0 + sum_j w_j Z_j
+        # augment Z with bias column
+        X = np.hstack([np.ones((self.num_samples, 1)), Z.astype(float)])
+        # Closed-form (X^T W X + αI)^{-1} X^T W Y
+        Wdiag = np.diag(W)
+        XtW = X.T @ Wdiag
+        A = XtW @ X
+        # ridge on all coefficients (including bias) for stability
+        A += self.alpha * np.eye(A.shape[0])
+        b = XtW @ Y
+        coef = np.linalg.solve(A, b)  # [w0, w1..wm]
+        w = coef[1:]  # per-feature weights
+
+        # Harmfulness: negative weight (obstacle presence decreasing success ⇒ harmful)
+        harm_local = -w
+
+        pairs = [(int(id_from_local[j]), float(harm_local[j])) for j in range(m)]
+        if m < n:
+            floor = (min(harm_local) if m > 0 else 0.0) - 1e6
+            for oid in all_ids:
+                if oid not in id_from_local:
+                    pairs.append((int(oid), float(floor) - 1e-3 * int(oid)))
+
+        pairs.sort(key=lambda x: x[1], reverse=True)
+        return {
+            "ranking": pairs,
+            "calls": calls,
+            "time_sec": time.perf_counter() - t0,
+            "considered": int(m),
+            "n_total": int(n),
+            "focus_top_m": self.focus_top_m or 0,
+        }
+

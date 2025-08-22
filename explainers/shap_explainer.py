@@ -1,255 +1,133 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Permutation-based Shapley value approximation for obstacle-level attribution.
+
+We approximate SHAP by sampling random permutations of features and computing
+marginal contributions: phi_i = E_pi[ f(S ∪ {i}) - f(S) ], where S are the
+features preceding i in permutation pi. Here, f returns {0,1} success labels.
+
+Implementation notes:
+- Subset S is interpreted as the set of *present* obstacles.
+- We start from an empty set (no obstacles) and add along the permutation.
+- To keep things fast, we build grids incrementally within each permutation.
+- We return "harmfulness" = -phi (higher means more responsible for failure).
+
+Returns:
+    {
+      'ranking': [(obs_id, score), ...],  # descending by harmfulness
+      'phi': np.ndarray[m],               # raw Shapley values (positive helps success)
+      'calls': int,
+      'time_sec': float
+    }
+"""
+
+from __future__ import annotations
+from typing import Dict, List, Tuple, Optional
 import numpy as np
-import random
-from collections import defaultdict
-import matplotlib.pyplot as plt
-import copy
-from math import factorial
-import itertools
+import time
+from explainers.baselines import geodesic_line_ranking
 
-class SHAPExplainer:
-    def __init__(self):
-        self.env = None
-        self.planner = None
-        self.grid_size = None
-        self.baseline_path = None
-        self.baseline_path_length = None
+def _planner_to_int_success(res) -> int:
+    if isinstance(res, dict):
+        return int(bool(res.get('success', False)))
+    return int(bool(res))
 
-    def set_environment(self, env, planner):
-        self.env = env.clone()
-        self.planner = planner
-        self.grid_size = env.grid_size
-        self.baseline_path = planner.plan()
-        self.baseline_path_length = len(self.baseline_path) if self.baseline_path else self.get_penalty_value()
 
-    def explain(self, num_samples=100, callback=None, affordance_mode="remove", shap_mode="monte-carlo"):
-        if shap_mode == "monte-carlo":
-            # Save original obstacle state at the beginning
-            original_obstacles = copy.deepcopy(self.env.obstacles)
-            original_obstacle_shapes = copy.deepcopy(self.env.obstacle_shapes)
-            
-            # Get fixed obstacle keys that won't change during computation
-            obstacle_keys = list(original_obstacle_shapes.keys())
-            num_obstacles = len(obstacle_keys)
+def _empty_grid_like(grid: np.ndarray) -> np.ndarray:
+    g = np.zeros_like(grid, dtype=bool)
+    return g
 
-            if num_obstacles == 0:
-                return {}
 
-            # Initialize SHAP values with fixed obstacle keys
-            shap_values = {shape_id: 0 for shape_id in obstacle_keys}
-            evaluated_combinations = {}
+def _add_obstacle_inplace(grid: np.ndarray, ob) -> None:
+    """Stamp obstacle pixels to True in-place."""
+    if ob.coords.size == 0:
+        return
+    rr, cc = ob.coords[:, 0], ob.coords[:, 1]
+    grid[rr, cc] = True
 
-            baseline_path_length = self.compute_path_length([1] * num_obstacles, evaluated_combinations, affordance_mode)
 
-            for sample in range(num_samples):
-                if callback:
-                    callback(sample, num_samples)
 
-                #-----DEBUGGING-----
-                #if len(shap_values) > 15: # len(self.env.obstacle_shapes):
-                #    raise ValueError(f"shape_id {shape_id} is out of range for obstacle_shapes (len={len(self.env.obstacle_shapes)})")
-                #-------------------
-                    
-                # Reset environment to original state for each sample
-                self.env.obstacles = copy.deepcopy(original_obstacles)
-                self.env.obstacle_shapes = copy.deepcopy(original_obstacle_shapes)
+class ShapExplainer:
+    """
+    Permutation KernelSHAP over binary obstacle features.
+    Optional focus_top_m runs SHAP only on top-M obstacles from a cheap geodesic heuristic.
+    """
+    def __init__(self, permutations: int = 100, random_state: int = None,
+                 focus_top_m: int = None):
+        self.permutations = int(permutations)
+        self.rng = np.random.default_rng(random_state)
+        self.focus_top_m = int(focus_top_m) if focus_top_m else None
 
-                obstacle_order = list(range(num_obstacles))
-                random.shuffle(obstacle_order)
-                #print('\nSHAP DEBUG Sample:', sample + 1)
-                #print("obstacle_order: ", obstacle_order)
-                #print("evaluated_combinations: ", evaluated_combinations)
+    def explain(self, env, planner):
+        import time
+        t0 = time.perf_counter()
+        n = len(env.obstacles)
+        all_ids = np.arange(1, n + 1, dtype=int)
 
-                current_combination = [1] * num_obstacles
-                prev_path_length = baseline_path_length
-
-                for obs_idx in obstacle_order:
-                    current_combination[obs_idx] = 0
-                    new_path_length = self.compute_path_length(current_combination, evaluated_combinations, affordance_mode)
-                    marginal_contribution = prev_path_length - new_path_length
-                    shap_values[obstacle_keys[obs_idx]] += marginal_contribution
-                    prev_path_length = new_path_length
-
-            # Calculate average SHAP values using original obstacle keys
-            for shape_id in obstacle_keys:
-                shap_values[shape_id] /= num_samples
-
-            # Restore environment to original state
-            self.env.obstacles = copy.deepcopy(original_obstacles)
-            self.env.obstacle_shapes = copy.deepcopy(original_obstacle_shapes)
-
-            if shap_values:
-                all_vals = list(shap_values.values())
-                print(f"SHAP value range: min={min(all_vals)}, max={max(all_vals)}")
-
-            '''
-            print("\n[SHAP DEBUG] Baseline path length (all obstacles):", baseline_path_length)
-            for shape_id in obstacle_keys:
-                combo = [1] * num_obstacles
-                idx = obstacle_keys.index(shape_id)
-                combo[idx] = 0
-                length = self.compute_path_length(combo, None, affordance_mode)
-                print(f"Removing obstacle #{shape_id}: path length = {length}")
-            '''        
-
-            #for k, v in shap_values.items():
-            #    print(f"Obstacle #{k}: SHAP value = {v:.2f}")
-
-            return shap_values
-        elif shap_mode == "full":
-            original_obstacles = copy.deepcopy(self.env.obstacles)
-            original_obstacle_shapes = copy.deepcopy(self.env.obstacle_shapes)
-            
-            obstacle_keys = list(original_obstacle_shapes.keys())
-            num_obstacles = len(obstacle_keys)
-            shap_values = {i: 0.0 for i in obstacle_keys}
-            cache = {}
-
-            N_fact = factorial(num_obstacles)
-            print("N_fact:", N_fact)
-            ctr=0
-            for i in range(num_obstacles):
-                rest_indices = [j for j in range(num_obstacles) if j != i]
-
-                for r in range(num_obstacles):  # coalition sizes from 0 to N-1
-                    for subset in itertools.combinations(rest_indices, r):
-                        ctr += 1
-                        print(subset, ctr)
-                        coalition = [0] * num_obstacles
-                        for j in subset:
-                            coalition[j] = 1
-
-                        coalition_with_i = coalition.copy()
-                        coalition_with_i[i] = 1
-
-                        f_S = self.compute_path_length(coalition, cache, affordance_mode)
-                        f_Si = self.compute_path_length(coalition_with_i, cache, affordance_mode)
-
-                        weight = (factorial(len(subset)) * factorial(num_obstacles - len(subset) - 1)) / N_fact
-                        shap_values[obstacle_keys[i]] += weight * (f_Si - f_S)
-
-                    if callback:
-                        callback(r, num_obstacles)
-
-            # Restore original environment
-            self.env.obstacles = original_obstacles
-            self.env.obstacle_shapes = original_obstacle_shapes
-            return shap_values
+        # ---- Focus subset (optional)
+        if self.focus_top_m and self.focus_top_m < n:
+            geo = geodesic_line_ranking(env)["ranking"]
+            subset_ids = np.array([oid for oid, _ in geo[: self.focus_top_m]], dtype=int)
         else:
-            raise ValueError(f"Unknown SHAP mode: {shap_mode}")
+            subset_ids = all_ids
 
-    def compute_path_length(self, combination, cache=None, affordance_mode="remove"):
-        if cache is not None:
-            key = tuple(combination)
-            if key in cache:
-                return cache[key]
+        # Precompute masks
+        # local index (0..m-1) → global obstacle id
+        m = len(subset_ids)
+        id_from_local = subset_ids
+        # for fast toggle
+        obj_map = env.obj_map
+        base_grid = env.grid.copy()
 
-        # Create a completely new environment clone for this computation
-        env_clone = self.env.clone()
-        
-        # Get current obstacle IDs from the clone
-        all_shape_ids = list(env_clone.obstacle_shapes.keys())
-        
-        # Ensure combination length matches current obstacle count
-        if len(combination) != len(all_shape_ids):
-            if len(combination) > len(all_shape_ids):
-                combination = combination[:len(all_shape_ids)]
-            else:
-                combination = combination + [1] * (len(all_shape_ids) - len(combination))
+        def eval_with_present(present_mask_local: np.ndarray) -> bool:
+            # start from original grid; remove only the subset obs that are "absent"
+            grid = base_grid.copy()
+            # turn OFF the subset obstacles not present
+            for j, present in enumerate(present_mask_local):
+                if not present:
+                    oid = int(id_from_local[j])
+                    grid[obj_map == oid] = False
+            res = planner.plan(grid, env.start, env.goal)
+            return bool(res["success"]) if isinstance(res, dict) else bool(res)
 
-        # Apply the perturbation to the clone
-        env_clone.generate_perturbation(
-            strategy="custom",
-            combination=combination,
-            mode=affordance_mode
-        )
+        # KernelSHAP via permutations: contributions for each local feature
+        phi_local = np.zeros(m, dtype=float)
+        calls = 0
 
-        '''
-        for i, val in enumerate(combination):
-            if i < len(all_shape_ids) and val == 0:  # Remove this obstacle
-                shape_id = all_shape_ids[i]
-                if shape_id in env_clone.obstacle_shapes:
-                    points_to_remove = env_clone.obstacle_shapes[shape_id]
-                    env_clone.obstacles = [p for p in env_clone.obstacles if p not in points_to_remove]
-                    del env_clone.obstacle_shapes[shape_id]
-        '''        
+        for _ in range(self.permutations):
+            perm = self.rng.permutation(m)
+            present = np.zeros(m, dtype=bool)
+            y_prev = eval_with_present(present); calls += 1
+            for j in perm:
+                present[j] = True
+                y_cur = eval_with_present(present); calls += 1
+                # contribution is change in success prob (bool→int)
+                phi_local[j] += (1 if y_cur else 0) - (1 if y_prev else 0)
+                y_prev = y_cur
 
-        # Use the cloned environment for path calculation
-        planner_class = type(self.planner)
-        planner = planner_class()
-        planner.set_environment(
-            start=env_clone.agent_pos,
-            goal=env_clone.goal_pos,
-            grid_size=env_clone.grid_size,
-            obstacles=env_clone.obstacles
-        )
-        path = planner.plan()
+        phi_local /= max(1, self.permutations)
 
-        path_length = len(path) if path else 0.0 #len(path) if path else self.get_penalty_value()
-        
-        # No need to restore - we used a clone
-        
-        if cache is not None:
-            cache[tuple(combination)] = path_length
+        # Convert to harmfulness scores (bigger ⇒ more harmful)
+        harm_local = -phi_local  # if adding obstacle decreases success, harmfulness positive
 
-        return path_length
-    
-    def get_penalty_value(self):
-        # Return a large constant penalty for infeasible paths
-        return self.grid_size * self.grid_size + 1
+        # Build full ranking: subset first by score, others appended with very low score
+        pairs = [(int(id_from_local[j]), float(harm_local[j])) for j in range(m)]
+        # assign a very small score to unconsidered obstacles (deterministic tie-breaker by id)
+        if m < n:
+            floor = (min(harm_local) if m > 0 else 0.0) - 1e6
+            for oid in all_ids:
+                if oid not in id_from_local:
+                    pairs.append((int(oid), float(floor) - 1e-3 * int(oid)))
 
-    def visualize(self, shap_values):
-        if not shap_values:
-            return None
+        # sort descending by score
+        pairs.sort(key=lambda x: x[1], reverse=True)
+        return {
+            "ranking": pairs,
+            "calls": calls,
+            "time_sec": time.perf_counter() - t0,
+            "considered": int(m),
+            "n_total": int(n),
+            "focus_top_m": self.focus_top_m or 0,
+        }
 
-        grid = np.zeros((self.grid_size, self.grid_size))
-        all_values = list(shap_values.values())
-        max_abs_shap = max(abs(min(all_values)), abs(max(all_values))) if all_values else 1
-        if max_abs_shap == 0:
-            max_abs_shap = 1
-
-        for shape_id, value in shap_values.items():
-            if shape_id in self.env.obstacle_shapes:  # Check if shape_id exists
-                for pos in self.env.obstacle_shapes[shape_id]:
-                    x, y = pos
-                    if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
-                        grid[x, y] = value
-
-        fig, ax = plt.subplots(figsize=(10, 8))
-        cmap = plt.cm.RdBu
-        heatmap = ax.imshow(grid, cmap=cmap, vmin=-max_abs_shap, vmax=max_abs_shap)
-
-        # Add grid lines
-        ax.set_xticks(np.arange(-0.5, self.grid_size, 1), minor=True)
-        ax.set_yticks(np.arange(-0.5, self.grid_size, 1), minor=True)
-        ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5)
-        ax.tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
-
-        # Annotate obstacle labels
-        for shape_id, value in shap_values.items():
-            if shape_id in self.env.obstacle_shapes and self.env.obstacle_shapes[shape_id]:
-                points = self.env.obstacle_shapes[shape_id]
-                if points:
-                    fx, fy = points[0]
-                    ax.annotate(f"#{shape_id}\n{value:.2f}",
-                                (fy, fx),
-                                color='black', fontsize=8,
-                                ha='center', va='center',
-                                bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
-
-        ax.set_title('SHAP Values: Impact of Obstacles on Path Length\n'
-                     'Blue = increases cost (obstructive), Red = decreases cost (helpful)')
-
-        # Plot start and goal
-        if self.env.agent_pos:
-            ax.scatter(self.env.agent_pos[1], self.env.agent_pos[0],
-                       color='blue', s=150, marker='o', label='Start')
-        if self.env.goal_pos:
-            ax.scatter(self.env.goal_pos[1], self.env.goal_pos[0],
-                       color='green', s=150, marker='*', label='Goal')
-
-        # Add colorbar
-        cbar = plt.colorbar(heatmap, ax=ax, shrink=0.8)
-        cbar.set_label("SHAP Value (Impact on Path Length)", fontsize=10)
-
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=2)
-        return fig
