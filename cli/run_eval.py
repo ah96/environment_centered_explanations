@@ -156,11 +156,13 @@ def main():
             raise ValueError(f"Unknown planner '{key}'")
         planners[key] = PLANNER_ALIASES[key](connectivity=args.connectivity)
 
-    # Prepare output CSV
+    # Prepare output CSV (unique, atomic)
     _ensure_dir(args.outdir)
     stamp = time.strftime("%Y%m%d_%H%M%S")
     import os as os_mod  # avoid any accidental local shadowing of `os`
-    out_csv = os_mod.path.join(args.outdir, f"eval_{stamp}.csv")
+    safe_tag = f"s{args.seed}"
+    out_csv = os_mod.path.join(args.outdir, f"eval_{safe_tag}_{stamp}.csv")
+    tmp_csv = out_csv + f".tmp_{os_mod.getpid()}"
     fieldnames = [
         "env_id","H","W","density","planner","method",
         "kmax","success_at_k","auc_s_at_k",
@@ -168,7 +170,7 @@ def main():
         "robust_jaccard","robust_kendall"
     ]
 
-    with open(out_csv, "w", newline="") as f:
+    with open(tmp_csv, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -318,6 +320,8 @@ def main():
 
                             writer.writerow(row)
 
+    # Atomic rename to final path
+    os_mod.replace(tmp_csv, out_csv)
     print(f"[OK] Wrote: {out_csv}")
 
 
