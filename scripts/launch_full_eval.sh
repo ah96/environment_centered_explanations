@@ -136,16 +136,118 @@ fanout() {
 }
 
 echo "[1/5] Main eval shards..."
-fanout run_eval_shard     "${EVAL_PER_SHARD}"  "run_eval"
+if command -v parallel >/dev/null 2>&1; then
+  seq 0 $((PARALLEL_JOBS-1)) | parallel -j "${PARALLEL_JOBS}" --halt soon,fail=1 \
+    "${PYTHON_BIN} -m cli.run_eval \
+      --sizes '${EVAL_SIZES}' \
+      --densities '${EVAL_DENS}' \
+      --num-envs ${EVAL_PER_SHARD} \
+      --planners '${EVAL_PLANNERS}' \
+      --explainers '${EVAL_EXPLAINERS}' \
+      --kmax ${EVAL_KMAX} \
+      --seed {} \
+      --outdir '${CSV_DIR}'"
+else
+  pids=()
+  for s in $(seq 0 $((PARALLEL_JOBS-1))); do
+    ${PYTHON_BIN} -m cli.run_eval \
+      --sizes "${EVAL_SIZES}" \
+      --densities "${EVAL_DENS}" \
+      --num-envs "${EVAL_PER_SHARD}" \
+      --planners "${EVAL_PLANNERS}" \
+      --explainers "${EVAL_EXPLAINERS}" \
+      --kmax "${EVAL_KMAX}" \
+      --seed "${s}" \
+      --outdir "${CSV_DIR}" &
+    pids+=("$!")
+  done
+  for pid in "${pids[@]}"; do wait "$pid"; done
+fi
 
 echo "[2/5] Exact minimality shards..."
-fanout run_exact_shard    "${EXACT_PER_SHARD}" "run_exact_small"
+if command -v parallel >/dev/null 2>&1; then
+  seq 0 $((PARALLEL_JOBS-1)) | parallel -j "${PARALLEL_JOBS}" --halt soon,fail=1 \
+    "${PYTHON_BIN} -m cli.run_exact_small \
+      --size '${EXACT_SIZE}' \
+      --density '${EXACT_DENS}' \
+      --num-envs ${EXACT_PER_SHARD} \
+      --planner '${EXACT_PLANNER}' \
+      --time-limit ${EXACT_TIME_LIMIT} \
+      --seed {} \
+      --outdir '${CSV_DIR}'"
+else
+  pids=()
+  for s in $(seq 0 $((PARALLEL_JOBS-1))); do
+    ${PYTHON_BIN} -m cli.run_exact_small \
+      --size "${EXACT_SIZE}" \
+      --density "${EXACT_DENS}" \
+      --num-envs "${EXACT_PER_SHARD}" \
+      --planner "${EXACT_PLANNER}" \
+      --time-limit "${EXACT_TIME_LIMIT}" \
+      --seed "${s}" \
+      --outdir "${CSV_DIR}" &
+    pids+=("$!")
+  done
+  for pid in "${pids[@]}"; do wait "$pid"; done
+fi
 
 echo "[3/5] Robustness shards..."
-fanout run_robust_shard   "${ROB_PER_SHARD}"   "run_robustness"
+if command -v parallel >/dev/null 2>&1; then
+  seq 0 $((PARALLEL_JOBS-1)) | parallel -j "${PARALLEL_JOBS}" --halt soon,fail=1 \
+    "${PYTHON_BIN} -m cli.run_robustness \
+      --sizes '${ROB_SIZES}' \
+      --densities '${ROB_DENS}' \
+      --num-envs ${ROB_PER_SHARD} \
+      --planners '${ROB_PLANNERS}' \
+      --explainers '${ROB_EXPLAINERS}' \
+      --kmax ${ROB_KMAX} \
+      --seed {} \
+      --outdir '${CSV_DIR}'"
+else
+  pids=()
+  for s in $(seq 0 $((PARALLEL_JOBS-1))); do
+    ${PYTHON_BIN} -m cli.run_robustness \
+      --sizes "${ROB_SIZES}" \
+      --densities "${ROB_DENS}" \
+      --num-envs "${ROB_PER_SHARD}" \
+      --planners "${ROB_PLANNERS}" \
+      --explainers "${ROB_EXPLAINERS}" \
+      --kmax "${ROB_KMAX}" \
+      --seed "${s}" \
+      --outdir "${CSV_DIR}" &
+    pids+=("$!")
+  done
+  for pid in "${pids[@]}"; do wait "$pid"; done
+fi
 
 echo "[4/5] Transfer shards..."
-fanout run_transfer_shard "${TR_PER_SHARD}"    "run_transfer"
+if command -v parallel >/dev/null 2>&1; then
+  seq 0 $((PARALLEL_JOBS-1)) | parallel -j "${PARALLEL_JOBS}" --halt soon,fail=1 \
+    "${PYTHON_BIN} -m cli.run_transfer \
+      --sizes '${TR_SIZES}' \
+      --densities '${TR_DENS}' \
+      --num-envs ${TR_PER_SHARD} \
+      --planners '${TR_PLANNERS}' \
+      --explainers '${TR_EXPLAINERS}' \
+      --kmax ${TR_KMAX} \
+      --seed {} \
+      --outdir '${CSV_DIR}'"
+else
+  pids=()
+  for s in $(seq 0 $((PARALLEL_JOBS-1))); do
+    ${PYTHON_BIN} -m cli.run_transfer \
+      --sizes "${TR_SIZES}" \
+      --densities "${TR_DENS}" \
+      --num-envs "${TR_PER_SHARD}" \
+      --planners "${TR_PLANNERS}" \
+      --explainers "${TR_EXPLAINERS}" \
+      --kmax "${TR_KMAX}" \
+      --seed "${s}" \
+      --outdir "${CSV_DIR}" &
+    pids+=("$!")
+  done
+  for pid in "${pids[@]}"; do wait "$pid"; done
+fi
 
 echo "[5/5] Making figures..."
 ${PYTHON_BIN} -m cli.make_figs \
