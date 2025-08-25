@@ -1,124 +1,158 @@
 #!/usr/bin/env bash
-# -----------------------------------------------------------------------------
-# Launch the full evaluation with GNU Parallel:
-#  - cores-aware (-j 0 uses number of visible cores)
-#  - sharded jobs per size×density for better utilization and faster feedback
-#  - deterministic seeding (seed = manifest line number)
-#  - neat run folder layout under runs/$RUN_ID
-#
-# USAGE:
-#   bash scripts/launch_full_eval.sh [RUN_ID]
-# EXAMPLE:
-#   RUN_ID=$(date +%Y%m%d_%H%M%S)_full
-#   bash scripts/launch_full_eval.sh "$RUN_ID"
-#
-# Optional env knobs before calling:
-#   JOBS=0                 # -j 0 → number of visible cores (default)
-#   REPS=6                 # shards per (size,density)
-#   NUM_ENVS=150           # total envs per (size,density) (will be split across REPS)
-# -----------------------------------------------------------------------------
-set -euo pipefail
+# Parallel full evaluation (uses up to 8 processes)
 
-# --------------------------- knobs you likely tweak ---------------------------
-SIZES="20x20 30x30 40x40"
-DENS="0.20 0.30 0.40"
-PLANNERS="a_star,dijkstra,bfs,dfs,theta_star"
-EXPL="shap,lime,cose,geodesic,rand"
+set -Eeuo pipefail
 
-KMAX=8
-CONNECTIVITY=8
-LIME_SAMPLES=500
-SHAP_PERM=100
-FOCUS_TOP_M=20
+# ---- General config ----
+PARALLEL_JOBS="${PARALLEL_JOBS:-8}"    # number of concurrent processes
+PYTHON_BIN="${PYTHON_BIN:-python}"     # override with: PYTHON_BIN=python3 ./launch_full_eval.sh
+export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
 
-# Sharding: split NUM_ENVS/REPS per job (remainder distributed to the first few shards)
-: "${REPS:=6}"           # shards per (size,density)
-: "${NUM_ENVS:=150}"     # total envs per (size,density)
-# Concurrency (0 = auto-detect visible cores)
-: "${JOBS:=0}"
+RUN_ID="$(date +'%Y%m%d_%H%M%S')"
+RUN_DIR="runs/${RUN_ID}"
+CSV_DIR="${RUN_DIR}/csv"
+FIGS_DIR="${RUN_DIR}/figs"
+LOG_DIR="${RUN_DIR}/logs"
+mkdir -p "${CSV_DIR}" "${FIGS_DIR}" "${LOG_DIR}"
 
-# Deterministic single-thread math libs
-export OMP_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-export OPENBLAS_NUM_THREADS=1
-export NUMEXPR_NUM_THREADS=1
-export PYTHONHASHSEED=0
+LOG_FILE="${LOG_DIR}/full_eval_${RUN_ID}.log"
+exec > >(tee -a "${LOG_FILE}") 2>&1
 
-# --------------------------- run id & directories ----------------------------
-RUN_ID="${1:-$(date +%Y%m%d_%H%M%S)_full}"
+echo "=== Full Evaluation (parallel) ==="
+echo "Run: ${RUN_DIR}   Jobs: ${PARALLEL_JOBS}"
+${PYTHON_BIN} -V || true
 
-ROOT="runs/$RUN_ID"
-OUTDIR="$ROOT/csv"
-FIGDIR="$ROOT/figs"
-LOGDIR="$ROOT/logs"
-JOBDIR="$ROOT/joblogs"
-MANIDIR="$ROOT/manifest"
-RESDIR="$ROOT/results"
+# ---- Workloads (same totals as before, split across seeds) ----
+# We achieve parallelism by sharding the environment count across seeds.
+EVAL_SIZES="${EVAL_SIZES:-20x20,30x30,40x40}"
+EVAL_DENS="${EVAL_DENS:-0.10,0.20,0.30}"
+EVAL_NUM_ENVS_TOTAL="${EVAL_NUM_ENVS_TOTAL:-100}"
+EVAL_PLANNERS="${EVAL_PLANNERS:-a_star,dijkstra,bfs,dfs,theta_star}"
+EVAL_EXPLAINERS="${EVAL_EXPLAINERS:-shap,lime,cose,rand,geodesic}"
+EVAL_KMAX="${EVAL_KMAX:-5}"
 
-mkdir -p "$OUTDIR" "$FIGDIR" "$LOGDIR" "$JOBDIR" "$MANIDIR" "$RESDIR"
+EXACT_SIZE="${EXACT_SIZE:-20x20}"
+EXACT_DENS="${EXACT_DENS:-0.20}"
+EXACT_NUM_ENVS_TOTAL="${EXACT_NUM_ENVS_TOTAL:-100}"
+EXACT_PLANNER="${EXACT_PLANNER:-a_star}"
+EXACT_TIME_LIMIT="${EXACT_TIME_LIMIT:-60}"
 
-# --------------------------- capture reproducibility -------------------------
-{ git rev-parse HEAD 2>/dev/null || echo "no_git"; }   > "$ROOT/meta_git_commit.txt" || true
-{ git status --porcelain 2>/dev/null || true; }       > "$ROOT/meta_git_dirty.txt"  || true
-{ uname -a || true; }                                 > "$ROOT/meta_uname.txt"      || true
-{ lscpu || true; }                                    > "$ROOT/meta_lscpu.txt"      || true
-{ python -V || true; }                                > "$ROOT/meta_python_version.txt" || true
-{ pip freeze 2>/dev/null || true; }                   > "$ROOT/meta_pip_freeze.txt" || true
+ROB_SIZES="${ROB_SIZES:-30x30}"
+ROB_DENS="${ROB_DENS:-0.20}"
+ROB_NUM_ENVS_TOTAL="${ROB_NUM_ENVS_TOTAL:-50}"
+ROB_PLANNERS="${ROB_PLANNERS:-a_star,dijkstra,bfs,dfs,theta_star}"
+ROB_EXPLAINERS="${ROB_EXPLAINERS:-shap,lime,cose,rand,geodesic}"
+ROB_KMAX="${ROB_KMAX:-5}"
 
-# --------------------------- info banner in logs -----------------------------
-CORES=$(parallel --number-of-cores || echo 0)
-CPUS=$(parallel --number-of-cpus  || echo 0)
-echo "[INFO] RUN_ID=$RUN_ID"
-echo "[INFO] Visible cores: $CORES   visible CPUs: $CPUS"
-echo "[INFO] JOBS concurrency set to: ${JOBS}  (0 = use visible cores)"
-echo "[INFO] Sharding: REPS=$REPS  NUM_ENVS=$NUM_ENVS  → per-shard ≈ $((NUM_ENVS/REPS)) (+ remainder)"
+TR_SIZES="${TR_SIZES:-20x20,30x30}"
+TR_DENS="${TR_DENS:-0.10,0.20}"
+TR_NUM_ENVS_TOTAL="${TR_NUM_ENVS_TOTAL:-50}"
+TR_PLANNERS="${TR_PLANNERS:-a_star,dijkstra,bfs,dfs,theta_star}"
+TR_EXPLAINERS="${TR_EXPLAINERS:-shap,lime,rand,geodesic}"
+TR_KMAX="${TR_KMAX:-5}"
 
-# --------------------------- build manifest (no seed) ------------------------
-MANIFEST="$MANIDIR/eval_cmds.txt"
-: > "$MANIFEST"
+# Compute per‑shard counts (integer ceil so we don’t lose any envs)
+ceil_div() { python - "$@" <<'PY'
+import math,sys
+n=int(sys.argv[1]); d=int(sys.argv[2]); print((n+d-1)//d)
+PY
+}
+EVAL_PER_SHARD=$(ceil_div "${EVAL_NUM_ENVS_TOTAL}" "${PARALLEL_JOBS}")
+EXACT_PER_SHARD=$(ceil_div "${EXACT_NUM_ENVS_TOTAL}" "${PARALLEL_JOBS}")
+ROB_PER_SHARD=$(ceil_div "${ROB_NUM_ENVS_TOTAL}" "${PARALLEL_JOBS}")
+TR_PER_SHARD=$(ceil_div "${TR_NUM_ENVS_TOTAL}" "${PARALLEL_JOBS}")
 
-for s in $SIZES; do
-  for d in $DENS; do
-    # split NUM_ENVS into REPS shards with fair distribution
-    base=$(( NUM_ENVS / REPS ))
-    rem=$(( NUM_ENVS % REPS ))
-    for r in $(seq 1 "$REPS"); do
-      n_this=$base
-      if [ "$r" -le "$rem" ]; then n_this=$(( n_this + 1 )); fi
-      echo "python -m cli.run_eval \
-        --sizes $s --densities $d \
-        --num-envs $n_this \
-        --planners $PLANNERS --explainers $EXPL \
-        --kmax $KMAX --connectivity $CONNECTIVITY \
-        --lime-samples $LIME_SAMPLES --shap-perm $SHAP_PERM \
-        --focus-top-m $FOCUS_TOP_M --robustness false \
-        --outdir $OUTDIR" >> "$MANIFEST"
+# Helper to run one eval shard with a specific seed and num_envs
+run_eval_shard() {
+  local seed="$1" num_envs="$2"
+  ${PYTHON_BIN} -m cli.run_eval \
+    --sizes "${EVAL_SIZES}" \
+    --densities "${EVAL_DENS}" \
+    --num-envs "${num_envs}" \
+    --planners "${EVAL_PLANNERS}" \
+    --explainers "${EVAL_EXPLAINERS}" \
+    --kmax "${EVAL_KMAX}" \
+    --seed "${seed}" \
+    --outdir "${CSV_DIR}"
+}
+
+run_exact_shard() {
+  local seed="$1" num_envs="$2"
+  ${PYTHON_BIN} -m cli.run_exact_small \
+    --size "${EXACT_SIZE}" \
+    --density "${EXACT_DENS}" \
+    --num-envs "${num_envs}" \
+    --planner "${EXACT_PLANNER}" \
+    --time-limit "${EXACT_TIME_LIMIT}" \
+    --seed "${seed}" \
+    --outdir "${CSV_DIR}"
+}
+
+run_robust_shard() {
+  local seed="$1" num_envs="$2"
+  ${PYTHON_BIN} -m cli.run_robustness \
+    --sizes "${ROB_SIZES}" \
+    --densities "${ROB_DENS}" \
+    --num-envs "${num_envs}" \
+    --planners "${ROB_PLANNERS}" \
+    --explainers "${ROB_EXPLAINERS}" \
+    --kmax "${ROB_KMAX}" \
+    --seed "${seed}" \
+    --outdir "${CSV_DIR}"
+}
+
+run_transfer_shard() {
+  local seed="$1" num_envs="$2"
+  ${PYTHON_BIN} -m cli.run_transfer \
+    --sizes "${TR_SIZES}" \
+    --densities "${TR_DENS}" \
+    --num-envs "${num_envs}" \
+    --planners "${TR_PLANNERS}" \
+    --explainers "${TR_EXPLAINERS}" \
+    --kmax "${TR_KMAX}" \
+    --seed "${seed}" \
+    --outdir "${CSV_DIR}"
+}
+
+# Function to fan out a task across N shards (seeds 0..N-1)
+fanout() {
+  local jobfun="$1" per_shard="$2" label="$3"
+  echo "==> ${label}: ${PARALLEL_JOBS} shards × ${per_shard} envs each"
+  if command -v parallel >/dev/null 2>&1; then
+    # GNU parallel path
+    seq 0 $((PARALLEL_JOBS-1)) | parallel -j "${PARALLEL_JOBS}" --halt soon,fail=1 "$jobfun" {} "${per_shard}"
+  else
+    # POSIX fallback: background jobs
+    pids=()
+    for s in $(seq 0 $((PARALLEL_JOBS-1))); do
+      $jobfun "$s" "${per_shard}" &
+      pids+=("$!")
     done
-  done
-done
+    # Wait and fail if any failed
+    for pid in "${pids[@]}"; do
+      wait "$pid"
+    done
+  fi
+}
 
-TOTAL=$(wc -l < "$MANIFEST")
-JOBLOG="$JOBDIR/eval.tsv"
+echo "[1/5] Main eval shards..."
+fanout run_eval_shard     "${EVAL_PER_SHARD}"  "run_eval"
 
-echo "[INFO] Total jobs in manifest: $TOTAL"
-echo "[INFO] Manifest: $MANIFEST"
-echo "[INFO] Joblog:   $JOBLOG"
-echo "[INFO] Results:  $RESDIR/eval/<host>/<seq>/{stdout,stderr}"
-echo "[INFO] Combined log: $LOGDIR/eval.log"
+echo "[2/5] Exact minimality shards..."
+fanout run_exact_shard    "${EXACT_PER_SHARD}" "run_exact_small"
 
-# --------------------------- launch with ETA & per-job logs ------------------
-# Seed is the manifest line number; nl gives us {1}=line#, {2}=command
-# stdbuf ensures line-buffered output for smoother live tails
-nl -ba "$MANIFEST" | \
-stdbuf -oL -eL parallel -j "$JOBS" --lb --eta --joblog "$JOBLOG" \
-         --colsep '\t' --results "$RESDIR/eval" \
-         '{2} --seed {1}' 2>&1 | tee "$LOGDIR/eval.log"
+echo "[3/5] Robustness shards..."
+fanout run_robust_shard   "${ROB_PER_SHARD}"   "run_robustness"
 
-echo "[DONE] Launched $TOTAL eval jobs for RUN_ID=$RUN_ID"
-echo "[PATHS]"
-echo "  CSV:    $OUTDIR"
-echo "  FIGS:   $FIGDIR"
-echo "  LOGS:   $LOGDIR  (combined)"
-echo "  RESULTS:$RESDIR/eval  (per-job stdout/stderr)"
-echo "  MANIFEST:$MANIFEST"
-echo "  JOBLOG: $JOBLOG"
+echo "[4/5] Transfer shards..."
+fanout run_transfer_shard "${TR_PER_SHARD}"    "run_transfer"
+
+echo "[5/5] Making figures..."
+${PYTHON_BIN} -m cli.make_figs \
+  --eval-glob       "${CSV_DIR}/eval_*.csv" \
+  --exact-glob      "${CSV_DIR}/exact_small_*.csv" \
+  --transfer-glob   "${CSV_DIR}/transfer_*.csv" \
+  --robustness-glob "${CSV_DIR}/robustness_*.csv" \
+  --outdir          "${FIGS_DIR}"
+
+echo "All done. Figures in ${FIGS_DIR}"
