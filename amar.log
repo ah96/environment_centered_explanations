@@ -1,0 +1,103 @@
+nohup: ignoring input
+[setup] Found 236 env file(s). workers=8, planner=a_star, k=5
+[progress] 5/236 files | failures considered=5 | ok_files=5 | elapsed=1.6s | eta=75.5s
+[progress] 10/236 files | failures considered=10 | ok_files=10 | elapsed=4.4s | eta=100.4s
+[progress] 15/236 files | failures considered=15 | ok_files=15 | elapsed=45.1s | eta=664.4s
+[progress] 20/236 files | failures considered=20 | ok_files=20 | elapsed=51.1s | eta=551.3s
+[progress] 25/236 files | failures considered=25 | ok_files=25 | elapsed=78.7s | eta=664.2s
+[progress] 30/236 files | failures considered=30 | ok_files=30 | elapsed=94.0s | eta=645.3s
+[progress] 35/236 files | failures considered=35 | ok_files=35 | elapsed=119.4s | eta=685.7s
+[progress] 40/236 files | failures considered=40 | ok_files=40 | elapsed=147.2s | eta=721.1s
+[progress] 45/236 files | failures considered=45 | ok_files=45 | elapsed=194.6s | eta=825.8s
+[progress] 50/236 files | failures considered=50 | ok_files=50 | elapsed=208.2s | eta=774.5s
+[progress] 55/236 files | failures considered=55 | ok_files=55 | elapsed=224.2s | eta=737.8s
+[progress] 60/236 files | failures considered=60 | ok_files=60 | elapsed=244.2s | eta=716.4s
+[progress] 65/236 files | failures considered=65 | ok_files=65 | elapsed=250.7s | eta=659.5s
+[progress] 70/236 files | failures considered=70 | ok_files=70 | elapsed=292.8s | eta=694.4s
+[progress] 75/236 files | failures considered=75 | ok_files=75 | elapsed=308.7s | eta=662.7s
+[progress] 76/236 files | failures considered=76 | ok_files=76 | elapsed=423.6s | eta=891.7s
+[progress] 80/236 files | failures considered=80 | ok_files=80 | elapsed=471.6s | eta=919.7s
+[progress] 85/236 files | failures considered=85 | ok_files=85 | elapsed=517.1s | eta=918.6s
+[progress] 90/236 files | failures considered=90 | ok_files=90 | elapsed=547.7s | eta=888.5s
+[progress] 91/236 files | failures considered=91 | ok_files=91 | elapsed=659.0s | eta=1050.0s
+[progress] 95/236 files | failures considered=95 | ok_files=95 | elapsed=674.3s | eta=1000.8s
+[progress] 100/236 files | failures considered=100 | ok_files=100 | elapsed=708.9s | eta=964.1s
+[progress] 105/236 files | failures considered=105 | ok_files=105 | elapsed=735.0s | eta=917.0s
+[progress] 107/236 files | failures considered=107 | ok_files=107 | elapsed=885.7s | eta=1067.8s
+[progress] 108/236 files | failures considered=108 | ok_files=108 | elapsed=1010.6s | eta=1197.7s
+[progress] 110/236 files | failures considered=110 | ok_files=110 | elapsed=1026.2s | eta=1175.5s
+[progress] 115/236 files | failures considered=115 | ok_files=115 | elapsed=1050.4s | eta=1105.2s
+[progress] 119/236 files | failures considered=119 | ok_files=119 | elapsed=1203.2s | eta=1183.0s
+[progress] 120/236 files | failures considered=120 | ok_files=120 | elapsed=1342.3s | eta=1297.6s
+[progress] 125/236 files | failures considered=125 | ok_files=125 | elapsed=1391.0s | eta=1235.2s
+[progress] 130/236 files | failures considered=130 | ok_files=130 | elapsed=1425.8s | eta=1162.5s
+[progress] 131/236 files | failures considered=131 | ok_files=131 | elapsed=1545.7s | eta=1238.9s
+[progress] 132/236 files | failures considered=132 | ok_files=132 | elapsed=1670.4s | eta=1316.1s
+[progress] 135/236 files | failures considered=135 | ok_files=135 | elapsed=1684.9s | eta=1260.5s
+[progress] 140/236 files | failures considered=140 | ok_files=140 | elapsed=1739.8s | eta=1193.0s
+[progress] 145/236 files | failures considered=145 | ok_files=145 | elapsed=1797.7s | eta=1128.2s
+[progress] 148/236 files | failures considered=148 | ok_files=148 | elapsed=1879.4s | eta=1117.5s
+[progress] 150/236 files | failures considered=150 | ok_files=150 | elapsed=1909.5s | eta=1094.8s
+[progress] 152/236 files | failures considered=152 | ok_files=152 | elapsed=2011.6s | eta=1111.7s
+[progress] 155/236 files | failures considered=155 | ok_files=155 | elapsed=2047.8s | eta=1070.1s
+[progress] 158/236 files | failures considered=158 | ok_files=158 | elapsed=2169.2s | eta=1070.9s
+[progress] 160/236 files | failures considered=160 | ok_files=160 | elapsed=2223.2s | eta=1056.0s
+[progress] 165/236 files | failures considered=165 | ok_files=165 | elapsed=2265.8s | eta=975.0s
+[progress] 169/236 files | failures considered=169 | ok_files=169 | elapsed=2352.3s | eta=932.6s
+[progress] 170/236 files | failures considered=170 | ok_files=170 | elapsed=2357.2s | eta=915.1s
+[progress] 173/236 files | failures considered=173 | ok_files=173 | elapsed=2443.8s | eta=890.0s
+[progress] 175/236 files | failures considered=175 | ok_files=175 | elapsed=2448.4s | eta=853.5s
+[progress] 180/236 files | failures considered=180 | ok_files=180 | elapsed=2500.2s | eta=777.9s
+[progress] 182/236 files | failures considered=182 | ok_files=182 | elapsed=2597.7s | eta=770.8s
+[progress] 184/236 files | failures considered=184 | ok_files=184 | elapsed=2669.9s | eta=754.5s
+[progress] 185/236 files | failures considered=185 | ok_files=185 | elapsed=2674.5s | eta=737.3s
+[progress] 190/236 files | failures considered=190 | ok_files=190 | elapsed=2727.2s | eta=660.3s
+[progress] 191/236 files | failures considered=191 | ok_files=191 | elapsed=2914.5s | eta=686.7s
+[progress] 192/236 files | failures considered=192 | ok_files=192 | elapsed=2988.7s | eta=684.9s
+[progress] 193/236 files | failures considered=193 | ok_files=193 | elapsed=3560.5s | eta=793.3s
+[progress] 195/236 files | failures considered=195 | ok_files=195 | elapsed=3591.2s | eta=755.1s
+[progress] 200/236 files | failures considered=200 | ok_files=200 | elapsed=3647.9s | eta=656.6s
+[progress] 201/236 files | failures considered=201 | ok_files=201 | elapsed=3760.4s | eta=654.8s
+[progress] 204/236 files | failures considered=204 | ok_files=204 | elapsed=3988.4s | eta=625.6s
+[progress] 205/236 files | failures considered=205 | ok_files=205 | elapsed=4025.0s | eta=608.7s
+[progress] 207/236 files | failures considered=207 | ok_files=207 | elapsed=4615.0s | eta=646.6s
+[progress] 209/236 files | failures considered=209 | ok_files=209 | elapsed=4680.0s | eta=604.6s
+[progress] 210/236 files | failures considered=210 | ok_files=210 | elapsed=4717.0s | eta=584.0s
+[progress] 211/236 files | failures considered=211 | ok_files=211 | elapsed=4981.3s | eta=590.2s
+[progress] 213/236 files | failures considered=213 | ok_files=213 | elapsed=5124.7s | eta=553.4s
+[progress] 215/236 files | failures considered=215 | ok_files=215 | elapsed=5374.5s | eta=525.0s
+[progress] 218/236 files | failures considered=218 | ok_files=218 | elapsed=5450.8s | eta=450.1s
+[progress] 219/236 files | failures considered=219 | ok_files=219 | elapsed=5936.4s | eta=460.8s
+[progress] 220/236 files | failures considered=220 | ok_files=220 | elapsed=5967.6s | eta=434.0s
+[progress] 222/236 files | failures considered=222 | ok_files=222 | elapsed=6040.3s | eta=380.9s
+[progress] 223/236 files | failures considered=223 | ok_files=223 | elapsed=6376.1s | eta=371.7s
+[progress] 224/236 files | failures considered=224 | ok_files=224 | elapsed=6448.9s | eta=345.5s
+[progress] 225/236 files | failures considered=225 | ok_files=225 | elapsed=6469.3s | eta=316.3s
+[progress] 226/236 files | failures considered=226 | ok_files=226 | elapsed=6727.5s | eta=297.7s
+[progress] 228/236 files | failures considered=228 | ok_files=228 | elapsed=7291.9s | eta=255.9s
+[progress] 230/236 files | failures considered=230 | ok_files=230 | elapsed=7352.1s | eta=191.8s
+[progress] 231/236 files | failures considered=231 | ok_files=231 | elapsed=7708.5s | eta=166.9s
+[progress] 233/236 files | failures considered=233 | ok_files=233 | elapsed=7814.8s | eta=100.6s
+[progress] 234/236 files | failures considered=234 | ok_files=234 | elapsed=8058.1s | eta=68.9s
+[progress] 235/236 files | failures considered=235 | ok_files=235 | elapsed=8121.0s | eta=34.6s
+[progress] 236/236 files | failures considered=236 | ok_files=236 | elapsed=8617.2s | eta=0.0s
+[progress] 236/236 files | failures considered=236 | ok_files=236 | elapsed=8617.2s | eta=0.0s
+[q1_agreement] Wrote runs/20250826_131931/figs/q1_agreement_heatmap.pdf
+[qual] Wrote runs/20250826_131931/figs/qual_case_original.pdf
+[qual] Wrote runs/20250826_131931/figs/qual_case_shap.pdf
+[qual] Wrote runs/20250826_131931/figs/qual_case_lime.pdf
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ubuntu/amar/git/environment_centered_explanations/cli/plot_agreement_and_qual.py", line 442, in <module>
+    main()
+  File "/home/ubuntu/amar/git/environment_centered_explanations/cli/plot_agreement_and_qual.py", line 426, in main
+    cose_out = cose.explain(env, planner, guide_ranking=shap_r)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/amar/git/environment_centered_explanations/explainers/cose.py", line 99, in explain
+    grid = _grid_without(env, trial)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/amar/git/environment_centered_explanations/explainers/cose.py", line 47, in _grid_without
+    if ob.coords.size > 0:
+       ^^^^^^^^^
+AttributeError: 'int' object has no attribute 'coords'

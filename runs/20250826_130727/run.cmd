@@ -1,0 +1,1 @@
+python -u -m cli.plot_agreement_and_qual   --env-glob "results/envs/E_*.npz"   --outdir "runs/20250826_130727/figs"   --planner "a_star" --connectivity 8   --k 5 --max-envs 0   --max-failures 0   --lime-samples 500 --lime-flip 0.30   --shap-perm 100   --workers 8   --progress-every 5   --heartbeat-secs 60      
