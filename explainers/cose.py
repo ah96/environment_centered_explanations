@@ -36,18 +36,43 @@ def _planner_to_int_success(res) -> int:
         return int(bool(res.get('success', False)))
     return int(bool(res))
 
+def _rc_from_obstacle(ob, W):
+    """Return (r, c) from different obstacle representations."""
+    # integer cell id
+    if isinstance(ob, (int, np.integer)):
+        ob = int(ob)
+        return divmod(ob, W)
+    # (r, c) tuple
+    if isinstance(ob, tuple) and len(ob) == 2:
+        r, c = ob
+        return int(r), int(c)
+    # object with .coords -> (r, c) or numpy array
+    if hasattr(ob, "coords"):
+        rc = getattr(ob, "coords")
+        if isinstance(rc, (tuple, list)) and len(rc) == 2:
+            return int(rc[0]), int(rc[1])
+        # support small numpy arrays like np.array([r, c])
+        try:
+            rc = np.array(rc).astype(int).tolist()
+            if len(rc) == 2:
+                return rc[0], rc[1]
+        except Exception:
+            pass
+    raise TypeError(f"Unsupported obstacle type: {type(ob)}")
 
-def _grid_without(env, removed_ids: Iterable[int]) -> np.ndarray:
-    """Return a copy of env.grid with given obstacle ids removed."""
-    g = env.grid.copy()
-    removed = set(int(i) for i in removed_ids)
-    for i in removed:
-        if 1 <= i <= len(env.obstacles):
-            ob = env.obstacles[i - 1]
-            if ob.coords.size > 0:
-                rr, cc = ob.coords[:, 0], ob.coords[:, 1]
-                g[rr, cc] = False
-    return g
+
+def _grid_without(env, trial):
+    """
+    Return a copy of env.grid where all obstacles in `trial` are removed (set free).
+    `trial` can contain ints (cell ids), (r,c) tuples, or objects with `.coords`.
+    """
+    G = np.array(env.grid, dtype=bool).copy()
+    H, W = G.shape
+    for ob in trial:
+        r, c = _rc_from_obstacle(ob, W)
+        if 0 <= r < H and 0 <= c < W:
+            G[r, c] = False  # remove obstacle -> mark free
+    return G
 
 
 class COSEExplainer:
