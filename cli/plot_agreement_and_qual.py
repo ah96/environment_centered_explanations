@@ -2,32 +2,61 @@
 # -*- coding: utf-8 -*-
 """
 plot_agreement_and_qual.py
---------------------------
-Generates:
-  1) q1_agreement_heatmap.pdf  — method-vs-method agreement (mean Jaccard on top-k)
-  2) qual_case_original.pdf    — the chosen environment (grid)
-  3) qual_case_lime.pdf        — LIME top-k highlighted
-  4) qual_case_shap.pdf        — SHAP top-k highlighted
-  5) qual_case_cose.pdf        — COSE set highlighted
+==========================
 
-We recompute explanations from saved env snapshots in results/envs/E_*.npz to avoid
-changing the eval CSV schema.
+Server-optimized script to compute *agreement* between explanation methods 
+(SHAP, LIME, geodesic baseline, random) on robot path planning failures,
+and optionally generate qualitative case study plots.
 
-Usage (example):
-  python -m cli.plot_agreement_and_qual \
-    --env-glob "results/envs/E_*.npz" \
-    --outdir "runs/20250825_200002/figs" \
-    --planner a_star --connectivity 8 \
-    --k 5 --max-envs 200 \
-    --lime-samples 500 --lime-flip 0.30 \
-    --shap-perm 100 \
-    --seed 0 \
-    --qual-env "20x20:0.2:17"
+Features:
+---------
+- Multiprocessing: runs in parallel using --workers (default: 8).
+- Progress logging: prints progress/ETA every few files and heartbeat every N seconds.
+- Safe for servers: uses headless matplotlib backend (Agg).
+- Optional speed-ups: 
+    * --max-envs      → cap total environments scanned
+    * --max-failures  → stop after N failure cases
+    * --skip-qual     → skip qualitative PDF plots
 
-Notes:
-- --qual-env lets you force a specific environment by key "HxW:density:env_id"
-  matching the filename suffix saved by your CLIs (see results/envs/E_... files).
-- If --qual-env is omitted, we pick a deterministic "best" env (first in sorted list).
+Outputs:
+--------
+- q1_agreement_heatmap.pdf → heatmap of method agreement
+- qual_case_*.pdf          → 4 qualitative case plots (unless --skip-qual used)
+
+How to run on a server (with nohup):
+------------------------------------
+# Activate your Python environment first, then run:
+
+nohup python -u -m cli.plot_agreement_and_qual \
+  --env-glob "results/envs/E_*.npz" \
+  --outdir "runs/$(date +%Y%m%d_%H%M%S)/figs" \
+  --planner a_star --connectivity 8 \
+  --k 5 --max-envs 0 \
+  --lime-samples 500 --lime-flip 0.30 \
+  --shap-perm 100 \
+  --workers 8 \
+  --progress-every 5 \
+  --heartbeat-secs 60 \
+  > run.log 2>&1 &
+
+# Monitor progress live:
+tail -f run.log
+
+# If you want to stop the job:
+kill <PID>
+
+Where <PID> can be retrieved with: ps -ef | grep plot_agreement_and_qual
+
+Example quick run (for testing):
+--------------------------------
+python -m cli.plot_agreement_and_qual \
+  --env-glob "results/envs/E_*.npz" \
+  --outdir "runs/test/figs" \
+  --planner a_star --connectivity 8 \
+  --k 3 --max-envs 20 --skip-qual --workers 4
+
+This will process only 20 environments, skip qualitative plots,
+and use 4 workers for speed.
 """
 
 from __future__ import annotations
@@ -35,9 +64,13 @@ import argparse
 import glob
 import os
 import re
-from typing import Dict, List, Tuple
-
+import time
+from typing import Dict, List, Tuple, Optional
 import numpy as np
+
+# --- ensure headless plotting on servers
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -76,35 +109,54 @@ PLANNERS = {
     "theta_star": ThetaStarPlanner,
 }
 
+METHODS = ["shap", "lime", "geodesic", "rand"]
+M_INDEX = {m: i for i, m in enumerate(METHODS)}
 
-def _load_env(npz_path: str) -> GridEnvironment:
+
+def _load_env(npz_path: str):
     Z = np.load(npz_path, allow_pickle=True)
+
     class _Env:
         pass
+
     env = _Env()
-    env.grid = Z["grid"]
-    env.obj_map = Z["obj_map"].item() if isinstance(Z["obj_map"], np.ndarray) else Z["obj_map"]
-    env.start = tuple(Z["start"])
-    env.goal = tuple(Z["goal"])
-    # convenience
+
+    G = Z["grid"]
+    if not isinstance(G, np.ndarray):
+        G = np.array(G)
+    env.grid = (G != 0)
+
+    try:
+        v = Z["obj_map"]
+        if isinstance(v, np.ndarray):
+            try:
+                env.obj_map = v.item()
+            except Exception:
+                env.obj_map = v.tolist()
+        else:
+            env.obj_map = v
+    except Exception:
+        env.obj_map = {}
+
+    env.start = tuple(np.array(Z["start"]).tolist())
+    env.goal  = tuple(np.array(Z["goal"]).tolist())
     env.H, env.W = env.grid.shape
-    # reconstruct obstacle indices as ints (row-major ids)
+
+    # obstacle ids
     obs = []
     for (r, c), is_block in np.ndenumerate(env.grid):
-        if is_block:
+        if bool(is_block):
             obs.append(r * env.W + c)
     env.obstacles = obs
-    return env  # type: ignore
+    return env
 
 
 def _parse_env_key_from_path(path: str) -> str:
-    # Paths are like: results/envs/E_20x20_d0.2_17.npz  (density may be "0.2" or "0.20")
     b = os.path.basename(path)
     m = re.match(r"E_(\d+)x(\d+)_d([0-9.]+)_([0-9]+)\.npz", b)
     if not m:
         return b
     H, W, d, eid = m.groups()
-    # normalize density to 1 decimal if possible
     try:
         d = str(float(d))
     except Exception:
@@ -130,12 +182,10 @@ def _ranking_topk(env, planner, method: str, k: int, lime_ns: int, lime_fp: floa
 
 def _draw_grid(env, ax, title: str = "", highlight: set | None = None):
     H, W = env.H, env.W
-    ax.imshow(~env.grid, cmap="gray", interpolation="none")  # free=True=white, obstacles black
-    # start/goal
+    ax.imshow(~env.grid, cmap="gray", interpolation="none")  # free=white, obstacles=black
     sr, sc = env.start; gr, gc = env.goal
     ax.scatter([sc], [sr], marker="o", s=60, edgecolors="k", facecolors="none", linewidths=2, label="Start")
     ax.scatter([gc], [gr], marker="*", s=80, edgecolors="k", facecolors="yellow", linewidths=1.5, label="Goal")
-    # highlight set as colored overlay
     if highlight:
         mask = np.zeros_like(env.grid, dtype=float)
         for idx in highlight:
@@ -150,141 +200,242 @@ def _ensure_dir(p: str):
     os.makedirs(p, exist_ok=True)
 
 
+# ---------- Parallel worker ----------
+def _init_planner(planner_name: str, connectivity: int):
+    # re-create planner in each worker to avoid cross-process state issues
+    return PLANNERS[planner_name](connectivity=connectivity)
+
+
+def _process_one(args_tuple):
+    """
+    Worker: returns (ok_processed, considered_failure, M_add, C_add, elapsed_sec, env_key)
+    where:
+      M_add: float32 [len(METHODS), len(METHODS)]
+      C_add: int32   [len(METHODS), len(METHODS)]
+    """
+    (npz_path, planner_name, connectivity, k, lime_ns, lime_fp, shap_perm, seed) = args_tuple
+    t0 = time.time()
+    try:
+        env = _load_env(npz_path)
+        planner = _init_planner(planner_name, connectivity)
+        plan_ok = planner.plan(env.grid, env.start, env.goal)
+        plan_ok = bool(plan_ok["success"] if isinstance(plan_ok, dict) else plan_ok)
+        if plan_ok:
+            # not a failure -> skip
+            return (True, False, np.zeros((len(METHODS), len(METHODS)), dtype=np.float32),
+                    np.zeros((len(METHODS), len(METHODS)), dtype=np.int32),
+                    time.time() - t0, _parse_env_key_from_path(npz_path))
+
+        sets = {}
+        for m in METHODS:
+            try:
+                s = _ranking_topk(env, planner, m, k, lime_ns, lime_fp, shap_perm, seed+1)
+                sets[m] = set(s)
+            except Exception:
+                # leave it out silently; pair contributions will be zero
+                pass
+
+        M_add = np.zeros((len(METHODS), len(METHODS)), dtype=np.float32)
+        C_add = np.zeros((len(METHODS), len(METHODS)), dtype=np.int32)
+        for a in METHODS:
+            if a not in sets: 
+                continue
+            for b in METHODS:
+                if a == b or b not in sets:
+                    continue
+                ia, ib = M_INDEX[a], M_INDEX[b]
+                jac = 0.0
+                # safe jaccard
+                A, B = sets[a], sets[b]
+                if A or B:
+                    inter = len(A & B)
+                    union = len(A | B)
+                    jac = (inter / union) if union > 0 else 0.0
+                M_add[ia, ib] += jac
+                C_add[ia, ib] += 1
+
+        return (True, True, M_add, C_add, time.time() - t0, _parse_env_key_from_path(npz_path))
+    except Exception:
+        return (False, False, np.zeros((len(METHODS), len(METHODS)), dtype=np.float32),
+                np.zeros((len(METHODS), len(METHODS)), dtype=np.int32),
+                time.time() - t0, _parse_env_key_from_path(npz_path))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--env-glob", type=str, default="results/envs/E_*.npz")
     ap.add_argument("--outdir", type=str, required=True)
     ap.add_argument("--planner", type=str, default="a_star", choices=list(PLANNERS.keys()))
     ap.add_argument("--connectivity", type=int, default=8, choices=[4, 8])
-    ap.add_argument("--k", type=int, default=5, help="Top-k for ranking methods & overlays")
-    ap.add_argument("--max-envs", type=int, default=200, help="Cap number of environments to average for agreement")
+    ap.add_argument("--k", type=int, default=5)
+    ap.add_argument("--max-envs", type=int, default=200, help="Cap total env files to scan")
+    ap.add_argument("--max-failures", type=int, default=0, help="If >0, stop after this many failure envs considered")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--lime-samples", type=int, default=500)
     ap.add_argument("--lime-flip", type=float, default=0.30)
     ap.add_argument("--shap-perm", type=int, default=100)
     ap.add_argument("--qual-env", type=str, default="", help='Optional explicit key "HxW:density:env_id"')
+    ap.add_argument("--skip-qual", action="store_true", help="Skip the 4 qualitative PDFs")
+    # server-friendly knobs
+    ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--progress-every", type=int, default=5, help="Print progress every N processed env files")
+    ap.add_argument("--heartbeat-secs", type=int, default=60, help="Also print heartbeat every S seconds")
     args = ap.parse_args()
 
     np.random.seed(args.seed)
-
     _ensure_dir(args.outdir)
 
-    # Planner
-    planner = PLANNERS[args.planner](connectivity=args.connectivity)
+    # planner name used inside workers
+    planner_name = args.planner
 
-    # Collect envs
+    # gather env paths
     paths = sorted(glob.glob(args.env_glob))
     if not paths:
         raise SystemExit(f"No env files for pattern: {args.env_glob}")
     if args.max_envs > 0:
         paths = paths[: args.max_envs]
 
-    # Agreement across methods
-    methods = ["shap", "lime", "geodesic", "rand"]
-    M = pd.DataFrame(0.0, index=methods, columns=methods)
-    C = pd.DataFrame(0, index=methods, columns=methods)
+    print(f"[setup] Found {len(paths)} env file(s). workers={args.workers}, planner={planner_name}, k={args.k}", flush=True)
 
-    for p in paths:
-        env = _load_env(p)
+    # -------- Parallel agreement computation -------- #
+    from multiprocessing import Pool
 
-        # Skip environments that are trivially solvable by the planner (we want failures)
-        ok = planner.plan(env.grid, env.start, env.goal)
-        ok = bool(ok["success"] if isinstance(ok, dict) else ok)
-        if ok:
-            continue
+    total = len(paths)
+    processed = 0
+    considered_fail = 0
+    success_files = 0
+    start = time.time()
+    last_heartbeat = start
+    sum_M = np.zeros((len(METHODS), len(METHODS)), dtype=np.float64)
+    sum_C = np.zeros((len(METHODS), len(METHODS)), dtype=np.int64)
 
-        sets = {}
-        for m in methods:
-            try:
-                s = _ranking_topk(env, planner, m, args.k, args.lime_samples, args.lime_flip, args.shap_perm, args.seed+1)
-                sets[m] = set(s)
-            except Exception:
-                continue
+    def _progress_print(force=False):
+        nonlocal last_heartbeat
+        now = time.time()
+        if (processed % max(1, args.progress-every) == 0) or force or (now - last_heartbeat >= args.heartbeat_secs):
+            elapsed = now - start
+            per = processed / total if total > 0 else 0.0
+            eta = (elapsed / max(1, processed)) * (total - processed) if processed > 0 else 0.0
+            print(f"[progress] {processed}/{total} files | failures considered={considered_fail} | "
+                  f"ok_files={success_files} | elapsed={elapsed:.1f}s | eta={eta:.1f}s",
+                  flush=True)
+            last_heartbeat = now
 
-        # accumulate Jaccard for each pair
-        for a in methods:
-            for b in methods:
-                if a == b or a not in sets or b not in sets:
-                    continue
-                jac = jaccard(sets[a], sets[b])
-                M.loc[a, b] += jac
-                C.loc[a, b] += 1
+    # Build argument tuples once
+    worker_args = [
+        (p, planner_name, args.connectivity, args.k,
+         args.lime_samples, args.lime_flip, args.shap_perm, args.seed)
+        for p in paths
+    ]
 
-    # average
-    for a in methods:
-        for b in methods:
-            if a == b or C.loc[a, b] == 0:
-                continue
-            M.loc[a, b] /= max(1, C.loc[a, b])
+    # Use imap_unordered for streaming results
+    with Pool(processes=args.workers, maxtasksperchild=64) as pool:
+        for ok_processed, considered, M_add, C_add, sec, key in pool.imap_unordered(_process_one, worker_args, chunksize=1):
+            processed += 1
+            if ok_processed:
+                success_files += 1
+            if considered:
+                considered_fail += 1
+                sum_M += M_add
+                sum_C += C_add
+
+            if args.max_failures > 0 and considered_fail >= args.max_failures:
+                print(f"[early-stop] Reached --max-failures={args.max_failures} after processing {processed} files.", flush=True)
+                break
+
+            if (processed % args.progress_every) == 0:
+                _progress_print()
+
+            # heartbeat based on time
+            if (time.time() - last_heartbeat) >= args.heartbeat_secs:
+                _progress_print(force=True)
+
+    # Final progress line
+    _progress_print(force=True)
+
+    # average where count > 0
+    with np.errstate(divide="ignore", invalid="ignore"):
+        M_avg = np.where(sum_C > 0, sum_M / np.maximum(1, sum_C), 0.0)
+
+    # pandas for plotting (keeps same axis labels)
+    M_df = pd.DataFrame(M_avg, index=METHODS, columns=METHODS)
 
     # plot heatmap
     fig = plt.figure(figsize=(5.6, 4.8))
-    im = plt.imshow(M.values, origin="upper", vmin=0.0, vmax=1.0)
+    im = plt.imshow(M_df.values, origin="upper", vmin=0.0, vmax=1.0)
     plt.colorbar(im, fraction=0.046, pad=0.04, label="Mean Jaccard (top-k)")
-    plt.xticks(np.arange(len(methods)), [m.upper() for m in methods], rotation=0)
-    plt.yticks(np.arange(len(methods)), [m.upper() for m in methods])
+    plt.xticks(np.arange(len(METHODS)), [m.upper() for m in METHODS], rotation=0)
+    plt.yticks(np.arange(len(METHODS)), [m.upper() for m in METHODS])
     # annotate
-    for i, a in enumerate(methods):
-        for j, b in enumerate(methods):
-            if i == j: continue
-            v = M.values[i, j]
+    for i, a in enumerate(METHODS):
+        for j, b in enumerate(METHODS):
+            if i == j: 
+                continue
+            v = M_df.values[i, j]
             plt.text(j, i, f"{100*v:.0f}%", ha="center", va="center", fontsize=9)
-    plt.title(f"Q1 Agreement Heatmap (planner={args.planner}, k={args.k})")
+    plt.title(f"Q1 Agreement Heatmap (planner={planner_name}, k={args.k})")
     plt.tight_layout()
     out_heat = os.path.join(args.outdir, "q1_agreement_heatmap.pdf")
     plt.savefig(out_heat, bbox_inches="tight"); plt.close()
-    print(f"[q1_agreement] Wrote {out_heat}")
+    print(f"[q1_agreement] Wrote {out_heat}", flush=True)
 
-    # --------- Qualitative case study (four PDFs) --------- #
-    # Pick env
-    qual_path = None
-    if args.qual_env:
-        # find matching key
-        for p in sorted(glob.glob(args.env_glob)):
-            if _parse_env_key_from_path(p) == args.qual_env:
-                qual_path = p; break
-        if qual_path is None:
-            raise SystemExit(f"Could not find --qual-env '{args.qual_env}' in {args.env_glob}")
+    # --------- Qualitative case study (optional) --------- #
+    if not args.skip_qual:
+        # Pick env
+        qual_path: Optional[str] = None
+        if args.qual_env:
+            for p in sorted(glob.glob(args.env_glob)):
+                if _parse_env_key_from_path(p) == args.qual_env:
+                    qual_path = p; break
+            if qual_path is None:
+                raise SystemExit(f"Could not find --qual-env '{args.qual_env}' in {args.env_glob}")
+        else:
+            qual_path = sorted(glob.glob(args.env_glob))[0]
+        env = _load_env(qual_path)
+        planner = _init_planner(planner_name, args.connectivity)
+
+        # Base original
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        _draw_grid(env, ax, title="Original (failure case)")
+        out = os.path.join(args.outdir, "qual_case_original.pdf")
+        plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
+        print(f"[qual] Wrote {out}", flush=True)
+
+        # SHAP
+        shap = ShapExplainer(permutations=args.shap_perm, random_state=args.seed+11)
+        shap_r = shap.explain(env, planner)["ranking"]
+        shap_top = topk_set(shap_r, args.k)
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        _draw_grid(env, ax, title=f"SHAP (top-{args.k})", highlight=set(shap_top))
+        out = os.path.join(args.outdir, "qual_case_shap.pdf")
+        plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
+        print(f"[qual] Wrote {out}", flush=True)
+
+        # LIME
+        lime = LimeExplainer(num_samples=args.lime_samples, flip_prob=args.lime_flip, random_state=args.seed+13)
+        lime_r = lime.explain(env, planner)["ranking"]
+        lime_top = topk_set(lime_r, args.k)
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        _draw_grid(env, ax, title=f"LIME (top-{args.k})", highlight=set(lime_top))
+        out = os.path.join(args.outdir, "qual_case_lime.pdf")
+        plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
+        print(f"[qual] Wrote {out}", flush=True)
+
+        # COSE (guided by SHAP)
+        cose = COSEExplainer(guide="shap")
+        cose_out = cose.explain(env, planner, guide_ranking=shap_r)
+        cose_set = set(cose_out.get("cose_set", []))
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        _draw_grid(env, ax, title="COSE (counterfactual set)", highlight=cose_set)
+        out = os.path.join(args.outdir, "qual_case_cose.pdf")
+        plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
+        print(f"[qual] Wrote {out}", flush=True)
     else:
-        qual_path = sorted(glob.glob(args.env_glob))[0]
-    env = _load_env(qual_path)
+        print("[qual] Skipped qualitative plots (--skip-qual).", flush=True)
 
-    # Base original
-    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-    _draw_grid(env, ax, title="Original (failure case)")
-    out = os.path.join(args.outdir, "qual_case_original.pdf")
-    plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
-    print(f"[qual] Wrote {out}")
-
-    # SHAP
-    shap = ShapExplainer(permutations=args.shap_perm, random_state=args.seed+11)
-    shap_r = shap.explain(env, planner)["ranking"]
-    shap_top = topk_set(shap_r, args.k)
-    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-    _draw_grid(env, ax, title=f"SHAP (top-{args.k})", highlight=set(shap_top))
-    out = os.path.join(args.outdir, "qual_case_shap.pdf")
-    plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
-    print(f"[qual] Wrote {out}")
-
-    # LIME
-    lime = LimeExplainer(num_samples=args.lime_samples, flip_prob=args.lime_flip, random_state=args.seed+13)
-    lime_r = lime.explain(env, planner)["ranking"]
-    lime_top = topk_set(lime_r, args.k)
-    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-    _draw_grid(env, ax, title=f"LIME (top-{args.k})", highlight=set(lime_top))
-    out = os.path.join(args.outdir, "qual_case_lime.pdf")
-    plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
-    print(f"[qual] Wrote {out}")
-
-    # COSE (guided by SHAP)
-    cose = COSEExplainer(guide="shap")
-    cose_out = cose.explain(env, planner, guide_ranking=shap_r)
-    cose_set = set(cose_out.get("cose_set", []))
-    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-    _draw_grid(env, ax, title="COSE (counterfactual set)", highlight=cose_set)
-    out = os.path.join(args.outdir, "qual_case_cose.pdf")
-    plt.tight_layout(); plt.savefig(out, bbox_inches="tight"); plt.close()
-    print(f"[qual] Wrote {out}")
+    total_elapsed = time.time() - start
+    print(f"[done] processed_files={processed} | failures_considered={considered_fail} | "
+          f"outdir={args.outdir} | total_elapsed={total_elapsed:.1f}s", flush=True)
 
 
 if __name__ == "__main__":
