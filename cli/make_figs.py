@@ -331,6 +331,130 @@ def plot_q1_agreement_heatmap_placeholder(outpath: str):
     """
     print("[q1_agreement_heatmap] Skipped (requires per-method top-k ID sets).")
 
+def plot_q1_success_by_planner(eval_df: pd.DataFrame, outdir: str):
+    d = eval_df.copy()
+    d = d[d["method"].isin(["shap","lime","geodesic","rand"])]
+    if d.empty:
+        print("[q1_success_by_planner] No ranking rows. Skipping."); return
+    # expand success@k
+    rows = []
+    for _, r in d.iterrows():
+        succ = _parse_success_at_k_dict(r.get("success_at_k","{}"))
+        for k, v in succ.items():
+            rows.append({"planner": r["planner"], "method": r["method"], "k": int(k), "success": int(v)})
+    if not rows:
+        print("[q1_success_by_planner] Could not parse success@k. Skipping."); return
+    E = pd.DataFrame(rows)
+
+    for planner, Gp in E.groupby("planner"):
+        plt.figure(figsize=(6.0,4.0))
+        for m in ["shap","lime","geodesic","rand"]:
+            g = Gp[Gp["method"]==m].groupby("k")["success"].mean().reset_index()
+            if g.empty: continue
+            plt.plot(g["k"].values, g["success"].values, marker="o", label=m.upper())
+        plt.xlabel("k (top-k obstacles removed)")
+        plt.ylabel("Success@k (mean)")
+        plt.ylim(-0.02, 1.02); plt.grid(True, alpha=0.3); plt.legend()
+        plt.tight_layout()
+        out = os.path.join(outdir, f"q1_success_at_k_{planner}.pdf")
+        plt.savefig(out, bbox_inches="tight"); plt.close()
+        print(f"[q1_success_by_planner] Wrote {out}")
+
+# ----------------------------- New plot functions ----------------------------- #       
+
+def plot_q2_runtime_calls(eval_df: pd.DataFrame, outdir: str):
+    d = eval_df.copy()
+    if d.empty: 
+        print("[q2_runtime_calls] No eval rows. Skipping."); return
+    # runtime per method
+    rt = d.groupby("method")["time_sec"].mean().reindex(["shap","lime","geodesic","rand","cose"])
+    rt = rt.dropna()
+    if not rt.empty:
+        plt.figure(figsize=(6.0,4.0))
+        x = np.arange(len(rt))
+        plt.bar(x, rt.values); plt.xticks(x, [m.upper() for m in rt.index])
+        plt.ylabel("Mean runtime (s) per environment"); plt.grid(True, axis="y", alpha=0.3)
+        plt.tight_layout()
+        out = os.path.join(outdir, "q2_mean_runtime_bar.pdf")
+        plt.savefig(out, bbox_inches="tight"); plt.close()
+        print(f"[q2_runtime_calls] Wrote {out}")
+
+    # calls per method
+    if "calls" in d.columns:
+        cl = d.groupby("method")["calls"].mean().reindex(["shap","lime","geodesic","rand","cose"]).dropna()
+        if not cl.empty:
+            plt.figure(figsize=(6.0,4.0))
+            x = np.arange(len(cl))
+            plt.bar(x, cl.values); plt.xticks(x, [m.upper() for m in cl.index])
+            plt.ylabel("Mean planner calls per environment"); plt.grid(True, axis="y", alpha=0.3)
+            plt.tight_layout()
+            out = os.path.join(outdir, "q2_mean_calls_bar.pdf")
+            plt.savefig(out, bbox_inches="tight"); plt.close()
+            print(f"[q2_runtime_calls] Wrote {out}")
+
+
+def plot_q3_robustness_jaccard(rob_df: pd.DataFrame, outpath: str):
+    d = rob_df.copy()
+    if d is None or d.empty:
+        print("[q3_robust_jaccard] No robustness rows. Skipping."); return
+    d = d[d["method"].isin(["shap","lime","geodesic","rand"])]
+    if d.empty or "jaccard_topk" not in d.columns:
+        print("[q3_robust_jaccard] Missing ranking methods or 'jaccard_topk'. Skipping."); return
+    G = d.groupby("method")["jaccard_topk"].mean().reindex(["shap","lime","geodesic","rand"]).dropna()
+    x = np.arange(len(G))
+    plt.figure(figsize=(6.0,4.0))
+    plt.bar(x, G.values); plt.xticks(x, [m.upper() for m in G.index])
+    plt.ylabel("Mean Jaccard (top-k) under perturbations"); plt.ylim(0.0,1.0); plt.grid(True, axis="y", alpha=0.3)
+    plt.tight_layout(); plt.savefig(outpath, bbox_inches="tight"); plt.close()
+    print(f"[q3_robust_jaccard] Wrote {outpath}")
+
+
+def plot_q3_cose_jaccard(rob_df: pd.DataFrame, outpath: str):
+    d = rob_df.copy()
+    if d is None or d.empty:
+        print("[q3_cose_jaccard] No robustness rows. Skipping."); return
+    d = d[(d["method"]=="cose") & (d["cose_jaccard"].notna())]
+    if d.empty:
+        print("[q3_cose_jaccard] No COSE rows with 'cose_jaccard'. Skipping."); return
+    val = d["cose_jaccard"].mean()
+    plt.figure(figsize=(3.6,4.0))
+    plt.bar([0], [val]); plt.xticks([0], ["COSE"]); plt.ylim(0.0,1.0)
+    plt.ylabel("Mean Jaccard (COSE set) under perturbations"); plt.grid(True, axis="y", alpha=0.3)
+    plt.tight_layout(); plt.savefig(outpath, bbox_inches="tight"); plt.close()
+    print(f"[q3_cose_jaccard] Wrote {outpath}")
+
+
+def plot_q3_transfer_auc(transfer_df: pd.DataFrame, outpath: str):
+    d = transfer_df.copy()
+    if d is None or d.empty:
+        print("[q3_transfer_auc] No transfer rows. Skipping."); return
+    if "transfer_auc_s_at_k" not in d.columns:
+        print("[q3_transfer_auc] 'transfer_auc_s_at_k' missing. Skipping."); return
+
+    # keep only ranking methods
+    d = d[d["method"].isin(["shap","lime","geodesic","rand"])]
+    if d.empty:
+        print("[q3_transfer_auc] No rows for ranking methods. Skipping."); return
+
+    # convert column to numeric once, then group mean per method
+    d["transfer_auc_s_at_k"] = pd.to_numeric(d["transfer_auc_s_at_k"], errors="coerce")
+    G = d.groupby("method", as_index=True)["transfer_auc_s_at_k"].mean()
+    G = G.reindex(["shap","lime","geodesic","rand"]).dropna()
+
+    if G.empty:
+        print("[q3_transfer_auc] No numeric AUC rows. Skipping."); return
+
+    x = np.arange(len(G))
+    plt.figure(figsize=(6.0,4.0))
+    plt.bar(x, G.values)
+    plt.xticks(x, [m.upper() for m in G.index])
+    plt.ylabel("Mean transfer AUC-S@K (A→B on failures of B)")
+    plt.ylim(0.0, 1.0)
+    plt.grid(True, axis="y", alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(outpath, bbox_inches="tight")
+    plt.close()
+    print(f"[q3_transfer_auc] Wrote {outpath}")
 
 # ----------------------------- main ----------------------------- #
 
@@ -385,6 +509,19 @@ def main():
 
     # Optional Q1 agreement heatmap (requires extra data not in current CSVs)
     # plot_q1_agreement_heatmap_placeholder(os.path.join(args.outdir, "q1_agreement_heatmap.pdf"))
+
+    # Extra plots (if data available)
+    if df_eval is not None:
+        plot_q1_success_by_planner(df_eval, args.outdir)          # q1_success_at_k_<planner>.pdf
+        plot_q2_runtime_calls(df_eval, args.outdir)               # q2_mean_runtime_bar.pdf, q2_mean_calls_bar.pdf
+
+    if df_rob is not None:
+        plot_q3_robustness_jaccard(df_rob, os.path.join(args.outdir, "q3_robustness_jaccard_bar.pdf"))
+        plot_q3_cose_jaccard(df_rob, os.path.join(args.outdir, "q3_cose_jaccard_bar.pdf"))
+
+    if df_trans is not None:
+        plot_q3_transfer_auc(df_trans, os.path.join(args.outdir, "q3_transfer_auc_bar.pdf"))
+
 
     print(f"[DONE] Figures in: {args.outdir}")
 
