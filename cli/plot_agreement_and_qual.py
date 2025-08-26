@@ -312,7 +312,7 @@ def main():
     def _progress_print(force=False):
         nonlocal last_heartbeat
         now = time.time()
-        if (processed % max(1, args.progress-every) == 0) or force or (now - last_heartbeat >= args.heartbeat_secs):
+        if (processed % max(1, args.progress_every) == 0) or force or (now - last_heartbeat >= args.heartbeat_secs):
             elapsed = now - start
             per = processed / total if total > 0 else 0.0
             eta = (elapsed / max(1, processed)) * (total - processed) if processed > 0 else 0.0
