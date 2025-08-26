@@ -1,0 +1,12 @@
+=== Full Evaluation (parallel) ===
+Run: runs/20250825_195349   Jobs: 8
+Python 3.12.3
+[1/5] Main eval shards...
+==> run_eval: 8 shards × 13 envs each
+/usr/bin/bash: line 1: run_eval_shard: command not found
+parallel: This job failed:
+run_eval_shard 0 13
+parallel: Starting no more jobs. Waiting for 1 jobs to finish.
+/usr/bin/bash: line 1: run_eval_shard: command not found
+parallel: This job failed:
+run_eval_shard 1 13

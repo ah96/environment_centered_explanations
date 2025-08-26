@@ -1,0 +1,4 @@
+=== Full Evaluation (parallel) ===
+Run: runs/20250825_194858   Jobs: 8
+scripts/launch_full_eval.sh: line 23: python: command not found
+scripts/launch_full_eval.sh: line 55: python: command not found
