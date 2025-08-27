@@ -1,0 +1,2257 @@
+nohup: ignoring input
+[INFO] Processing 20x20:0.1:10 -> runs/all_qual/20x20-0.1-10
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-10/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-10/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-10/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-10/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-10/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-10 | total_elapsed=72.4s
+[INFO] Processing 20x20:0.1:11 -> runs/all_qual/20x20-0.1-11
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-11/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-11/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-11/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-11/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-11/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-11 | total_elapsed=39.5s
+[INFO] Processing 20x20:0.1:12 -> runs/all_qual/20x20-0.1-12
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-12/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-12/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-12/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-12/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-12/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-12 | total_elapsed=70.9s
+[INFO] Processing 20x20:0.1:13 -> runs/all_qual/20x20-0.1-13
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-13/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-13/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-13/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-13/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-13/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-13 | total_elapsed=74.5s
+[INFO] Processing 20x20:0.1:1 -> runs/all_qual/20x20-0.1-1
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-1/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-1/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-1/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-1/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-1/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-1 | total_elapsed=82.1s
+[INFO] Processing 20x20:0.1:2 -> runs/all_qual/20x20-0.1-2
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-2/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-2/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-2/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-2/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-2/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-2 | total_elapsed=36.3s
+[INFO] Processing 20x20:0.1:3 -> runs/all_qual/20x20-0.1-3
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-3/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-3/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-3/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-3/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-3/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-3 | total_elapsed=38.0s
+[INFO] Processing 20x20:0.1:4 -> runs/all_qual/20x20-0.1-4
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-4/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-4/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-4/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-4/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-4/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-4 | total_elapsed=37.4s
+[INFO] Processing 20x20:0.1:5 -> runs/all_qual/20x20-0.1-5
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-5/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-5/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-5/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-5/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-5/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-5 | total_elapsed=37.3s
+[INFO] Processing 20x20:0.1:6 -> runs/all_qual/20x20-0.1-6
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-6/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-6/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-6/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-6/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-6/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-6 | total_elapsed=41.5s
+[INFO] Processing 20x20:0.1:7 -> runs/all_qual/20x20-0.1-7
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-7/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-7/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-7/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-7/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-7/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-7 | total_elapsed=76.9s
+[INFO] Processing 20x20:0.1:8 -> runs/all_qual/20x20-0.1-8
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-8/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-8/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-8/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-8/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-8/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-8 | total_elapsed=36.9s
+[INFO] Processing 20x20:0.1:9 -> runs/all_qual/20x20-0.1-9
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.1-9/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-9/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-9/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-9/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.1-9/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.1-9 | total_elapsed=41.5s
+[INFO] Processing 20x20:0.2:10 -> runs/all_qual/20x20-0.2-10
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-10/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-10/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-10/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-10/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-10/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-10 | total_elapsed=41.2s
+[INFO] Processing 20x20:0.2:11 -> runs/all_qual/20x20-0.2-11
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-11/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-11/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-11/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-11/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-11/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-11 | total_elapsed=99.7s
+[INFO] Processing 20x20:0.2:12 -> runs/all_qual/20x20-0.2-12
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-12/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-12/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-12/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-12/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-12/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-12 | total_elapsed=39.1s
+[INFO] Processing 20x20:0.2:13 -> runs/all_qual/20x20-0.2-13
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-13/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-13/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-13/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-13/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-13/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-13 | total_elapsed=93.5s
+[INFO] Processing 20x20:0.2:14 -> runs/all_qual/20x20-0.2-14
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-14/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-14/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-14/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-14/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-14/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-14 | total_elapsed=96.4s
+[INFO] Processing 20x20:0.2:15 -> runs/all_qual/20x20-0.2-15
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-15/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-15/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-15/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-15/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-15/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-15 | total_elapsed=37.9s
+[INFO] Processing 20x20:0.2:16 -> runs/all_qual/20x20-0.2-16
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-16/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-16/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-16/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-16/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-16/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-16 | total_elapsed=90.4s
+[INFO] Processing 20x20:0.2:17 -> runs/all_qual/20x20-0.2-17
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-17/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-17/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-17/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-17/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-17/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-17 | total_elapsed=94.4s
+[INFO] Processing 20x20:0.2:18 -> runs/all_qual/20x20-0.2-18
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-18/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-18/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-18/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-18/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-18/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-18 | total_elapsed=38.6s
+[INFO] Processing 20x20:0.2:19 -> runs/all_qual/20x20-0.2-19
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-19/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-19/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-19/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-19/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-19/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-19 | total_elapsed=43.6s
+[INFO] Processing 20x20:0.2:1 -> runs/all_qual/20x20-0.2-1
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-1/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-1/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-1/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-1/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-1/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-1 | total_elapsed=37.9s
+[INFO] Processing 20x20:0.2:20 -> runs/all_qual/20x20-0.2-20
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-20/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-20/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-20/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-20/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-20/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-20 | total_elapsed=95.0s
+[INFO] Processing 20x20:0.2:21 -> runs/all_qual/20x20-0.2-21
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-21/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-21/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-21/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-21/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-21/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-21 | total_elapsed=38.9s
+[INFO] Processing 20x20:0.2:22 -> runs/all_qual/20x20-0.2-22
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-22/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-22/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-22/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-22/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-22/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-22 | total_elapsed=93.1s
+[INFO] Processing 20x20:0.2:23 -> runs/all_qual/20x20-0.2-23
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-23/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-23/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-23/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-23/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-23/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-23 | total_elapsed=37.2s
+[INFO] Processing 20x20:0.2:24 -> runs/all_qual/20x20-0.2-24
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-24/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-24/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-24/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-24/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-24/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-24 | total_elapsed=109.6s
+[INFO] Processing 20x20:0.2:25 -> runs/all_qual/20x20-0.2-25
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-25/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-25/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-25/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-25/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-25/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-25 | total_elapsed=95.5s
+[INFO] Processing 20x20:0.2:26 -> runs/all_qual/20x20-0.2-26
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-26/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-26/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-26/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-26/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-26/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-26 | total_elapsed=38.9s
+[INFO] Processing 20x20:0.2:2 -> runs/all_qual/20x20-0.2-2
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-2/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-2/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-2/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-2/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-2/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-2 | total_elapsed=38.4s
+[INFO] Processing 20x20:0.2:3 -> runs/all_qual/20x20-0.2-3
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-3/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-3/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-3/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-3/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-3/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-3 | total_elapsed=92.3s
+[INFO] Processing 20x20:0.2:4 -> runs/all_qual/20x20-0.2-4
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-4/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-4/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-4/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-4/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-4/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-4 | total_elapsed=42.9s
+[INFO] Processing 20x20:0.2:5 -> runs/all_qual/20x20-0.2-5
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=43.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-5/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-5/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-5/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-5/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-5/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-5 | total_elapsed=46.0s
+[INFO] Processing 20x20:0.2:6 -> runs/all_qual/20x20-0.2-6
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-6/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-6/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-6/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-6/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-6/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-6 | total_elapsed=42.0s
+[INFO] Processing 20x20:0.2:7 -> runs/all_qual/20x20-0.2-7
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-7/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-7/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-7/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-7/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-7/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-7 | total_elapsed=40.3s
+[INFO] Processing 20x20:0.2:8 -> runs/all_qual/20x20-0.2-8
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-8/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-8/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-8/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-8/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-8/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-8 | total_elapsed=38.1s
+[INFO] Processing 20x20:0.2:9 -> runs/all_qual/20x20-0.2-9
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.2-9/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-9/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-9/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-9/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.2-9/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.2-9 | total_elapsed=92.0s
+[INFO] Processing 20x20:0.3:14 -> runs/all_qual/20x20-0.3-14
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-14/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-14/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-14/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-14/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-14/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-14 | total_elapsed=102.5s
+[INFO] Processing 20x20:0.3:15 -> runs/all_qual/20x20-0.3-15
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-15/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-15/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-15/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-15/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-15/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-15 | total_elapsed=39.1s
+[INFO] Processing 20x20:0.3:16 -> runs/all_qual/20x20-0.3-16
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-16/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-16/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-16/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-16/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-16/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-16 | total_elapsed=39.5s
+[INFO] Processing 20x20:0.3:17 -> runs/all_qual/20x20-0.3-17
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-17/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-17/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-17/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-17/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-17/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-17 | total_elapsed=113.8s
+[INFO] Processing 20x20:0.3:18 -> runs/all_qual/20x20-0.3-18
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-18/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-18/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-18/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-18/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-18/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-18 | total_elapsed=111.7s
+[INFO] Processing 20x20:0.3:19 -> runs/all_qual/20x20-0.3-19
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-19/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-19/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-19/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-19/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-19/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-19 | total_elapsed=108.5s
+[INFO] Processing 20x20:0.3:20 -> runs/all_qual/20x20-0.3-20
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-20/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-20/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-20/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-20/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-20/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-20 | total_elapsed=48.5s
+[INFO] Processing 20x20:0.3:21 -> runs/all_qual/20x20-0.3-21
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-21/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-21/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-21/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-21/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-21/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-21 | total_elapsed=105.6s
+[INFO] Processing 20x20:0.3:22 -> runs/all_qual/20x20-0.3-22
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-22/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-22/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-22/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-22/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-22/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-22 | total_elapsed=46.6s
+[INFO] Processing 20x20:0.3:23 -> runs/all_qual/20x20-0.3-23
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=45.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-23/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-23/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-23/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-23/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-23/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-23 | total_elapsed=49.1s
+[INFO] Processing 20x20:0.3:24 -> runs/all_qual/20x20-0.3-24
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-24/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-24/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-24/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-24/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-24/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-24 | total_elapsed=111.9s
+[INFO] Processing 20x20:0.3:25 -> runs/all_qual/20x20-0.3-25
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-25/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-25/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-25/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-25/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-25/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-25 | total_elapsed=108.2s
+[INFO] Processing 20x20:0.3:26 -> runs/all_qual/20x20-0.3-26
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-26/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-26/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-26/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-26/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-26/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-26 | total_elapsed=112.6s
+[INFO] Processing 20x20:0.3:27 -> runs/all_qual/20x20-0.3-27
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-27/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-27/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-27/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-27/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-27/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-27 | total_elapsed=39.8s
+[INFO] Processing 20x20:0.3:28 -> runs/all_qual/20x20-0.3-28
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-28/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-28/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-28/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-28/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-28/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-28 | total_elapsed=38.9s
+[INFO] Processing 20x20:0.3:29 -> runs/all_qual/20x20-0.3-29
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-29/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-29/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-29/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-29/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-29/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-29 | total_elapsed=43.2s
+[INFO] Processing 20x20:0.3:30 -> runs/all_qual/20x20-0.3-30
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-30/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-30/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-30/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-30/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-30/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-30 | total_elapsed=104.2s
+[INFO] Processing 20x20:0.3:31 -> runs/all_qual/20x20-0.3-31
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-31/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-31/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-31/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-31/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-31/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-31 | total_elapsed=104.2s
+[INFO] Processing 20x20:0.3:32 -> runs/all_qual/20x20-0.3-32
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-32/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-32/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-32/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-32/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-32/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-32 | total_elapsed=48.9s
+[INFO] Processing 20x20:0.3:33 -> runs/all_qual/20x20-0.3-33
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-33/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-33/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-33/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-33/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-33/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-33 | total_elapsed=40.1s
+[INFO] Processing 20x20:0.3:34 -> runs/all_qual/20x20-0.3-34
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-34/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-34/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-34/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-34/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-34/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-34 | total_elapsed=107.4s
+[INFO] Processing 20x20:0.3:35 -> runs/all_qual/20x20-0.3-35
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-35/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-35/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-35/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-35/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-35/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-35 | total_elapsed=38.8s
+[INFO] Processing 20x20:0.3:36 -> runs/all_qual/20x20-0.3-36
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-36/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-36/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-36/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-36/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-36/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-36 | total_elapsed=111.0s
+[INFO] Processing 20x20:0.3:37 -> runs/all_qual/20x20-0.3-37
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-37/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-37/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-37/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-37/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-37/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-37 | total_elapsed=40.0s
+[INFO] Processing 20x20:0.3:38 -> runs/all_qual/20x20-0.3-38
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-38/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-38/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-38/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-38/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-38/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-38 | total_elapsed=38.7s
+[INFO] Processing 20x20:0.3:39 -> runs/all_qual/20x20-0.3-39
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=46.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/20x20-0.3-39/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-39/qual_case_original.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-39/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-39/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/20x20-0.3-39/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/20x20-0.3-39 | total_elapsed=50.2s
+[INFO] Processing 30x30:0.1:10 -> runs/all_qual/30x30-0.1-10
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-10/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-10/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-10/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-10/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-10/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-10 | total_elapsed=195.6s
+[INFO] Processing 30x30:0.1:11 -> runs/all_qual/30x30-0.1-11
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-11/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-11/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-11/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-11/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-11/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-11 | total_elapsed=37.3s
+[INFO] Processing 30x30:0.1:12 -> runs/all_qual/30x30-0.1-12
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-12/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-12/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-12/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-12/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-12/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-12 | total_elapsed=42.2s
+[INFO] Processing 30x30:0.1:13 -> runs/all_qual/30x30-0.1-13
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-13/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-13/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-13/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-13/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-13/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-13 | total_elapsed=37.6s
+[INFO] Processing 30x30:0.1:14 -> runs/all_qual/30x30-0.1-14
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-14/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-14/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-14/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-14/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-14/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-14 | total_elapsed=43.5s
+[INFO] Processing 30x30:0.1:15 -> runs/all_qual/30x30-0.1-15
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-15/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-15/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-15/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-15/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-15/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-15 | total_elapsed=37.5s
+[INFO] Processing 30x30:0.1:16 -> runs/all_qual/30x30-0.1-16
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-16/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-16/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-16/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-16/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-16/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-16 | total_elapsed=209.0s
+[INFO] Processing 30x30:0.1:17 -> runs/all_qual/30x30-0.1-17
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-17/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-17/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-17/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-17/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-17/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-17 | total_elapsed=40.1s
+[INFO] Processing 30x30:0.1:18 -> runs/all_qual/30x30-0.1-18
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-18/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-18/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-18/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-18/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-18/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-18 | total_elapsed=39.7s
+[INFO] Processing 30x30:0.1:19 -> runs/all_qual/30x30-0.1-19
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-19/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-19/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-19/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-19/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-19/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-19 | total_elapsed=242.9s
+[INFO] Processing 30x30:0.1:27 -> runs/all_qual/30x30-0.1-27
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-27/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-27/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-27/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-27/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-27/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-27 | total_elapsed=213.3s
+[INFO] Processing 30x30:0.1:28 -> runs/all_qual/30x30-0.1-28
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-28/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-28/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-28/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-28/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-28/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-28 | total_elapsed=39.8s
+[INFO] Processing 30x30:0.1:29 -> runs/all_qual/30x30-0.1-29
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-29/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-29/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-29/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-29/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-29/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-29 | total_elapsed=38.7s
+[INFO] Processing 30x30:0.1:30 -> runs/all_qual/30x30-0.1-30
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-30/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-30/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-30/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-30/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-30/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-30 | total_elapsed=211.2s
+[INFO] Processing 30x30:0.1:31 -> runs/all_qual/30x30-0.1-31
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-31/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-31/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-31/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-31/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-31/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-31 | total_elapsed=223.7s
+[INFO] Processing 30x30:0.1:32 -> runs/all_qual/30x30-0.1-32
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-32/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-32/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-32/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-32/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-32/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-32 | total_elapsed=38.4s
+[INFO] Processing 30x30:0.1:33 -> runs/all_qual/30x30-0.1-33
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-33/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-33/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-33/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-33/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-33/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-33 | total_elapsed=223.3s
+[INFO] Processing 30x30:0.1:34 -> runs/all_qual/30x30-0.1-34
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-34/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-34/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-34/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-34/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-34/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-34 | total_elapsed=233.8s
+[INFO] Processing 30x30:0.1:35 -> runs/all_qual/30x30-0.1-35
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-35/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-35/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-35/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-35/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-35/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-35 | total_elapsed=233.1s
+[INFO] Processing 30x30:0.1:36 -> runs/all_qual/30x30-0.1-36
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-36/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-36/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-36/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-36/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-36/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-36 | total_elapsed=210.8s
+[INFO] Processing 30x30:0.1:37 -> runs/all_qual/30x30-0.1-37
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-37/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-37/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-37/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-37/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-37/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-37 | total_elapsed=198.1s
+[INFO] Processing 30x30:0.1:38 -> runs/all_qual/30x30-0.1-38
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-38/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-38/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-38/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-38/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-38/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-38 | total_elapsed=37.6s
+[INFO] Processing 30x30:0.1:39 -> runs/all_qual/30x30-0.1-39
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-39/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-39/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-39/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-39/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-39/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-39 | total_elapsed=37.8s
+[INFO] Processing 30x30:0.1:40 -> runs/all_qual/30x30-0.1-40
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-40/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-40/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-40/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-40/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-40/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-40 | total_elapsed=229.5s
+[INFO] Processing 30x30:0.1:41 -> runs/all_qual/30x30-0.1-41
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-41/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-41/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-41/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-41/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-41/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-41 | total_elapsed=204.1s
+[INFO] Processing 30x30:0.1:42 -> runs/all_qual/30x30-0.1-42
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-42/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-42/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-42/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-42/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-42/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-42 | total_elapsed=38.0s
+[INFO] Processing 30x30:0.1:8 -> runs/all_qual/30x30-0.1-8
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-8/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-8/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-8/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-8/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-8/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-8 | total_elapsed=196.7s
+[INFO] Processing 30x30:0.1:9 -> runs/all_qual/30x30-0.1-9
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.1-9/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-9/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-9/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-9/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.1-9/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.1-9 | total_elapsed=202.1s
+[INFO] Processing 30x30:0.2:10 -> runs/all_qual/30x30-0.2-10
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-10/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-10/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-10/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-10/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-10/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-10 | total_elapsed=46.9s
+[INFO] Processing 30x30:0.2:11 -> runs/all_qual/30x30-0.2-11
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-11/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-11/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-11/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-11/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-11/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-11 | total_elapsed=41.9s
+[INFO] Processing 30x30:0.2:12 -> runs/all_qual/30x30-0.2-12
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-12/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-12/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-12/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-12/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-12/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-12 | total_elapsed=40.7s
+[INFO] Processing 30x30:0.2:13 -> runs/all_qual/30x30-0.2-13
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-13/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-13/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-13/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-13/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-13/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-13 | total_elapsed=317.3s
+[INFO] Processing 30x30:0.2:14 -> runs/all_qual/30x30-0.2-14
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-14/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-14/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-14/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-14/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-14/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-14 | total_elapsed=41.2s
+[INFO] Processing 30x30:0.2:15 -> runs/all_qual/30x30-0.2-15
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-15/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-15/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-15/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-15/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-15/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-15 | total_elapsed=341.2s
+[INFO] Processing 30x30:0.2:16 -> runs/all_qual/30x30-0.2-16
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-16/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-16/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-16/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-16/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-16/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-16 | total_elapsed=42.6s
+[INFO] Processing 30x30:0.2:17 -> runs/all_qual/30x30-0.2-17
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-17/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-17/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-17/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-17/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-17/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-17 | total_elapsed=41.7s
+[INFO] Processing 30x30:0.2:18 -> runs/all_qual/30x30-0.2-18
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-18/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-18/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-18/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-18/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-18/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-18 | total_elapsed=319.1s
+[INFO] Processing 30x30:0.2:19 -> runs/all_qual/30x30-0.2-19
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-19/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-19/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-19/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-19/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-19/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-19 | total_elapsed=317.3s
+[INFO] Processing 30x30:0.2:1 -> runs/all_qual/30x30-0.2-1
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-1/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-1/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-1/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-1/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-1/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-1 | total_elapsed=42.8s
+[INFO] Processing 30x30:0.2:20 -> runs/all_qual/30x30-0.2-20
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-20/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-20/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-20/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-20/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-20/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-20 | total_elapsed=41.8s
+[INFO] Processing 30x30:0.2:21 -> runs/all_qual/30x30-0.2-21
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-21/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-21/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-21/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-21/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-21/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-21 | total_elapsed=318.1s
+[INFO] Processing 30x30:0.2:22 -> runs/all_qual/30x30-0.2-22
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-22/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-22/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-22/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-22/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-22/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-22 | total_elapsed=314.7s
+[INFO] Processing 30x30:0.2:23 -> runs/all_qual/30x30-0.2-23
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-23/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-23/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-23/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-23/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-23/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-23 | total_elapsed=53.7s
+[INFO] Processing 30x30:0.2:24 -> runs/all_qual/30x30-0.2-24
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-24/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-24/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-24/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-24/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-24/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-24 | total_elapsed=43.0s
+[INFO] Processing 30x30:0.2:25 -> runs/all_qual/30x30-0.2-25
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-25/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-25/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-25/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-25/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-25/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-25 | total_elapsed=42.9s
+[INFO] Processing 30x30:0.2:26 -> runs/all_qual/30x30-0.2-26
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-26/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-26/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-26/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-26/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-26/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-26 | total_elapsed=308.9s
+[INFO] Processing 30x30:0.2:29 -> runs/all_qual/30x30-0.2-29
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-29/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-29/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-29/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-29/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-29/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-29 | total_elapsed=40.8s
+[INFO] Processing 30x30:0.2:2 -> runs/all_qual/30x30-0.2-2
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-2/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-2/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-2/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-2/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-2/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-2 | total_elapsed=41.4s
+[INFO] Processing 30x30:0.2:30 -> runs/all_qual/30x30-0.2-30
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-30/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-30/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-30/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-30/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-30/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-30 | total_elapsed=301.2s
+[INFO] Processing 30x30:0.2:31 -> runs/all_qual/30x30-0.2-31
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-31/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-31/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-31/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-31/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-31/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-31 | total_elapsed=307.7s
+[INFO] Processing 30x30:0.2:32 -> runs/all_qual/30x30-0.2-32
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-32/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-32/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-32/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-32/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-32/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-32 | total_elapsed=302.5s
+[INFO] Processing 30x30:0.2:33 -> runs/all_qual/30x30-0.2-33
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-33/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-33/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-33/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-33/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-33/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-33 | total_elapsed=41.5s
+[INFO] Processing 30x30:0.2:34 -> runs/all_qual/30x30-0.2-34
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-34/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-34/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-34/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-34/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-34/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-34 | total_elapsed=365.0s
+[INFO] Processing 30x30:0.2:35 -> runs/all_qual/30x30-0.2-35
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-35/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-35/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-35/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-35/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-35/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-35 | total_elapsed=41.1s
+[INFO] Processing 30x30:0.2:36 -> runs/all_qual/30x30-0.2-36
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=39.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-36/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-36/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-36/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-36/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-36/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-36 | total_elapsed=45.5s
+[INFO] Processing 30x30:0.2:37 -> runs/all_qual/30x30-0.2-37
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-37/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-37/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-37/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-37/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-37/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-37 | total_elapsed=367.0s
+[INFO] Processing 30x30:0.2:38 -> runs/all_qual/30x30-0.2-38
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-38/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-38/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-38/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-38/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-38/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-38 | total_elapsed=42.1s
+[INFO] Processing 30x30:0.2:39 -> runs/all_qual/30x30-0.2-39
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-39/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-39/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-39/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-39/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-39/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-39 | total_elapsed=318.5s
+[INFO] Processing 30x30:0.2:3 -> runs/all_qual/30x30-0.2-3
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-3/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-3/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-3/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-3/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-3/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-3 | total_elapsed=338.9s
+[INFO] Processing 30x30:0.2:40 -> runs/all_qual/30x30-0.2-40
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=43.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-40/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-40/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-40/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-40/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-40/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-40 | total_elapsed=381.9s
+[INFO] Processing 30x30:0.2:41 -> runs/all_qual/30x30-0.2-41
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-41/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-41/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-41/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-41/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-41/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-41 | total_elapsed=325.3s
+[INFO] Processing 30x30:0.2:42 -> runs/all_qual/30x30-0.2-42
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-42/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-42/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-42/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-42/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-42/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-42 | total_elapsed=317.0s
+[INFO] Processing 30x30:0.2:43 -> runs/all_qual/30x30-0.2-43
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-43/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-43/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-43/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-43/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-43/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-43 | total_elapsed=310.4s
+[INFO] Processing 30x30:0.2:44 -> runs/all_qual/30x30-0.2-44
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-44/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-44/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-44/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-44/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-44/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-44 | total_elapsed=51.5s
+[INFO] Processing 30x30:0.2:45 -> runs/all_qual/30x30-0.2-45
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-45/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-45/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-45/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-45/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-45/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-45 | total_elapsed=321.0s
+[INFO] Processing 30x30:0.2:46 -> runs/all_qual/30x30-0.2-46
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-46/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-46/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-46/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-46/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-46/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-46 | total_elapsed=336.5s
+[INFO] Processing 30x30:0.2:47 -> runs/all_qual/30x30-0.2-47
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=39.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-47/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-47/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-47/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-47/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-47/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-47 | total_elapsed=322.2s
+[INFO] Processing 30x30:0.2:48 -> runs/all_qual/30x30-0.2-48
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-48/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-48/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-48/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-48/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-48/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-48 | total_elapsed=41.8s
+[INFO] Processing 30x30:0.2:49 -> runs/all_qual/30x30-0.2-49
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=42.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-49/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-49/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-49/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-49/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-49/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-49 | total_elapsed=48.9s
+[INFO] Processing 30x30:0.2:4 -> runs/all_qual/30x30-0.2-4
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-4/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-4/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-4/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-4/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-4/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-4 | total_elapsed=321.6s
+[INFO] Processing 30x30:0.2:50 -> runs/all_qual/30x30-0.2-50
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-50/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-50/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-50/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-50/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-50/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-50 | total_elapsed=333.3s
+[INFO] Processing 30x30:0.2:51 -> runs/all_qual/30x30-0.2-51
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-51/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-51/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-51/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-51/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-51/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-51 | total_elapsed=321.0s
+[INFO] Processing 30x30:0.2:52 -> runs/all_qual/30x30-0.2-52
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-52/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-52/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-52/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-52/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-52/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-52 | total_elapsed=322.7s
+[INFO] Processing 30x30:0.2:53 -> runs/all_qual/30x30-0.2-53
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=39.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-53/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-53/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-53/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-53/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-53/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-53 | total_elapsed=45.1s
+[INFO] Processing 30x30:0.2:54 -> runs/all_qual/30x30-0.2-54
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-54/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-54/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-54/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-54/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-54/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-54 | total_elapsed=314.1s
+[INFO] Processing 30x30:0.2:55 -> runs/all_qual/30x30-0.2-55
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-55/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-55/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-55/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-55/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-55/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-55 | total_elapsed=44.2s
+[INFO] Processing 30x30:0.2:5 -> runs/all_qual/30x30-0.2-5
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-5/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-5/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-5/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-5/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-5/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-5 | total_elapsed=41.4s
+[INFO] Processing 30x30:0.2:6 -> runs/all_qual/30x30-0.2-6
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-6/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-6/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-6/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-6/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-6/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-6 | total_elapsed=42.7s
+[INFO] Processing 30x30:0.2:7 -> runs/all_qual/30x30-0.2-7
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-7/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-7/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-7/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-7/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-7/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-7 | total_elapsed=326.6s
+[INFO] Processing 30x30:0.2:9 -> runs/all_qual/30x30-0.2-9
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.2-9/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-9/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-9/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-9/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.2-9/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.2-9 | total_elapsed=329.7s
+[INFO] Processing 30x30:0.3:42 -> runs/all_qual/30x30-0.3-42
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-42/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-42/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-42/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-42/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-42/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-42 | total_elapsed=48.5s
+[INFO] Processing 30x30:0.3:43 -> runs/all_qual/30x30-0.3-43
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-43/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-43/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-43/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-43/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-43/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-43 | total_elapsed=452.3s
+[INFO] Processing 30x30:0.3:44 -> runs/all_qual/30x30-0.3-44
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-44/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-44/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-44/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-44/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-44/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-44 | total_elapsed=81.2s
+[INFO] Processing 30x30:0.3:45 -> runs/all_qual/30x30-0.3-45
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-45/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-45/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-45/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-45/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-45/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-45 | total_elapsed=53.1s
+[INFO] Processing 30x30:0.3:46 -> runs/all_qual/30x30-0.3-46
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-46/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-46/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-46/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-46/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-46/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-46 | total_elapsed=46.4s
+[INFO] Processing 30x30:0.3:47 -> runs/all_qual/30x30-0.3-47
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-47/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-47/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-47/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-47/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-47/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-47 | total_elapsed=387.8s
+[INFO] Processing 30x30:0.3:48 -> runs/all_qual/30x30-0.3-48
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-48/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-48/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-48/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-48/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-48/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-48 | total_elapsed=391.0s
+[INFO] Processing 30x30:0.3:49 -> runs/all_qual/30x30-0.3-49
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-49/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-49/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-49/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-49/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-49/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-49 | total_elapsed=46.8s
+[INFO] Processing 30x30:0.3:50 -> runs/all_qual/30x30-0.3-50
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-50/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-50/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-50/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-50/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-50/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-50 | total_elapsed=48.1s
+[INFO] Processing 30x30:0.3:51 -> runs/all_qual/30x30-0.3-51
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-51/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-51/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-51/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-51/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-51/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-51 | total_elapsed=380.3s
+[INFO] Processing 30x30:0.3:52 -> runs/all_qual/30x30-0.3-52
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-52/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-52/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-52/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-52/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-52/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-52 | total_elapsed=51.9s
+[INFO] Processing 30x30:0.3:53 -> runs/all_qual/30x30-0.3-53
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-53/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-53/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-53/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-53/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-53/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-53 | total_elapsed=49.2s
+[INFO] Processing 30x30:0.3:54 -> runs/all_qual/30x30-0.3-54
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-54/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-54/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-54/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-54/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-54/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-54 | total_elapsed=46.0s
+[INFO] Processing 30x30:0.3:55 -> runs/all_qual/30x30-0.3-55
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-55/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-55/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-55/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-55/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-55/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-55 | total_elapsed=454.4s
+[INFO] Processing 30x30:0.3:56 -> runs/all_qual/30x30-0.3-56
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-56/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-56/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-56/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-56/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-56/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-56 | total_elapsed=392.2s
+[INFO] Processing 30x30:0.3:57 -> runs/all_qual/30x30-0.3-57
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=42.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-57/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-57/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-57/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-57/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-57/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-57 | total_elapsed=58.1s
+[INFO] Processing 30x30:0.3:58 -> runs/all_qual/30x30-0.3-58
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-58/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-58/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-58/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-58/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-58/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-58 | total_elapsed=426.2s
+[INFO] Processing 30x30:0.3:59 -> runs/all_qual/30x30-0.3-59
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-59/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-59/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-59/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-59/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-59/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-59 | total_elapsed=46.3s
+[INFO] Processing 30x30:0.3:60 -> runs/all_qual/30x30-0.3-60
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-60/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-60/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-60/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-60/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-60/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-60 | total_elapsed=53.3s
+[INFO] Processing 30x30:0.3:61 -> runs/all_qual/30x30-0.3-61
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-61/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-61/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-61/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-61/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-61/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-61 | total_elapsed=388.8s
+[INFO] Processing 30x30:0.3:62 -> runs/all_qual/30x30-0.3-62
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=39.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-62/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-62/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-62/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-62/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-62/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-62 | total_elapsed=423.8s
+[INFO] Processing 30x30:0.3:63 -> runs/all_qual/30x30-0.3-63
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-63/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-63/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-63/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-63/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-63/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-63 | total_elapsed=45.8s
+[INFO] Processing 30x30:0.3:64 -> runs/all_qual/30x30-0.3-64
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-64/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-64/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-64/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-64/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-64/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-64 | total_elapsed=419.9s
+[INFO] Processing 30x30:0.3:65 -> runs/all_qual/30x30-0.3-65
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-65/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-65/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-65/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-65/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-65/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-65 | total_elapsed=52.4s
+[INFO] Processing 30x30:0.3:66 -> runs/all_qual/30x30-0.3-66
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-66/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-66/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-66/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-66/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-66/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-66 | total_elapsed=47.0s
+[INFO] Processing 30x30:0.3:67 -> runs/all_qual/30x30-0.3-67
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-67/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-67/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-67/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-67/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-67/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-67 | total_elapsed=386.5s
+[INFO] Processing 30x30:0.3:68 -> runs/all_qual/30x30-0.3-68
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/30x30-0.3-68/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-68/qual_case_original.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-68/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-68/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/30x30-0.3-68/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/30x30-0.3-68 | total_elapsed=49.3s
+[INFO] Processing 40x40:0.1:55 -> runs/all_qual/40x40-0.1-55
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-55/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-55/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-55/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-55/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-55/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-55 | total_elapsed=40.1s
+[INFO] Processing 40x40:0.1:56 -> runs/all_qual/40x40-0.1-56
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-56/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-56/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-56/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-56/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-56/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-56 | total_elapsed=40.5s
+[INFO] Processing 40x40:0.1:57 -> runs/all_qual/40x40-0.1-57
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-57/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-57/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-57/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-57/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-57/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-57 | total_elapsed=41.5s
+[INFO] Processing 40x40:0.1:58 -> runs/all_qual/40x40-0.1-58
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-58/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-58/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-58/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-58/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-58/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-58 | total_elapsed=562.7s
+[INFO] Processing 40x40:0.1:60 -> runs/all_qual/40x40-0.1-60
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-60/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-60/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-60/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-60/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-60/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-60 | total_elapsed=40.7s
+[INFO] Processing 40x40:0.1:61 -> runs/all_qual/40x40-0.1-61
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-61/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-61/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-61/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-61/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-61/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-61 | total_elapsed=46.4s
+[INFO] Processing 40x40:0.1:62 -> runs/all_qual/40x40-0.1-62
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-62/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-62/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-62/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-62/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-62/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-62 | total_elapsed=40.9s
+[INFO] Processing 40x40:0.1:64 -> runs/all_qual/40x40-0.1-64
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-64/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-64/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-64/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-64/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-64/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-64 | total_elapsed=587.3s
+[INFO] Processing 40x40:0.1:65 -> runs/all_qual/40x40-0.1-65
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=42.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.1-65/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-65/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-65/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-65/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.1-65/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.1-65 | total_elapsed=47.5s
+[INFO] Processing 40x40:0.2:56 -> runs/all_qual/40x40-0.2-56
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-56/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-56/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-56/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-56/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-56/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-56 | total_elapsed=53.5s
+[INFO] Processing 40x40:0.2:57 -> runs/all_qual/40x40-0.2-57
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-57/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-57/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-57/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-57/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-57/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-57 | total_elapsed=51.0s
+[INFO] Processing 40x40:0.2:58 -> runs/all_qual/40x40-0.2-58
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-58/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-58/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-58/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-58/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-58/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-58 | total_elapsed=55.5s
+[INFO] Processing 40x40:0.2:59 -> runs/all_qual/40x40-0.2-59
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-59/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-59/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-59/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-59/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-59/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-59 | total_elapsed=51.0s
+[INFO] Processing 40x40:0.2:60 -> runs/all_qual/40x40-0.2-60
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-60/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-60/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-60/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-60/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-60/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-60 | total_elapsed=977.4s
+[INFO] Processing 40x40:0.2:61 -> runs/all_qual/40x40-0.2-61
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-61/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-61/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-61/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-61/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-61/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-61 | total_elapsed=51.3s
+[INFO] Processing 40x40:0.2:62 -> runs/all_qual/40x40-0.2-62
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-62/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-62/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-62/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-62/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-62/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-62 | total_elapsed=965.8s
+[INFO] Processing 40x40:0.2:63 -> runs/all_qual/40x40-0.2-63
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-63/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-63/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-63/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-63/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-63/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-63 | total_elapsed=900.2s
+[INFO] Processing 40x40:0.2:64 -> runs/all_qual/40x40-0.2-64
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-64/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-64/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-64/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-64/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-64/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-64 | total_elapsed=879.4s
+[INFO] Processing 40x40:0.2:65 -> runs/all_qual/40x40-0.2-65
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=42.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-65/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-65/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-65/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-65/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-65/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-65 | total_elapsed=60.7s
+[INFO] Processing 40x40:0.2:66 -> runs/all_qual/40x40-0.2-66
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-66/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-66/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-66/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-66/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-66/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-66 | total_elapsed=54.3s
+[INFO] Processing 40x40:0.2:67 -> runs/all_qual/40x40-0.2-67
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=39.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-67/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-67/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-67/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-67/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-67/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-67 | total_elapsed=55.0s
+[INFO] Processing 40x40:0.2:68 -> runs/all_qual/40x40-0.2-68
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-68/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-68/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-68/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-68/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-68/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-68 | total_elapsed=58.6s
+[INFO] Processing 40x40:0.2:69 -> runs/all_qual/40x40-0.2-69
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-69/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-69/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-69/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-69/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-69/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-69 | total_elapsed=49.6s
+[INFO] Processing 40x40:0.2:70 -> runs/all_qual/40x40-0.2-70
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-70/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-70/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-70/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-70/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-70/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-70 | total_elapsed=892.6s
+[INFO] Processing 40x40:0.2:71 -> runs/all_qual/40x40-0.2-71
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.7s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-71/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-71/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-71/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-71/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-71/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-71 | total_elapsed=51.1s
+[INFO] Processing 40x40:0.2:72 -> runs/all_qual/40x40-0.2-72
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=39.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-72/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-72/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-72/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-72/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-72/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-72 | total_elapsed=915.9s
+[INFO] Processing 40x40:0.2:73 -> runs/all_qual/40x40-0.2-73
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-73/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-73/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-73/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-73/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-73/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-73 | total_elapsed=1058.0s
+[INFO] Processing 40x40:0.2:74 -> runs/all_qual/40x40-0.2-74
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-74/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-74/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-74/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-74/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-74/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-74 | total_elapsed=892.5s
+[INFO] Processing 40x40:0.2:75 -> runs/all_qual/40x40-0.2-75
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=39.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-75/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-75/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-75/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-75/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-75/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-75 | total_elapsed=1016.9s
+[INFO] Processing 40x40:0.2:76 -> runs/all_qual/40x40-0.2-76
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-76/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-76/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-76/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-76/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-76/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-76 | total_elapsed=49.7s
+[INFO] Processing 40x40:0.2:77 -> runs/all_qual/40x40-0.2-77
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-77/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-77/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-77/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-77/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-77/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-77 | total_elapsed=950.2s
+[INFO] Processing 40x40:0.2:78 -> runs/all_qual/40x40-0.2-78
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=38.6s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-78/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-78/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-78/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-78/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-78/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-78 | total_elapsed=53.4s
+[INFO] Processing 40x40:0.2:79 -> runs/all_qual/40x40-0.2-79
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-79/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-79/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-79/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-79/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-79/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-79 | total_elapsed=51.8s
+[INFO] Processing 40x40:0.2:80 -> runs/all_qual/40x40-0.2-80
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-80/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-80/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-80/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-80/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-80/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-80 | total_elapsed=57.3s
+[INFO] Processing 40x40:0.2:81 -> runs/all_qual/40x40-0.2-81
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.2-81/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-81/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-81/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-81/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.2-81/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.2-81 | total_elapsed=883.5s
+[INFO] Processing 40x40:0.3:66 -> runs/all_qual/40x40-0.3-66
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-66/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-66/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-66/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-66/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-66/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-66 | total_elapsed=1129.0s
+[INFO] Processing 40x40:0.3:67 -> runs/all_qual/40x40-0.3-67
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-67/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-67/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-67/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-67/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-67/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-67 | total_elapsed=87.8s
+[INFO] Processing 40x40:0.3:68 -> runs/all_qual/40x40-0.3-68
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-68/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-68/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-68/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-68/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-68/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-68 | total_elapsed=1459.1s
+[INFO] Processing 40x40:0.3:69 -> runs/all_qual/40x40-0.3-69
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-69/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-69/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-69/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-69/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-69/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-69 | total_elapsed=1616.8s
+[INFO] Processing 40x40:0.3:70 -> runs/all_qual/40x40-0.3-70
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-70/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-70/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-70/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-70/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-70/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-70 | total_elapsed=184.3s
+[INFO] Processing 40x40:0.3:71 -> runs/all_qual/40x40-0.3-71
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-71/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-71/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-71/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-71/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-71/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-71 | total_elapsed=1349.2s
+[INFO] Processing 40x40:0.3:72 -> runs/all_qual/40x40-0.3-72
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-72/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-72/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-72/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-72/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-72/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-72 | total_elapsed=1163.1s
+[INFO] Processing 40x40:0.3:73 -> runs/all_qual/40x40-0.3-73
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-73/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-73/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-73/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-73/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-73/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-73 | total_elapsed=1286.8s
+[INFO] Processing 40x40:0.3:74 -> runs/all_qual/40x40-0.3-74
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-74/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-74/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-74/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-74/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-74/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-74 | total_elapsed=1153.9s
+[INFO] Processing 40x40:0.3:75 -> runs/all_qual/40x40-0.3-75
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.3s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-75/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-75/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-75/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-75/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-75/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-75 | total_elapsed=66.5s
+[INFO] Processing 40x40:0.3:76 -> runs/all_qual/40x40-0.3-76
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=41.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-76/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-76/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-76/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-76/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-76/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-76 | total_elapsed=1311.3s
+[INFO] Processing 40x40:0.3:77 -> runs/all_qual/40x40-0.3-77
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.4s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-77/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-77/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-77/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-77/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-77/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-77 | total_elapsed=68.2s
+[INFO] Processing 40x40:0.3:78 -> runs/all_qual/40x40-0.3-78
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.0s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-78/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-78/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-78/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-78/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-78/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-78 | total_elapsed=1177.1s
+[INFO] Processing 40x40:0.3:79 -> runs/all_qual/40x40-0.3-79
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.1s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-79/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-79/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-79/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-79/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-79/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-79 | total_elapsed=1134.9s
+[INFO] Processing 40x40:0.3:80 -> runs/all_qual/40x40-0.3-80
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=35.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-80/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-80/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-80/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-80/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-80/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-80 | total_elapsed=1133.2s
+[INFO] Processing 40x40:0.3:81 -> runs/all_qual/40x40-0.3-81
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.5s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-81/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-81/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-81/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-81/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-81/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-81 | total_elapsed=70.0s
+[INFO] Processing 40x40:0.3:82 -> runs/all_qual/40x40-0.3-82
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=40.9s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-82/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-82/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-82/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-82/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-82/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-82 | total_elapsed=1321.0s
+[INFO] Processing 40x40:0.3:83 -> runs/all_qual/40x40-0.3-83
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=37.8s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-83/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-83/qual_case_original.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-83/qual_case_shap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-83/qual_case_lime.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-83/qual_case_cose.pdf
+[done] processed_files=1 | failures_considered=1 | outdir=runs/all_qual/40x40-0.3-83 | total_elapsed=68.1s
+[INFO] Processing 40x40:0.3:84 -> runs/all_qual/40x40-0.3-84
+[setup] Found 1 env file(s). workers=8, planner=a_star, k=5
+[early-stop] Reached --max-failures=1 after processing 1 files.
+[progress] 1/1 files | failures considered=1 | ok_files=1 | elapsed=36.2s | eta=0.0s
+[q1_agreement] Wrote runs/all_qual/40x40-0.3-84/q1_agreement_heatmap.pdf
+[qual] Wrote runs/all_qual/40x40-0.3-84/qual_case_original.pdf
