@@ -578,6 +578,13 @@ def rebuild_objects_from_grid(env: GridEnvironment) -> GridEnvironment:
     )
 
 
+# ------------------------------ Tiny helper ----------------------------- #
+
+def active_obstacles(env: GridEnvironment):
+    """Yield obstacles with non-empty coords (after removals)."""
+    return [ob for ob in env.obstacles if ob.coords.size > 0]
+
+
 # ---------------------------------- Demo ------------------------------------ #
 
 if __name__ == "__main__":
