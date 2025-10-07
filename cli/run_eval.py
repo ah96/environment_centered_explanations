@@ -141,13 +141,12 @@ def main():
 
     do_robust = str(args.robustness).strip().lower() in {"1","true","yes","y"}
     if do_robust:
-        from eval.robustness import robustness_suite  # lazy import; requires SciPy
+        from eval.robustness import robustness_suite  # lazy import; requir
 
     sizes = _parse_sizes(args.sizes)
     densities = _parse_densities(args.densities)
     planners_sel = [p.strip().lower() for p in args.planners.split(",")]
     explainers_sel = [e.strip().lower() for e in args.explainers.split(",")]
-    do_robust = str(args.robustness).strip().lower() in {"1","true","yes","y"}
 
     # Instantiate planner objects once (reused across envs)
     planners = {}

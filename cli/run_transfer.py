@@ -58,6 +58,39 @@ PLANNER_ALIASES = {
     "theta_star": ThetaStarPlanner,
 }
 
+def _match_ids_by_iou(envA, envB, iou_thresh=0.3):
+    idsA = [i for i in np.unique(envA.obj_map) if i>0]
+    idsB = [i for i in np.unique(envB.obj_map) if i>0]
+    M = np.zeros((len(idsA), len(idsB)), float)
+    for a_i, a in enumerate(idsA):
+        A = (envA.obj_map == a)
+        a_area = int(A.sum())
+        if a_area == 0: continue
+        for b_j, b in enumerate(idsB):
+            B = (envB.obj_map == b)
+            inter = int((A & B).sum())
+            union = a_area + int(B.sum()) - inter
+            M[a_i, b_j] = (inter/union) if union>0 else 0.0
+    mapping = {}
+    usedB = set()
+    for a_i, a in enumerate(idsA):
+        j = M[a_i].argmax() if M.shape[1]>0 else -1
+        b = idsB[j] if j>=0 else None
+        if j>=0 and M[a_i, j] >= iou_thresh and b not in usedB:
+            mapping[a] = b; usedB.add(b)
+        else:
+            mapping[a] = None
+    return mapping
+
+def _remap_ranking(ranking, id_map):
+    from collections import defaultdict
+    acc = defaultdict(float)
+    for oid, s in ranking:
+        b = id_map.get(int(oid))
+        if b is not None:
+            acc[int(b)] += float(s)
+    return sorted(acc.items(), key=lambda kv: (-kv[1], kv[0]))
+
 def _parse_sizes(s: str) -> List[Tuple[int,int]]:
     out = []
     for tok in s.split(","):

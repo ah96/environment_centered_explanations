@@ -2,34 +2,35 @@
 
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
-[![Paper](https://img.shields.io/badge/arXiv-Preprint-red.svg)]()
+[![Paper](https://img.shields.io/badge/IEEE-RA--L--2025-red.svg)]()
 
-This repository provides the official implementation of our framework for generating **environment-centered causal explanations** of robot path planning failures.  
-Instead of exposing internal planner structures, the framework perturbs obstacle configurations in grid-based environments to identify:
+Official implementation of our **planner-agnostic framework** for generating **environment-centered causal explanations** of robot path-planning failures.
+
+Instead of exposing internal planner states, we perturb obstacle configurations in grid environments to identify:
 1. **Causal obstacles** that make a problem infeasible, and  
 2. **Minimal modifications** that restore feasibility.  
 
-We adapt and evaluate state-of-the-art model-agnostic explanation methods at the obstacle level:
-- **LIME** – robust attributions under perturbations  
-- **SHAP** – faithful obstacle importance rankings  
-- **COSE** – a novel greedy algorithm for computing minimal critical obstacle sets (compact counterfactual explanations)  
+We adapt and evaluate state-of-the-art explainers:
+- **LIME** – local obstacle-level importance via random perturbations  
+- **SHAP** – Shapley-value-based causal importance  
+- **COSE** – our novel *Counterfactual Obstacle Set Explainer* (minimal critical obstacles)  
 
-Our large-scale experiments span six classical planners, multiple obstacle densities, and different perturbation affordances.
+Large-scale experiments cover six classical planners, multiple obstacle densities, and different perturbation affordances.
 
 ---
 
 ## 🚀 Features
 
-- Planner-agnostic environment-centered explanation framework  
-- Adaptations of **LIME** and **SHAP** for obstacle-level attributions  
-- **COSE**: novel algorithm for compact counterfactual explanations  
-- Automated evaluation pipeline with metrics for:
-  - Faithfulness  
-  - Robustness  
-  - Compactness  
-  - Generalization across planners  
-- Ready-to-use scripts for generating environments, running planners, and producing explanations  
-- Reproducibility-friendly: runs on CPU only, no external dependencies beyond Python scientific stack  
+- Planner-agnostic, environment-centered explanation pipeline  
+- **LIME**, **SHAP**, and **COSE** adaptations for grid obstacles  
+- Automated evaluation of:
+  - Faithfulness (Success@K, AUC-S@K)  
+  - Robustness under geometric perturbations  
+  - Transferability across planners  
+  - Compactness / minimality (vs ILP oracle)  
+- Full CLI suite for reproducible experiments (`cli/`)  
+- Shell & Python scripts for batch jobs, monitoring, and CI smoke tests (`scripts/`)  
+- CPU-only, lightweight dependencies (NumPy, SciPy, PuLP, Matplotlib)
 
 ---
 
@@ -37,16 +38,13 @@ Our large-scale experiments span six classical planners, multiple obstacle densi
 
 ```
 environment_centered_explanations/
-├── cli/                   # Command-line scripts
-│   ├── run_eval.py        # Run large-scale evaluations
-│   ├── make_figs.py       # Generate analysis figures
-│   ├── plot_agreement_and_qual.py
-│   └── ...
-├── explainers/            # Implementation of LIME, SHAP, and COSE
-├── planners/              # Classical path planners (A*, Dijkstra, etc.)
-├── envs/                  # Environment generators and perturbation tools
-├── results/               # Output CSVs, NPZs, and plots (generated)
-├── tests/                 # Unit tests
+├── envs/              # Environment generation & perturbations
+├── planners/          # Classical planners: A*, Dijkstra, BFS, DFS, Theta*
+├── explainers/        # LIME, SHAP, COSE implementations
+├── eval/              # Metrics: faithfulness, robustness, transfer, minimality
+├── cli/               # Command-line tools for experiments & plots
+├── scripts/           # Automation (launch_full_eval.sh, monitor_parallel.py, self_check.py)
+├── tests/             # Unit & visualization tests
 └── README.md
 ```
 
@@ -54,55 +52,87 @@ environment_centered_explanations/
 
 ## ⚙️ Installation
 
-Clone the repository and install dependencies:
-
 ```bash
 git clone https://github.com/<your-username>/environment_centered_explanations.git
 cd environment_centered_explanations
-pip install -r requirements.txt
+pip install -e .
 ```
 
-We recommend using a Python virtual environment (`venv` or `conda`).
+Dependencies: `numpy`, `scipy`, `matplotlib`, `pulp`, `pandas`, `tqdm`.
+
+We recommend running smoke tests first:
+```bash
+python3 scripts/self_check.py
+```
 
 ---
 
-## 🧑‍💻 Usage
+## 🧑‍💻 Basic Usage
 
-### 1. Generate Environments
+### 1️⃣ Run Core Evaluation
 ```bash
-python -m cli.generate_envs     --outdir results/envs     --sizes 20 30 40     --densities 0.2 0.3
+python -m cli.run_eval   --sizes 30x30 --densities 0.20   --num-envs 10 --planners a_star,dijkstra   --explainers lime,shap,cose,geodesic   --outdir results/csv
 ```
 
-### 2. Run Evaluations
+### 2️⃣ Robustness & Transfer Studies
 ```bash
-python -m cli.run_eval     --env-glob "results/envs/E_*.npz"     --planners a_star dijkstra bfs dfs     --explainers lime shap cose     --outdir results/csv
+python -m cli.run_robustness --sizes 30x30 --densities 0.20 --geom-remap
+python -m cli.run_transfer   --sizes 30x30 --densities 0.20 --geom-remap
 ```
 
-### 3. Produce Figures
+### 3️⃣ Aggregate and Plot
 ```bash
-python -m cli.make_figs     --eval-glob "results/csv/eval_*.csv"     --outdir results/figs
+python -m cli.make_figs --outdir results/figs
 ```
 
-Figures will be saved as `.pdf` and `.png` in `results/figs/`.
+### 4️⃣ (Optional) Monitor Parallel Jobs
+```bash
+bash scripts/launch_full_eval.sh &
+python3 scripts/monitor_parallel.py joblog.txt 120 --watch 5
+```
 
 ---
 
-## 📊 Example Results
+## 🧪 Self-Check & CI
 
-- **COSE** yields the most compact explanations  
-- **LIME** provides the most robust attributions under perturbations  
-- **SHAP** offers the most faithful obstacle rankings  
-- Explanations generalize across planners, demonstrating planner-agnosticism  
+```bash
+python3 scripts/self_check.py
+```
+
+Checks that:
+- environment generation works  
+- planners produce valid paths  
+- LIME, SHAP, and COSE run successfully  
+- evaluation metrics are consistent  
+- all CLI commands respond to `--help`
+
+---
+
+## 📊 Example Qualitative Result
 
 <p align="center">
   <img src="docs/example_explanations.png" alt="Example Explanations" width="600">
 </p>
 
+- **COSE** yields minimal causal obstacle sets (compact counterfactuals)  
+- **LIME** produces stable obstacle rankings under perturbations  
+- **SHAP** offers highly faithful attributions  
+- COSE-based repairs restore path feasibility across planners  
+
+---
+
+## 🧩 Scripts Overview
+
+| Script | Description |
+|---------|--------------|
+| `scripts/launch_full_eval.sh` | Launches large-scale parallel evaluation (GNU Parallel). |
+| `scripts/monitor_parallel.py` | Tracks progress and ETA of parallel jobs (`--watch`). |
+| `scripts/self_check.py` | Runs end-to-end consistency tests. |
+| `scripts/smoke_all.sh` | Minimal smoke test before experiments. |
+
 ---
 
 ## 📝 Citation
-
-If you use this repository in your research, please cite:
 
 ```bibtex
 @article{halilovic2025environment,
@@ -115,13 +145,13 @@ If you use this repository in your research, please cite:
 
 ---
 
-## 📫 Contact
+## 📜 License
 
-For questions, suggestions, or collaborations, please contact:  
-**Amar Halilovic** – [your email / website link]  
+Licensed under the MIT License – see [LICENSE](LICENSE).
 
 ---
 
-## 📜 License
+## 📫 Contact
 
-This project is licensed under the MIT License – see [LICENSE](LICENSE) for details.
+**Amar Halilovic**  
+[website / email placeholder]

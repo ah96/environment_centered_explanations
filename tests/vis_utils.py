@@ -18,7 +18,12 @@ def render_env(env, ax=None, show_ids=False, title=None):
       - obstacles by obj_map ID (colored)
       - start (green star), goal (red star)
     """
-    H, W = env.shape
+    # Prefer env.shape, fall back to grid.shape if shape is not present
+    if hasattr(env, "shape"):
+        H, W = env.shape
+    else:
+        H, W = env.grid.shape
+    
     if ax is None:
         _, ax = plt.subplots(figsize=(W/5, H/5), dpi=120)
 

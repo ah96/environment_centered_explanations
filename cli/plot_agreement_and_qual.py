@@ -114,40 +114,32 @@ M_INDEX = {m: i for i, m in enumerate(METHODS)}
 
 
 def _load_env(npz_path: str):
+    """Reconstruct a minimal GridEnvironment-like object from snapshot."""
     Z = np.load(npz_path, allow_pickle=True)
 
-    class _Env:
+    class _Env:  # lightweight
         pass
-
     env = _Env()
 
+    # Grid
     G = Z["grid"]
-    if not isinstance(G, np.ndarray):
-        G = np.array(G)
-    env.grid = (G != 0)
+    env.grid = np.asarray(G, dtype=bool)
 
-    try:
-        v = Z["obj_map"]
-        if isinstance(v, np.ndarray):
-            try:
-                env.obj_map = v.item()
-            except Exception:
-                env.obj_map = v.tolist()
-        else:
-            env.obj_map = v
-    except Exception:
-        env.obj_map = {}
+    # Object labels: keep as the original 2D int array (IDs: 0=free, 1..K=obstacles)
+    if "obj_map" in Z:
+        env.obj_map = np.asarray(Z["obj_map"])
+    else:
+        # fallback: derive labels from grid (each obstacle cell as its own ID)
+        env.obj_map = np.zeros_like(env.grid, dtype=int)
+        env.obj_map[env.grid] = np.arange(1, env.grid.sum() + 1)
 
-    env.start = tuple(np.array(Z["start"]).tolist())
-    env.goal  = tuple(np.array(Z["goal"]).tolist())
+    env.start = tuple(np.asarray(Z["start"]).tolist())
+    env.goal  = tuple(np.asarray(Z["goal"]).tolist())
     env.H, env.W = env.grid.shape
 
-    # obstacle ids
-    obs = []
-    for (r, c), is_block in np.ndenumerate(env.grid):
-        if bool(is_block):
-            obs.append(r * env.W + c)
-    env.obstacles = obs
+    # obstacles list: 1..K (IDs present in obj_map)
+    ids = np.unique(env.obj_map)
+    env.obstacles = [i for i in ids.tolist() if i > 0]
     return env
 
 

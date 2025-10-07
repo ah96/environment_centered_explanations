@@ -36,43 +36,29 @@ def _planner_to_int_success(res) -> int:
         return int(bool(res.get('success', False)))
     return int(bool(res))
 
-def _rc_from_obstacle(ob, W):
-    """Return (r, c) from different obstacle representations."""
-    # integer cell id
-    if isinstance(ob, (int, np.integer)):
-        ob = int(ob)
-        return divmod(ob, W)
-    # (r, c) tuple
-    if isinstance(ob, tuple) and len(ob) == 2:
-        r, c = ob
-        return int(r), int(c)
-    # object with .coords -> (r, c) or numpy array
-    if hasattr(ob, "coords"):
-        rc = getattr(ob, "coords")
-        if isinstance(rc, (tuple, list)) and len(rc) == 2:
-            return int(rc[0]), int(rc[1])
-        # support small numpy arrays like np.array([r, c])
-        try:
-            rc = np.array(rc).astype(int).tolist()
-            if len(rc) == 2:
-                return rc[0], rc[1]
-        except Exception:
-            pass
-    raise TypeError(f"Unsupported obstacle type: {type(ob)}")
-
-
 def _grid_without(env, trial):
     """
-    Return a copy of env.grid where all obstacles in `trial` are removed (set free).
-    `trial` can contain ints (cell ids), (r,c) tuples, or objects with `.coords`.
+    Return a copy of env.grid where all obstacles in `trial` are removed.
+    `trial` can contain obstacle *IDs* (1-based) or objects with `.coords`.
     """
     G = np.array(env.grid, dtype=bool).copy()
-    H, W = G.shape
+    obj_map = getattr(env, "obj_map", None)
     for ob in trial:
-        r, c = _rc_from_obstacle(ob, W)
-        if 0 <= r < H and 0 <= c < W:
-            G[r, c] = False  # remove obstacle -> mark free
+        # Obstacle ID (preferred path)
+        if isinstance(ob, (int, np.integer)):
+            oid = int(ob)
+            if obj_map is not None and oid > 0:
+                G[obj_map == oid] = False
+            continue
+        # Object with coords
+        if hasattr(ob, "coords") and getattr(ob, "coords") is not None:
+            coords = np.asarray(ob.coords)
+            if coords.size > 0:
+                G[coords[:, 0], coords[:, 1]] = False
+            continue
+        # Fallback: ignore unsupported entries
     return G
+
 
 
 class COSEExplainer:

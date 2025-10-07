@@ -96,7 +96,7 @@ class LimeExplainer:
         import time
         t0 = time.perf_counter()
         n = len(env.obstacles)
-        all_ids = np.arange(1, n + 1, dtype=int)
+        all_ids = np.array([i for i,o in enumerate(env.obstacles, start=1) if getattr(o, "coords", None) is not None and o.coords.size > 0], dtype=int)
 
         # ---- Focus subset (optional)
         if self.focus_top_m and self.focus_top_m < n:
