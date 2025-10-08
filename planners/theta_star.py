@@ -17,31 +17,46 @@ import numpy as np
 
 
 def _los_free(grid, a, b):
-    r0,c0 = a; r1,c1 = b
-    dr = abs(r1-r0); dc = abs(c1-c0)
-    sr = 1 if r1>=r0 else -1
-    sc = 1 if c1>=c0 else -1
+    """Check line-of-sight between two points using Bresenham."""
+    r0, c0 = a
+    r1, c1 = b
+    
+    # Check if endpoints are the same
+    if (r0, c0) == (r1, c1):
+        return not grid[r0, c0]
+    
+    dr = abs(r1 - r0)
+    dc = abs(c1 - c0)
+    sr = 1 if r1 >= r0 else -1
+    sc = 1 if c1 >= c0 else -1
     r, c = r0, c0
+    
     if dr >= dc:
         err = dr // 2
-        for _ in range(dr):
-            if grid[r, c]: return False
+        for _ in range(dr + 1):  # Include endpoint
+            if grid[r, c]:
+                return False
+            if r == r1 and c == c1:
+                break
             r += sr
             err -= dc
             if err < 0:
                 c += sc
                 err += dr
-        return not grid[r, c]
+        return True
     else:
         err = dc // 2
-        for _ in range(dc):
-            if grid[r, c]: return False
+        for _ in range(dc + 1):  # Include endpoint
+            if grid[r, c]:
+                return False
+            if r == r1 and c == c1:
+                break
             c += sc
             err -= dr
             if err < 0:
                 r += sr
                 err += dc
-        return not grid[r, c]
+        return True
 
 class ThetaStarPlanner:
     def __init__(self, connectivity: int = 8):
@@ -125,7 +140,8 @@ class ThetaStarPlanner:
 
                 # Theta* shortcut: if LoS between parent(r,c) and (nr,nc), try that parent
                 pr, pc = int(par_r[r, c]), int(par_c[r, c])
-                if pr != -1 and _los_free(grid, (pr, pc), (nr, nc)):
+                # Check if current node has a valid parent (not start node)
+                if (pr, pc) != (r, c) and _los_free(grid, (pr, pc), (nr, nc)):
                     # Recompute cost as parent -> neighbor
                     # Distance between (pr,pc) and (nr,nc) in Euclidean metric
                     tentative_g2 = g[pr, pc] + math.hypot(nr - pr, nc - pc)

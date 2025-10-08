@@ -118,6 +118,9 @@ def _free_bfs_has_path(grid: np.ndarray,
     if grid[sr, sc] or grid[gr, gc]:
         return False  # start or goal is blocked
 
+    if (sr, sc) == (gr, gc):  # FIX: Handle start == goal case
+        return True
+
     visited = np.zeros_like(grid, dtype=bool)
     q = [(sr, sc)]
     visited[sr, sc] = True
@@ -150,6 +153,9 @@ def _free_bfs_shortest_path(grid: np.ndarray,
     gr, gc = goal
     if grid[sr, sc] or grid[gr, gc]:
         return None
+
+    if (sr, sc) == (gr, gc):  # FIX: Handle start == goal case
+        return [(sr, sc)]
 
     deltas = DELTAS_8 if connectivity == 8 else DELTAS_4
 
@@ -266,14 +272,16 @@ def _stamp_mask(grid: np.ndarray,
         ring_canvas = np.zeros((canvas_h, canvas_w), dtype=bool)
 
         # Where to insert dilated_new into ring_canvas
-        ins_r0 = max(0, r0 - rpad0)
-        ins_c0 = max(0, c0 - cpad0)
+        ins_r0 = r0 - rpad0  # FIX: Remove max(0, ...) - already computed correctly
+        ins_c0 = c0 - cpad0
         ins_r1 = min(canvas_h, ins_r0 + dilated_new.shape[0])
         ins_c1 = min(canvas_w, ins_c0 + dilated_new.shape[1])
 
         # Corresponding slice on dilated_new (clamped; avoids negative indices)
-        src_r0 = max(0, -(r0 - rpad0))
-        src_c0 = max(0, -(c0 - cpad0))
+        src_r0 = max(0, -ins_r0)  # FIX: Handle case when insertion point is negative
+        src_c0 = max(0, -ins_c0)
+        ins_r0 = max(0, ins_r0)  # FIX: Clamp insertion point after computing source
+        ins_c0 = max(0, ins_c0)
         src_r1 = src_r0 + (ins_r1 - ins_r0)
         src_c1 = src_c0 + (ins_c1 - ins_c0)
 
@@ -320,7 +328,7 @@ def _random_blob_mask(rng: np.random.Generator,
     coords = [(r, c)]
 
     # Precompute neighbor order with bias
-    deltas = list(DELTAS_4) + list(DELTAS_8)
+    # deltas = list(DELTAS_4) + list(DELTAS_8)  # FIX: Remove unused variable
     for _ in range(n - 1):
         # pick a random existing cell to grow from
         base_r, base_c = coords[rng.integers(0, len(coords))]
@@ -342,16 +350,24 @@ def _random_blob_mask(rng: np.random.Generator,
             # fallback: pick any free cell adjacent to the current blob
             # (simple, robust)
             free = np.argwhere(~canvas)
+            if len(free) == 0:  # FIX: Handle case when canvas is full
+                break
             rng.shuffle(free)
+            found = False  # FIX: Track if we found a valid cell
             for fr, fc in free:
                 # neighbor to blob?
                 if np.any(canvas[max(0, fr-1):fr+2, max(0, fc-1):fc+2]):
                     canvas[fr, fc] = True
                     coords.append((fr, fc))
+                    found = True
                     break
+            if not found:  # FIX: If no adjacent free cell found, stop
+                break
 
     # Tight bbox
     ys, xs = np.where(canvas)
+    if len(ys) == 0:  # FIX: Handle empty canvas (shouldn't happen but be safe)
+        return np.ones((1, 1), dtype=bool)
     r0, r1 = ys.min(), ys.max() + 1
     c0, c1 = xs.min(), xs.max() + 1
     return canvas[r0:r1, c0:c1]

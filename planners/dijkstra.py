@@ -33,15 +33,14 @@ class DijkstraPlanner:
     @staticmethod
     def _reconstruct(par_r: np.ndarray, par_c: np.ndarray,
                      start: Tuple[int,int], goal: Tuple[int,int]):
-        if par_r[goal] == -1 and goal != start:
-            return None
         path = []
         r, c = goal
         while (r, c) != start:
             path.append((int(r), int(c)))
-            pr, pc = par_r[r, c], par_c[r, c]
-            if pr == -1: return None
-            r, c = int(pr), int(pc)
+            pr, pc = int(par_r[r, c]), int(par_c[r, c])
+            if pr == -1 and pc == -1:  # No parent found
+                return None
+            r, c = pr, pc
         path.append(start)
         path.reverse()
         return path
@@ -49,8 +48,17 @@ class DijkstraPlanner:
     def plan(self, grid: np.ndarray, start: Tuple[int,int], goal: Tuple[int,int]) -> Dict:
         H, W = grid.shape
         sr, sc = start; gr, gc = goal
+        
+        # Validate bounds
+        if not (0 <= sr < H and 0 <= sc < W and 0 <= gr < H and 0 <= gc < W):
+            return {'success': False, 'path': None}
+        
         if grid[sr, sc] or grid[gr, gc]:
             return {'success': False, 'path': None}
+        
+        # Handle trivial case
+        if start == goal:
+            return {'success': True, 'path': [start]}
 
         dist = np.full((H, W), np.inf, dtype=np.float32)
         par_r = np.full((H, W), -1, dtype=np.int32)

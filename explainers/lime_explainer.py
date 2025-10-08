@@ -30,54 +30,6 @@ import time
 from explainers.baselines import geodesic_line_ranking
 
 
-def _planner_to_int_success(res) -> int:
-    """Normalize various planner return formats to {0,1}."""
-    if isinstance(res, dict):
-        return int(bool(res.get('success', False)))
-    return int(bool(res))
-
-
-def _build_grid_from_mask(base_grid: np.ndarray,
-                          obstacles: List,
-                          present_mask: np.ndarray) -> np.ndarray:
-    """
-    Construct a grid where only obstacles with present_mask[i]==1 are present.
-    We *start from the full grid* and remove absences for speed.
-    """
-    grid = base_grid.copy()
-    # Remove any obstacle whose bit is 0
-    for i, ob in enumerate(obstacles, start=1):
-        if present_mask[i - 1] == 0 and ob.coords.size > 0:
-            rr, cc = ob.coords[:, 0], ob.coords[:, 1]
-            grid[rr, cc] = False
-    return grid
-
-
-def _hamming_kernel(z: np.ndarray, z0: np.ndarray, sigma: float) -> np.ndarray:
-    """RBF on normalized Hamming distances."""
-    m = z0.size
-    # d = fraction of bits that differ from z0
-    d = np.mean(z != z0, axis=1)
-    w = np.exp(- (d ** 2) / (sigma ** 2))
-    return w
-
-
-def _weighted_ridge(X: np.ndarray, y: np.ndarray, w: np.ndarray, l2: float) -> np.ndarray:
-    """
-    Solve (X^T W X + l2 I) beta = X^T W y  for beta.
-    X: (n_samples, m), y: (n_samples,), w: (n_samples,)
-    """
-    # Apply weights via sqrt(W) to stabilize numerics
-    sw = np.sqrt(w).reshape(-1, 1)
-    Xw = X * sw
-    yw = y * sw.ravel()
-    # Regularized normal equations
-    XT_X = Xw.T @ Xw
-    m = X.shape[1]
-    beta = np.linalg.solve(XT_X + l2 * np.eye(m), Xw.T @ yw)
-    return beta
-
-
 class LimeExplainer:
     """
     LIME for binary obstacle presence with Hamming RBF kernel + ridge.
@@ -93,19 +45,39 @@ class LimeExplainer:
         self.focus_top_m = int(focus_top_m) if focus_top_m else None
 
     def explain(self, env, planner):
-        import time
         t0 = time.perf_counter()
         n = len(env.obstacles)
         all_ids = np.array([i for i,o in enumerate(env.obstacles, start=1) if getattr(o, "coords", None) is not None and o.coords.size > 0], dtype=int)
 
+        # Handle edge case: no valid obstacles
+        if len(all_ids) == 0:
+            return {
+                "ranking": [],
+                "calls": 0,
+                "time_sec": time.perf_counter() - t0,
+                "considered": 0,
+                "n_total": n,
+                "focus_top_m": self.focus_top_m or 0,
+            }
+
         # ---- Focus subset (optional)
-        if self.focus_top_m and self.focus_top_m < n:
+        if self.focus_top_m and self.focus_top_m < len(all_ids):
             geo = geodesic_line_ranking(env)["ranking"]
             subset_ids = np.array([oid for oid, _ in geo[: self.focus_top_m]], dtype=int)
         else:
             subset_ids = all_ids
 
         m = len(subset_ids)
+        if m == 0:
+            return {
+                "ranking": [],
+                "calls": 0,
+                "time_sec": time.perf_counter() - t0,
+                "considered": 0,
+                "n_total": n,
+                "focus_top_m": self.focus_top_m or 0,
+            }
+
         id_from_local = subset_ids
         obj_map = env.obj_map
         base_grid = env.grid.copy()
@@ -127,8 +99,27 @@ class LimeExplainer:
                     oid = int(id_from_local[j])
                     grid[obj_map == oid] = False
             res = planner.plan(grid, env.start, env.goal)
-            Y[i] = 1.0 if (res["success"] if isinstance(res, dict) else bool(res)) else 0.0
+            Y[i] = 1.0 if (res.get("success", False) if isinstance(res, dict) else bool(res)) else 0.0
             calls += 1
+
+        # Check if all outcomes are the same (no variance to explain)
+        if np.all(Y == Y[0]):
+            # Assign uniform scores
+            harm_local = np.zeros(m)
+            pairs = [(int(id_from_local[j]), 0.0) for j in range(m)]
+            if m < len(all_ids):
+                for oid in all_ids:
+                    if oid not in id_from_local:
+                        pairs.append((int(oid), 0.0))
+            pairs.sort(key=lambda x: x[1], reverse=True)
+            return {
+                "ranking": pairs,
+                "calls": calls,
+                "time_sec": time.perf_counter() - t0,
+                "considered": int(m),
+                "n_total": int(n),
+                "focus_top_m": self.focus_top_m or 0,
+            }
 
         # Hamming distance kernel around the origin (all ones)
         # distance = number of flips from the original
@@ -154,7 +145,7 @@ class LimeExplainer:
         harm_local = -w
 
         pairs = [(int(id_from_local[j]), float(harm_local[j])) for j in range(m)]
-        if m < n:
+        if m < len(all_ids):
             floor = (min(harm_local) if m > 0 else 0.0) - 1e6
             for oid in all_ids:
                 if oid not in id_from_local:
@@ -169,4 +160,3 @@ class LimeExplainer:
             "n_total": int(n),
             "focus_top_m": self.focus_top_m or 0,
         }
-

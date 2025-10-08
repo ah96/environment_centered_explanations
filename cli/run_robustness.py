@@ -21,8 +21,8 @@ Example:
       --kmax 5 --seed 0
 """
 
-from __future__ import annotations
 import argparse, csv, os, time
+import random  # Add this import at the top
 from typing import Dict, List, Tuple
 import numpy as np
 

@@ -92,8 +92,10 @@ class COSEExplainer:
         calls = 0
 
         # Quick check: if already success, empty set is minimal.
-        if _planner_to_int_success(planner.plan(env.grid.copy(), env.start, env.goal)) == 1:
-            return {'cose_set': set(), 'order_used': [], 'calls': 1, 'time_sec': time.perf_counter() - t0}
+        result = planner.plan(env.grid.copy(), env.start, env.goal)
+        calls += 1
+        if _planner_to_int_success(result) == 1:
+            return {'cose_set': set(), 'order_used': [], 'calls': calls, 'time_sec': time.perf_counter() - t0}
 
         # Build trial order
         if guide_ranking is not None and len(guide_ranking) > 0:
@@ -101,55 +103,53 @@ class COSEExplainer:
         else:
             order = list(range(1, len(env.obstacles) + 1))
 
-        # 1) Greedy forward selection: add until success
+        # 1) Greedy forward selection: add obstacles until success
         selected: List[int] = []
+        success_found = False
+        
         for oid in order:
             if self.max_remove is not None and len(selected) >= self.max_remove:
                 break
+            
             trial = selected + [oid]
             grid = _grid_without(env, trial)
-            succ = _planner_to_int_success(planner.plan(grid, env.start, env.goal))
+            result = planner.plan(grid, env.start, env.goal)
+            succ = _planner_to_int_success(result)
             calls += 1
+            
+            selected.append(oid)
+            
             if succ == 1:
-                selected = trial
+                success_found = True
                 break  # success achieved; proceed to pruning
-            else:
-                # Keep the obstacle ONLY if it showed progress? We cannot measure progress
-                # without a numeric metric; in practice, we collect obstacles until success.
-                selected = trial
 
-        # If still not successful (e.g., order exhausted), keep trying all remaining
-        idx = 0
-        while _planner_to_int_success(planner.plan(_grid_without(env, selected), env.start, env.goal)) == 0 and idx < len(order):
+        # If still not successful after greedy phase, return the selected set
+        if not success_found:
+            grid = _grid_without(env, selected)
+            result = planner.plan(grid, env.start, env.goal)
             calls += 1
-            # Add the next not-yet-selected obstacle
-            for oid in order:
-                if oid not in selected:
-                    selected.append(oid)
-                    break
-            idx += 1
-
-        # If still failure after exhausting obstacles, return full set (degenerate)
-        if _planner_to_int_success(planner.plan(_grid_without(env, selected), env.start, env.goal)) == 0:
-            calls += 1
-            t1 = time.perf_counter()
-            return {'cose_set': set(selected), 'order_used': order, 'calls': calls, 'time_sec': t1 - t0}
-
-        calls += 1  # last check above
+            if _planner_to_int_success(result) == 0:
+                t1 = time.perf_counter()
+                return {'cose_set': set(selected), 'order_used': order, 'calls': calls, 'time_sec': t1 - t0}
 
         # 2) Redundancy pruning: remove any obstacle that is not necessary.
         pruned = list(selected)
-        changed = True
-        while changed:
-            changed = False
-            for oid in list(pruned):
-                test_set = [x for x in pruned if x != oid]
-                grid = _grid_without(env, test_set)
-                succ = _planner_to_int_success(planner.plan(grid, env.start, env.goal))
-                calls += 1
-                if succ == 1:
-                    pruned = test_set
-                    changed = True
+        i = 0
+        while i < len(pruned):
+            oid = pruned[i]
+            test_set = [x for x in pruned if x != oid]
+            grid = _grid_without(env, test_set)
+            result = planner.plan(grid, env.start, env.goal)
+            succ = _planner_to_int_success(result)
+            calls += 1
+            
+            if succ == 1:
+                # This obstacle is redundant, remove it
+                pruned = test_set
+                # Don't increment i, check the same position again
+            else:
+                # This obstacle is necessary, keep it and move to next
+                i += 1
 
         t1 = time.perf_counter()
         return {

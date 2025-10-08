@@ -163,7 +163,12 @@ def _stamp_object_at(env: GridEnvironment,
 
     if not allow_touch and moat > 0:
         # Dilate the object's local mask by `moat` cells
-        dil = _dilate_bool(mask, iters=moat) if _dilate_bool is not None else binary_dilation(mask, iterations=moat)
+        if _dilate_bool is not None:
+            dil = _dilate_bool(mask, iters=moat)
+        else:
+            # Use scipy's binary_dilation with proper structure
+            structure = np.ones((3, 3), dtype=bool)
+            dil = binary_dilation(mask, structure=structure, iterations=moat)
 
         # Padded ROI on the grid (clamped to image bounds)
         rpad0 = max(0, nr0 - moat)
@@ -178,19 +183,32 @@ def _stamp_object_at(env: GridEnvironment,
         ring_canvas = np.zeros((canvas_h, canvas_w), dtype=bool)
 
         # Where to insert the dilated mask inside the canvas
-        ins_r0 = max(0, nr0 - rpad0)
-        ins_c0 = max(0, nc0 - cpad0)
+        ins_r0 = nr0 - rpad0
+        ins_c0 = nc0 - cpad0
         ins_r1 = min(canvas_h, ins_r0 + dil.shape[0])
         ins_c1 = min(canvas_w, ins_c0 + dil.shape[1])
 
-        # Corresponding slice from the dilated mask (clamped; avoids negatives)
-        src_r0 = max(0, -(nr0 - rpad0))
-        src_c0 = max(0, -(nc0 - cpad0))
+        # Corresponding slice from the dilated mask (handle negative offsets)
+        src_r0 = max(0, -ins_r0)
+        src_c0 = max(0, -ins_c0)
+        # Adjust insertion bounds if negative
+        ins_r0 = max(0, ins_r0)
+        ins_c0 = max(0, ins_c0)
+        
         src_r1 = src_r0 + (ins_r1 - ins_r0)
         src_c1 = src_c0 + (ins_c1 - ins_c0)
 
+        # Ensure slices are valid
+        if src_r1 > dil.shape[0]:
+            src_r1 = dil.shape[0]
+            ins_r1 = ins_r0 + (src_r1 - src_r0)
+        if src_c1 > dil.shape[1]:
+            src_c1 = dil.shape[1]
+            ins_c1 = ins_c0 + (src_c1 - src_c0)
+
         # Paste the dilated mask into the ring_canvas
-        ring_canvas[ins_r0:ins_r1, ins_c0:ins_c1] = dil[src_r0:src_r1, src_c0:src_c1]
+        if ins_r1 > ins_r0 and ins_c1 > ins_c0 and src_r1 > src_r0 and src_c1 > src_c0:
+            ring_canvas[ins_r0:ins_r1, ins_c0:ins_c1] = dil[src_r0:src_r1, src_c0:src_c1]
 
         # If the dilated ring touches any existing obstacle, reject placement
         if (grid_roi & ring_canvas).any():
@@ -286,7 +304,7 @@ def move_obstacle(env: GridEnvironment,
 
     # Precompute a small pool of candidate offsets (uniform in square radius)
     candidates = []
-    for _ in range(int(n_candidates)):
+    for _ in range(n_candidates):
         dr = int(rng.integers(-max_translation, max_translation + 1))
         dc = int(rng.integers(-max_translation, max_translation + 1))
         candidates.append((base_tl[0] + dr, base_tl[1] + dc))

@@ -28,25 +28,6 @@ import numpy as np
 import time
 from explainers.baselines import geodesic_line_ranking
 
-def _planner_to_int_success(res) -> int:
-    if isinstance(res, dict):
-        return int(bool(res.get('success', False)))
-    return int(bool(res))
-
-
-def _empty_grid_like(grid: np.ndarray) -> np.ndarray:
-    g = np.zeros_like(grid, dtype=bool)
-    return g
-
-
-def _add_obstacle_inplace(grid: np.ndarray, ob) -> None:
-    """Stamp obstacle pixels to True in-place."""
-    if ob.coords.size == 0:
-        return
-    rr, cc = ob.coords[:, 0], ob.coords[:, 1]
-    grid[rr, cc] = True
-
-
 
 class ShapExplainer:
     """
@@ -60,15 +41,16 @@ class ShapExplainer:
         self.focus_top_m = int(focus_top_m) if focus_top_m else None
 
     def explain(self, env, planner):
-        import time
         t0 = time.perf_counter()
         n = len(env.obstacles)
-        all_ids = np.array([i for i,o in enumerate(env.obstacles, start=1) if getattr(o, "coords", None) is not None and o.coords.size > 0], dtype=int)
+        all_ids = np.array([i for i, o in enumerate(env.obstacles, start=1) 
+                           if getattr(o, "coords", None) is not None and o.coords.size > 0], 
+                          dtype=int)
 
         # ---- Focus subset (optional)
         if self.focus_top_m and self.focus_top_m < n:
             geo = geodesic_line_ranking(env)["ranking"]
-            subset_ids = np.array([oid for oid, _ in geo[: self.focus_top_m]], dtype=int)
+            subset_ids = np.array([oid for oid, _ in geo[:self.focus_top_m]], dtype=int)
         else:
             subset_ids = all_ids
 
@@ -80,7 +62,8 @@ class ShapExplainer:
         obj_map = env.obj_map
         base_grid = env.grid.copy()
 
-        def eval_with_present(present_mask_local: np.ndarray) -> bool:
+        def eval_with_present(present_mask_local: np.ndarray) -> int:
+            """Evaluate planner with given obstacle presence mask. Returns 1 for success, 0 for failure."""
             # start from original grid; remove only the subset obs that are "absent"
             grid = base_grid.copy()
             # turn OFF the subset obstacles not present
@@ -89,7 +72,8 @@ class ShapExplainer:
                     oid = int(id_from_local[j])
                     grid[obj_map == oid] = False
             res = planner.plan(grid, env.start, env.goal)
-            return bool(res["success"]) if isinstance(res, dict) else bool(res)
+            success = res.get("success", False) if isinstance(res, dict) else res
+            return int(bool(success))
 
         # KernelSHAP via permutations: contributions for each local feature
         phi_local = np.zeros(m, dtype=float)
@@ -98,15 +82,19 @@ class ShapExplainer:
         for _ in range(self.permutations):
             perm = self.rng.permutation(m)
             present = np.zeros(m, dtype=bool)
-            y_prev = eval_with_present(present); calls += 1
+            y_prev = eval_with_present(present)
+            calls += 1
+            
             for j in perm:
                 present[j] = True
-                y_cur = eval_with_present(present); calls += 1
-                # contribution is change in success prob (bool→int)
-                phi_local[j] += (1 if y_cur else 0) - (1 if y_prev else 0)
+                y_cur = eval_with_present(present)
+                calls += 1
+                # contribution is change in success prob (int: 0 or 1)
+                phi_local[j] += y_cur - y_prev
                 y_prev = y_cur
 
-        phi_local /= max(1, self.permutations)
+        if self.permutations > 0:
+            phi_local /= self.permutations
 
         # Convert to harmfulness scores (bigger ⇒ more harmful)
         harm_local = -phi_local  # if adding obstacle decreases success, harmfulness positive
@@ -122,6 +110,7 @@ class ShapExplainer:
 
         # sort descending by score
         pairs.sort(key=lambda x: x[1], reverse=True)
+        
         return {
             "ranking": pairs,
             "calls": calls,
@@ -130,4 +119,3 @@ class ShapExplainer:
             "n_total": int(n),
             "focus_top_m": self.focus_top_m or 0,
         }
-

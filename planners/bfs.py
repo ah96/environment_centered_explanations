@@ -14,7 +14,7 @@ import numpy as np
 
 class BFSPlanner:
     def __init__(self, connectivity: int = 8):
-        assert connectivity in (4, 8)
+        assert connectivity in (4, 8), f"Connectivity must be 4 or 8, got {connectivity}"
         self.conn = connectivity
         if connectivity == 8:
             self.deltas = np.array([
@@ -27,7 +27,7 @@ class BFSPlanner:
 
     @staticmethod
     def _reconstruct(par_r: np.ndarray, par_c: np.ndarray,
-                     start: Tuple[int,int], goal: Tuple[int,int]):
+                     start: Tuple[int,int], goal: Tuple[int,int]) -> Optional[List[Tuple[int,int]]]:
         if par_r[goal] == -1 and goal != start:
             return None
         path = []
@@ -35,17 +35,25 @@ class BFSPlanner:
         while (r, c) != start:
             path.append((int(r), int(c)))
             pr, pc = par_r[r, c], par_c[r, c]
-            if pr == -1: return None
+            if pr == -1:
+                return None
             r, c = int(pr), int(pc)
         path.append(start)
         path.reverse()
         return path
 
-    def plan(self, grid: np.ndarray, start: Tuple[int,int], goal: Tuple[int,int]) -> Dict:
+    def plan(self, grid: np.ndarray, start: Tuple[int,int], goal: Tuple[int,int]) -> Dict[str, any]:
         H, W = grid.shape
-        sr, sc = start; gr, gc = goal
+        sr, sc = start
+        gr, gc = goal
+        
+        # Validate start and goal positions
+        if not (0 <= sr < H and 0 <= sc < W and 0 <= gr < H and 0 <= gc < W):
+            return {'success': False, 'path': None}
+        
         if grid[sr, sc] or grid[gr, gc]:
             return {'success': False, 'path': None}
+        
         if start == goal:
             return {'success': True, 'path': [start]}
 
@@ -62,8 +70,9 @@ class BFSPlanner:
             if (r, c) == (gr, gc):
                 path = self._reconstruct(par_r, par_c, start, goal)
                 return {'success': True, 'path': path}
+            
             for dr, dc in self.deltas:
-                nr, nc = r + int(dr), c + int(dc)
+                nr, nc = r + dr, c + dc
                 if nr < 0 or nr >= H or nc < 0 or nc >= W:
                     continue
                 if visited[nr, nc] or grid[nr, nc]:

@@ -8,7 +8,7 @@ Return a dict with: {'ranking': [(obs_id, score), ...], 'calls': 0, 'time_sec': 
 """
 
 from __future__ import annotations
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional, Dict, Any
 import numpy as np
 import time
 
@@ -33,42 +33,50 @@ def _bresenham(r0: int, c0: int, r1: int, c1: int) -> np.ndarray:
         pts.append((r, c))
     return np.array(pts, dtype=int)
 
-def random_ranking(env, planner=None, *, random_state: Optional[int] = None) -> Dict:
+def random_ranking(env, planner=None, *, random_state: Optional[int] = None) -> Dict[str, Any]:
     """
     Uniform random permutation of obstacle ids (1..n).
     planner is accepted for API compatibility but ignored.
     """
     t0 = time.perf_counter()
     n = len(env.obstacles)
+    if n == 0:
+        return {"ranking": [], "calls": 0, "time_sec": time.perf_counter() - t0}
+    
     ids = np.arange(1, n + 1, dtype=int)
     rng = np.random.default_rng(random_state)
     rng.shuffle(ids)
-    # give decreasing scores so higher = “more harmful”
+    # give decreasing scores so higher = "more harmful"
     scores = np.linspace(1.0, 0.0, num=n, endpoint=False)
     ranking: List[Tuple[int, float]] = [(int(i), float(s)) for i, s in zip(ids, scores)]
     return {"ranking": ranking, "calls": 0, "time_sec": time.perf_counter() - t0}
 
-def geodesic_line_ranking(env, planner=None) -> Dict:
+def geodesic_line_ranking(env, planner=None) -> Dict[str, Any]:
     """
     Rank obstacles by proximity to the straight start→goal line (Bresenham).
     Heuristic: obstacles whose pixels lie closer to that line get higher scores.
     planner is accepted for API compatibility but ignored.
     """
     t0 = time.perf_counter()
+    
+    if len(env.obstacles) == 0:
+        return {"ranking": [], "calls": 0, "time_sec": time.perf_counter() - t0}
+    
     (r0, c0), (r1, c1) = env.start, env.goal
     line = _bresenham(r0, c0, r1, c1)
-    # distance grid: for each cell, min L1 distance to any line pixel
+    
+    # More efficient distance calculation using broadcasting
     H, W = env.grid.shape
     dist = np.full((H, W), np.inf, dtype=float)
+    
+    # Compute distance for all grid cells to all line points at once
+    grid_r, grid_c = np.meshgrid(np.arange(H), np.arange(W), indexing='ij')
+    
     for (rr, cc) in line:
-        # cheap L1 expansion around (rr,cc)
-        # update a box; this is faster than full cdist for small maps
-        rmin = 0; rmax = H; cmin = 0; cmax = W
-        rs = np.arange(rmin, rmax)[:, None]
-        cs = np.arange(cmin, cmax)[None, :]
-        # update with |r-rr|+|c-cc|
-        cur = np.abs(rs - rr) + np.abs(cs - cc)
-        dist = np.minimum(dist, cur)
+        # L1 distance from this line point to all grid cells
+        cur_dist = np.abs(grid_r - rr) + np.abs(grid_c - cc)
+        dist = np.minimum(dist, cur_dist)
+    
     # score each obstacle: negative of min distance (closer ⇒ bigger score)
     ranking: List[Tuple[int, float]] = []
     for oid, ob in enumerate(env.obstacles, start=1):
@@ -78,5 +86,5 @@ def geodesic_line_ranking(env, planner=None) -> Dict:
         rr, cc = ob.coords[:, 0], ob.coords[:, 1]
         dmin = float(np.min(dist[rr, cc]))
         ranking.append((oid, -dmin))
-    # sort by score descending already handled by downstream, but keep as-is
+    
     return {"ranking": ranking, "calls": 0, "time_sec": time.perf_counter() - t0}

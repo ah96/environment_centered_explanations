@@ -62,45 +62,56 @@ class AStarPlanner:
     def plan(self, grid: np.ndarray, start: Tuple[int,int], goal: Tuple[int,int]) -> Dict:
         H, W = grid.shape
         sr, sc = start; gr, gc = goal
+        
+        # Validate start and goal positions
+        if not (0 <= sr < H and 0 <= sc < W and 0 <= gr < H and 0 <= gc < W):
+            return {'success': False, 'path': None}
         if grid[sr, sc] or grid[gr, gc]:
             return {'success': False, 'path': None}
 
         g = np.full((H, W), np.inf, dtype=np.float32)
-        f = np.full((H, W), np.inf, dtype=np.float32)
-        in_open = np.zeros((H, W), dtype=bool)
-        closed = np.zeros((H, W), dtype=bool)
         par_r = np.full((H, W), -1, dtype=np.int32)
         par_c = np.full((H, W), -1, dtype=np.int32)
+        closed = np.zeros((H, W), dtype=bool)
 
         g[sr, sc] = 0.0
-        f[sr, sc] = self._heuristic(start, goal)
+        h_start = self._heuristic(start, goal)
 
         pq: List[Tuple[float, int, int]] = []
-        heapq.heappush(pq, (f[sr, sc], sr, sc))
-        in_open[sr, sc] = True
+        heapq.heappush(pq, (h_start, sr, sc))
 
         while pq:
-            _, r, c = heapq.heappop(pq)
+            f_val, r, c = heapq.heappop(pq)
+            
+            # Skip if already processed
             if closed[r, c]:
                 continue
             closed[r, c] = True
-            if (r, c) == (gr, gc):
+            
+            # Check if goal reached
+            if r == gr and c == gc:
                 path = self._reconstruct(par_r, par_c, start, goal)
                 return {'success': True, 'path': path}
 
             for k, (dr, dc) in enumerate(self.deltas):
                 nr, nc = r + int(dr), c + int(dc)
+                
+                # Boundary check
                 if nr < 0 or nr >= H or nc < 0 or nc >= W:
                     continue
+                
+                # Skip obstacles and closed nodes
                 if grid[nr, nc] or closed[nr, nc]:
                     continue
-                tentative = g[r, c] + self.costs[k]
-                if tentative < g[nr, nc]:
-                    g[nr, nc] = tentative
+                
+                tentative_g = g[r, c] + self.costs[k]
+                
+                # Update if we found a better path
+                if tentative_g < g[nr, nc]:
+                    g[nr, nc] = tentative_g
                     par_r[nr, nc] = r
                     par_c[nr, nc] = c
-                    f[nr, nc] = tentative + self._heuristic((nr, nc), goal)
-                    heapq.heappush(pq, (f[nr, nc], nr, nc))
-                    in_open[nr, nc] = True
+                    f_val = tentative_g + self._heuristic((nr, nc), goal)
+                    heapq.heappush(pq, (f_val, nr, nc))
 
         return {'success': False, 'path': None}

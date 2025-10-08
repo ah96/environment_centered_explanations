@@ -135,13 +135,14 @@ def main():
     ap.add_argument("--focus-top-m", type=int, default=0, help="If >0, restrict SHAP/LIME to the top-M obstacles from a cheap geodesic heuristic.")
     args = ap.parse_args()
 
-    import numpy as np, random
+    import random
     np.random.seed(args.seed)   # makes generate_environment(...) deterministic
-    random.seed(args.seed)      # if your code ever uses python's random
+    random.seed(args.seed)      
 
     do_robust = str(args.robustness).strip().lower() in {"1","true","yes","y"}
     if do_robust:
-        from eval.robustness import robustness_suite  # lazy import; requir
+        # lazy import; requires robustness module
+        from eval.robustness import robustness_suite
 
     sizes = _parse_sizes(args.sizes)
     densities = _parse_densities(args.densities)
@@ -158,10 +159,9 @@ def main():
     # Prepare output CSV (unique, atomic)
     _ensure_dir(args.outdir)
     stamp = time.strftime("%Y%m%d_%H%M%S")
-    import os as os_mod  # avoid any accidental local shadowing of `os`
     safe_tag = f"s{args.seed}"
-    out_csv = os_mod.path.join(args.outdir, f"eval_{safe_tag}_{stamp}.csv")
-    tmp_csv = out_csv + f".tmp_{os_mod.getpid()}"
+    out_csv = os.path.join(args.outdir, f"eval_{safe_tag}_{stamp}.csv")
+    tmp_csv = out_csv + f".tmp_{os.getpid()}"
     fieldnames = [
         "env_id","H","W","density","planner","method",
         "kmax","success_at_k","auc_s_at_k",
@@ -179,8 +179,7 @@ def main():
         for (H,W) in sizes:
             for dens in densities:
                 for i_env in range(args.num_envs):
-                    seed_i = int(base_rng.integers(1_000_000_000))
-
+                    # Generate unique seed for this environment
                     base = (int(args.seed) * 1_000_003 + int(env_id) * 97 + int(H) * 11 + int(W) * 13 + int(round(dens*1000)) * 17) % 2**32
                     rng = np.random.default_rng(base)
                     env = _generate_failure_env(H, W, dens, rng=rng)
@@ -190,9 +189,8 @@ def main():
                         continue
                     env_id += 1
 
-                    # after generating env
-                    import numpy as np
-                    os_mod.makedirs("results/envs", exist_ok=True)
+                    # Save environment for reproducibility/debugging
+                    os.makedirs("results/envs", exist_ok=True)
                     np.savez_compressed(f"results/envs/E_{H}x{W}_d{dens}_{env_id}.npz",
                                         grid=env.grid, obj_map=env.obj_map, start=env.start, goal=env.goal)
 
@@ -208,20 +206,20 @@ def main():
                         if "lime" in explainers_sel:
                             lime = LimeExplainer(num_samples=args.lime_samples,
                                                 flip_prob=args.lime_flip,
-                                                random_state=seed_i,
+                                                random_state=base,
                                                 focus_top_m=(args.focus_top_m or None))
                             results["lime"] = lime.explain(env, planner)
                             rankings["lime"] = results["lime"]["ranking"]
 
                         if "shap" in explainers_sel:
                             shapx = ShapExplainer(permutations=args.shap_perm,
-                                                random_state=seed_i,
+                                                random_state=base,
                                                 focus_top_m=(args.focus_top_m or None))
                             results["shap"] = shapx.explain(env, planner)
                             rankings["shap"] = results["shap"]["ranking"]
 
                         if "rand" in explainers_sel:
-                            results["rand"] = random_ranking(env, random_state=seed_i)
+                            results["rand"] = random_ranking(env, random_state=base)
                             rankings["rand"] = results["rand"]["ranking"]
 
                         if "geodesic" in explainers_sel:
@@ -263,20 +261,19 @@ def main():
                                     r0 = rankings[mkey]
                                     jac_list = []
                                     tau_list = []
-                                    for kind, envp in robustness_suite(env, seed=seed_i):
+                                    for kind, envp in robustness_suite(env, seed=base):
                                         # recompute ranking under perturbed env
                                         if mkey == "shap":
-                                            rx = ShapExplainer(permutations=max(30, args.shap_perm//2), random_state=seed_i+1).explain(envp, planner)["ranking"]
+                                            rx = ShapExplainer(permutations=max(30, args.shap_perm//2), random_state=base+1).explain(envp, planner)["ranking"]
                                         elif mkey == "lime":
-                                            rx = LimeExplainer(num_samples=max(200, args.lime_samples//2), flip_prob=args.lime_flip, random_state=seed_i+1).explain(envp, planner)["ranking"]
+                                            rx = LimeExplainer(num_samples=max(200, args.lime_samples//2), flip_prob=args.lime_flip, random_state=base+1).explain(envp, planner)["ranking"]
                                         elif mkey == "rand":
-                                            rx = random_ranking(envp, random_state=seed_i+1)["ranking"]
+                                            rx = random_ranking(envp, random_state=base+1)["ranking"]
                                         else:
                                             rx = geodesic_line_ranking(envp)["ranking"]
                                         # compute stability
                                         tau = kendall_tau(r0, rx)
                                         # Jaccard on top-K (same K)
-                                        from eval.metrics import topk_set  # safe local import
                                         jac = jaccard(topk_set(r0, K), topk_set(rx, K))
                                         tau_list.append(tau); jac_list.append(jac)
                                     row["robust_jaccard"] = float(np.mean(jac_list)) if jac_list else ""
@@ -289,13 +286,14 @@ def main():
                         # COSE (counterfactual set)
                         if "cose" in results:
                             cose_out = results["cose"]
+                            cose_set = set(cose_out.get("cose_set", []))
                             row = {
                                 "env_id": env_id,
                                 "H": H, "W": W, "density": dens,
                                 "planner": pkey, "method": "cose",
                                 "kmax": "", "success_at_k": "",
                                 "auc_s_at_k": "",
-                                "expl_set_size": len(cose_out.get("cose_set", [])),
+                                "expl_set_size": len(cose_set),
                                 "calls": int(cose_out.get("calls", 0)),
                                 "time_sec": float(cose_out.get("time_sec", 0.0)),
                                 "robust_jaccard": "",
@@ -304,15 +302,14 @@ def main():
 
                             if do_robust:
                                 try:
-                                    from eval.metrics import jaccard as _jac
-                                    base_set = set(cose_out.get("cose_set", []))
                                     jac_list = []
-                                    for kind, envp in robustness_suite(env, seed=seed_i):
+                                    for kind, envp in robustness_suite(env, seed=base):
                                         # Re-run COSE (guided by same guide style if available)
                                         guide = rankings.get("shap") or rankings.get("lime") or None
                                         cose_p = COSEExplainer(guide="shap" if "shap" in rankings else ("lime" if "lime" in rankings else "none"))
                                         outp = cose_p.explain(envp, planner, guide_ranking=guide)
-                                        jac_list.append(_jac(base_set, outp.get("cose_set", set())))
+                                        perturbed_set = set(outp.get("cose_set", []))
+                                        jac_list.append(jaccard(cose_set, perturbed_set))
                                     row["robust_jaccard"] = float(np.mean(jac_list)) if jac_list else ""
                                 except Exception:
                                     pass
@@ -320,7 +317,7 @@ def main():
                             writer.writerow(row)
 
     # Atomic rename to final path
-    os_mod.replace(tmp_csv, out_csv)
+    os.replace(tmp_csv, out_csv)
     print(f"[OK] Wrote: {out_csv}")
 
 

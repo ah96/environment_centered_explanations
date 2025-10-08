@@ -13,7 +13,7 @@ Assumptions
     * Ranking-based (LIME/SHAP/baselines): {'ranking': [(obs_id, score), ...], 'calls', 'time_sec', ...}
     * COSE: {'cose_set': set[int], 'calls', 'time_sec', ...}
 
-What’s inside
+What's inside
 -------------
 - success_at_k() / auc_success_at_k() for faithfulness
 - topk_set() helper + jaccard() for set overlap
@@ -23,14 +23,14 @@ What’s inside
 """
 
 from __future__ import annotations
-from typing import Dict, List, Tuple, Iterable, Optional
+from typing import Dict, List, Tuple, Iterable, Optional, Any, Union
 import numpy as np
 import math
 import time
 
 # Flexible imports so this works whether used as a package or simple folder
 try:
-    from explanations.envs.generator import GridEnvironment
+    from envs.generator import GridEnvironment
 except Exception:
     try:
         from ..envs.generator import GridEnvironment  # type: ignore
@@ -38,30 +38,38 @@ except Exception:
         from envs.generator import GridEnvironment  # type: ignore
 
 
-def _planner_to_bool(res) -> bool:
+def _planner_to_bool(res: Union[Dict, bool]) -> bool:
     if isinstance(res, dict):
         return bool(res.get('success', False))
     return bool(res)
 
 
-def _grid_without(env: GridEnvironment, remove_ids: Iterable[int]):
+def _grid_without(env: GridEnvironment, remove_ids: Iterable[int]) -> np.ndarray:
     g = env.grid.copy()
+    grid_height, grid_width = g.shape
+    
     for oid in set(int(i) for i in remove_ids):
         if 1 <= oid <= len(env.obstacles):
             ob = env.obstacles[oid - 1]
             if ob.coords.size > 0:
                 rr, cc = ob.coords[:, 0], ob.coords[:, 1]
-                g[rr, cc] = False
+                # Validate coordinates are within bounds
+                valid_mask = (rr >= 0) & (rr < grid_height) & (cc >= 0) & (cc < grid_width)
+                rr, cc = rr[valid_mask], cc[valid_mask]
+                if len(rr) > 0:
+                    g[rr, cc] = False
     # keep start/goal free
-    g[env.start] = False
-    g[env.goal] = False
+    if 0 <= env.start[0] < grid_height and 0 <= env.start[1] < grid_width:
+        g[env.start] = False
+    if 0 <= env.goal[0] < grid_height and 0 <= env.goal[1] < grid_width:
+        g[env.goal] = False
     return g
 
 
 # -------------------- Faithfulness: Success@k and AUC-S@K -------------------- #
 
 def success_at_k(env: GridEnvironment,
-                 planner,
+                 planner: Any,
                  ranking: List[Tuple[int, float]],
                  ks: Iterable[int]) -> Dict[int, int]:
     """
@@ -116,8 +124,8 @@ def kendall_tau(ranking_a: List[Tuple[int, float]],
     # Map id -> rank (1 best). Break ties by (score desc, id asc)
     order_a = sorted(ranking_a, key=lambda x: (-x[1], x[0]))
     order_b = sorted(ranking_b, key=lambda x: (-x[1], x[0]))
-    id_to_rank_a = {oid: idx + 1 for idx, (oid, _) in enumerate(order_a)}
-    id_to_rank_b = {oid: idx + 1 for idx, (oid, _) in enumerate(order_b)}
+    id_to_rank_a = {int(oid): idx + 1 for idx, (oid, _) in enumerate(order_a)}
+    id_to_rank_b = {int(oid): idx + 1 for idx, (oid, _) in enumerate(order_b)}
     # Use intersection of ids present in both rankings
     ids = sorted(set(id_to_rank_a) & set(id_to_rank_b))
     n = len(ids)
@@ -141,15 +149,15 @@ def kendall_tau(ranking_a: List[Tuple[int, float]],
     denom = concordant + discordant
     if denom == 0:
         return 0.0
-    return (concordant - discordant) / denom
+    return float(concordant - discordant) / float(denom)
 
 
 # ------------------------------- Convenience -------------------------------- #
 
 def evaluate_ranking_success_curve(env: GridEnvironment,
-                                   planner,
+                                   planner: Any,
                                    ranking: List[Tuple[int, float]],
-                                   k_max: Optional[int] = None) -> Dict[str, object]:
+                                   k_max: Optional[int] = None) -> Dict[str, Any]:
     """
     Convenience wrapper: compute Success@k for k=1..K and AUC-S@K.
     """

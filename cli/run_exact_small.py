@@ -105,8 +105,8 @@ def main():
     args = ap.parse_args()
 
     import random
-    np.random.seed(args.seed)   # makes generate_environment(...) deterministic
-    random.seed(args.seed)      # if any plain-random code is used
+    np.random.seed(args.seed)
+    random.seed(args.seed)
 
     H, W = _parse_size(args.size)
     density = _parse_density(args.density)
@@ -118,10 +118,10 @@ def main():
 
     _ensure_dir(args.outdir)
     stamp = time.strftime("%Y%m%d_%H%M%S")
-    import os as os_mod  # avoid shadowing
+    # Remove redundant os_mod import comment
     safe_tag = f"s{args.seed}"
-    out_csv = os_mod.path.join(args.outdir, f"exact_small_{H}x{W}_{int(100*density)}_{safe_tag}_{stamp}.csv")
-    tmp_csv = out_csv + f".tmp_{os_mod.getpid()}"
+    out_csv = os.path.join(args.outdir, f"exact_small_{H}x{W}_{int(100*density)}_{safe_tag}_{stamp}.csv")
+    tmp_csv = out_csv + f".tmp_{os.getpid()}"
 
     fields = [
         "env_id","H","W","density","planner","connectivity",
@@ -147,7 +147,7 @@ def main():
             env_id += 1
 
             # Save environment snapshot for repro
-            os_mod.makedirs("results/envs", exist_ok=True)
+            os.makedirs("results/envs", exist_ok=True)
             np.savez_compressed(f"results/envs/E_{H}x{W}_d{density}_{env_id}.npz",
                                 grid=env.grid, obj_map=env.obj_map, start=env.start, goal=env.goal)
 
@@ -185,7 +185,7 @@ def main():
             })
 
     # Atomic rename to final path
-    os_mod.replace(tmp_csv, out_csv)
+    os.replace(tmp_csv, out_csv)
     print(f"[OK] Wrote: {out_csv}")
 
 if __name__ == "__main__":

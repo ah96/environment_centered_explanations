@@ -40,7 +40,7 @@ import time
 
 # Flexible import
 try:
-    from explanations.envs.generator import GridEnvironment
+    from envs.generator import GridEnvironment
 except Exception:
     try:
         from ..envs.generator import GridEnvironment  # type: ignore
@@ -55,6 +55,7 @@ except Exception as e:
 
 
 def _neighbors(H: int, W: int, connectivity: int = 8):
+    """Generate all directed edges (r, c) -> (nr, nc) for the grid."""
     if connectivity == 4:
         deltas = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     else:
@@ -82,13 +83,15 @@ def exact_minimal_set(env: GridEnvironment,
     prob = pulp.LpProblem("MinimalObstacleRemoval", pulp.LpMinimize)
 
     # Variables
-    x = pulp.LpVariable.dicts('x', (i + 1 for i in range(n_obs)), 0, 1, cat=pulp.LpBinary)  # obstacle removal
+    x = pulp.LpVariable.dicts('x', range(n_obs), 0, 1, cat=pulp.LpBinary)  # obstacle removal
     t = pulp.LpVariable.dicts('t', ((r, c) for r in range(H) for c in range(W)), 0, 1, cat=pulp.LpBinary)  # traversable
-    f = pulp.LpVariable.dicts('f', ((r, c, nr, nc) for (r, c, nr, nc) in _neighbors(H, W, connectivity)),
-                              lowBound=0, upBound=1, cat=pulp.LpContinuous)
+    
+    # Create edge list and flow variables
+    edges = list(_neighbors(H, W, connectivity))
+    f = pulp.LpVariable.dicts('f', edges, lowBound=0, upBound=1, cat=pulp.LpContinuous)
 
     # Objective: minimize number of removed obstacles
-    prob += pulp.lpSum([x[i + 1] for i in range(n_obs)])
+    prob += pulp.lpSum([x[i] for i in range(n_obs)])
 
     # Traversability constraints
     # Free cells -> t=1; occupied cell in obstacle i -> t = x_i
@@ -97,21 +100,31 @@ def exact_minimal_set(env: GridEnvironment,
             if not env.grid[r, c]:
                 prob += (t[(r, c)] == 1), f"free_cell_{r}_{c}"
             else:
-                oid = int(env.obj_map[r, c])
-                prob += (t[(r, c)] == x[oid]), f"occ_cell_{r}_{c}_oid_{oid}"
+                oid = int(env.obj_map[r, c]) - 1  # Convert to 0-indexed
+                if 0 <= oid < n_obs:
+                    prob += (t[(r, c)] == x[oid]), f"occ_cell_{r}_{c}_oid_{oid}"
 
     # Edge capacity: f_uv <= t_u and f_uv <= t_v
-    for (r, c, nr, nc) in _neighbors(H, W, connectivity):
+    for (r, c, nr, nc) in edges:
         prob += (f[(r, c, nr, nc)] <= t[(r, c)]), f"cap_from_{r}_{c}_to_{nr}_{nc}"
         prob += (f[(r, c, nr, nc)] <= t[(nr, nc)]), f"cap_to_{r}_{c}_to_{nr}_{nc}"
 
     # Flow conservation
     sr, sc = env.start
     gr, gc = env.goal
+    
+    # Build adjacency for efficient flow calculation
+    outgoing = {(r, c): [] for r in range(H) for c in range(W)}
+    incoming = {(r, c): [] for r in range(H) for c in range(W)}
+    for (r, c, nr, nc) in edges:
+        outgoing[(r, c)].append((r, c, nr, nc))
+        incoming[(nr, nc)].append((r, c, nr, nc))
+    
     for r in range(H):
         for c in range(W):
-            inflow = pulp.lpSum([f[(nr, nc, r, c)] for (nr, nc, rr, cc) in _neighbors(H, W, connectivity) if rr == r and cc == c])
-            outflow = pulp.lpSum([f[(r, c, nr, nc)] for (rr, cc, nr, nc) in _neighbors(H, W, connectivity) if rr == r and cc == c])
+            inflow = pulp.lpSum([f[edge] for edge in incoming[(r, c)]])
+            outflow = pulp.lpSum([f[edge] for edge in outgoing[(r, c)]])
+            
             if (r, c) == (sr, sc):
                 prob += (outflow - inflow == 1), f"flow_source_{r}_{c}"
             elif (r, c) == (gr, gc):
@@ -120,15 +133,16 @@ def exact_minimal_set(env: GridEnvironment,
                 prob += (outflow - inflow == 0), f"flow_cons_{r}_{c}"
 
     # Solver
-    solver = solver or pulp.PULP_CBC_CMD(msg=False, timeLimit=time_limit)
+    if solver is None:
+        solver = pulp.PULP_CBC_CMD(msg=False, timeLimit=time_limit)
     status = prob.solve(solver)
 
     # Extract solution
     sel: Set[int] = set()
     for i in range(n_obs):
-        xi = pulp.value(x[i + 1])
+        xi = pulp.value(x[i])
         if xi is not None and xi > 0.5:
-            sel.add(i + 1)
+            sel.add(i + 1)  # Return 1-indexed to match environment convention
 
     status_str = pulp.LpStatus.get(status, "Unknown")
     obj_val = pulp.value(prob.objective)

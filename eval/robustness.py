@@ -20,7 +20,7 @@ from typing import Dict, List, Tuple, Optional
 import numpy as np
 
 try:
-    from explanations.envs.generator import GridEnvironment, rebuild_objects_from_grid
+    from envs.generator import GridEnvironment, rebuild_objects_from_grid
 except Exception:
     try:
         from ..envs.generator import GridEnvironment, rebuild_objects_from_grid  # type: ignore
@@ -28,7 +28,7 @@ except Exception:
         from envs.generator import GridEnvironment, rebuild_objects_from_grid  # type: ignore
 
 try:
-    from explanations.envs.affordances import move_obstacle
+    from envs.affordances import move_obstacle
 except Exception:
     try:
         from ..envs.affordances import move_obstacle  # type: ignore
@@ -44,7 +44,8 @@ except Exception as e:
 
 # ------------------------ helpers ------------------------ #
 
-def _bresenham(r0: int, c0: int, r1: int, c1: int):
+def _bresenham(r0: int, c0: int, r1: int, c1: int) -> List[Tuple[int, int]]:
+    """Bresenham's line algorithm."""
     pts = []
     dr = abs(r1 - r0); dc = abs(c1 - c0)
     sr = 1 if r0 < r1 else -1
@@ -66,10 +67,11 @@ def _bresenham(r0: int, c0: int, r1: int, c1: int):
 
 
 def _new_env_from_grid(env: GridEnvironment, new_grid: np.ndarray) -> GridEnvironment:
+    """Create new environment from modified grid, rebuilding object mappings."""
     new_env = GridEnvironment(
         grid=new_grid.copy(),
-        obj_map=env.obj_map.copy(),   # will be replaced in rebuild
-        obstacles=list(env.obstacles),
+        obj_map=np.zeros_like(env.obj_map),  # Will be replaced in rebuild
+        obstacles=[],  # Will be replaced in rebuild
         start=env.start,
         goal=env.goal,
         settings=dict(env.settings),
@@ -92,7 +94,19 @@ def perturb_jitter(env: GridEnvironment,
     """
     Attempt to translate each obstacle by <= max_translation in r/c (small jitter).
     Keeps shapes intact and avoids overlaps using the affordance's constraints.
+    
+    Args:
+        env: Source environment
+        max_translation: Maximum translation distance
+        n_candidates: Number of candidate positions to try
+        moat: Minimum spacing between obstacles
+        seed: Random seed for reproducibility
     """
+    if max_translation < 0:
+        raise ValueError("max_translation must be non-negative")
+    if n_candidates < 1:
+        raise ValueError("n_candidates must be positive")
+    
     rng = np.random.default_rng(seed)
     # Work on a copy through successive moves
     cur = GridEnvironment(
@@ -105,6 +119,9 @@ def perturb_jitter(env: GridEnvironment,
         rng=env.rng
     )
     m = len(cur.obstacles)
+    if m == 0:
+        return cur
+    
     # Visit obstacles in random order for variety
     order = rng.permutation(m) + 1
     for oid in order:
@@ -123,12 +140,32 @@ def perturb_jitter(env: GridEnvironment,
 
 
 def perturb_dilate(env: GridEnvironment, iterations: int = 1) -> GridEnvironment:
-    new_grid = binary_dilation(env.grid, iterations=int(iterations))
+    """
+    Dilate obstacles in the environment.
+    
+    Args:
+        env: Source environment
+        iterations: Number of dilation iterations
+    """
+    if iterations < 1:
+        raise ValueError("iterations must be positive")
+    
+    new_grid = binary_dilation(env.grid, iterations=iterations).astype(bool)
     return _new_env_from_grid(env, new_grid)
 
 
 def perturb_erode(env: GridEnvironment, iterations: int = 1) -> GridEnvironment:
-    new_grid = binary_erosion(env.grid, iterations=int(iterations))
+    """
+    Erode obstacles in the environment.
+    
+    Args:
+        env: Source environment
+        iterations: Number of erosion iterations
+    """
+    if iterations < 1:
+        raise ValueError("iterations must be positive")
+    
+    new_grid = binary_erosion(env.grid, iterations=iterations).astype(bool)
     # Ensure start/goal free even if erosion clears area around
     new_grid[env.start] = False
     new_grid[env.goal] = False
@@ -141,7 +178,26 @@ def perturb_distractors(env: GridEnvironment,
                         seed: Optional[int] = None) -> GridEnvironment:
     """
     Add n small 1x1 'pebble' obstacles placed far from the straight start-goal line.
+    
+    Args:
+        env: Source environment
+        n: Number of distractors to add
+        min_l1_dist_to_line: Minimum L1 distance from start-goal line
+        seed: Random seed for reproducibility
     """
+    if n < 0:
+        raise ValueError("n must be non-negative")
+    if n == 0:
+        return GridEnvironment(
+            grid=env.grid.copy(),
+            obj_map=env.obj_map.copy(),
+            obstacles=list(env.obstacles),
+            start=env.start,
+            goal=env.goal,
+            settings=dict(env.settings),
+            rng=env.rng
+        )
+    
     rng = np.random.default_rng(seed)
     H, W = env.grid.shape
     line = set(_bresenham(env.start[0], env.start[1], env.goal[0], env.goal[1]))
@@ -169,6 +225,10 @@ def perturb_distractors(env: GridEnvironment,
         new_grid[r, c] = True
         added += 1
 
+    if added < n:
+        import warnings
+        warnings.warn(f"Could only add {added}/{n} distractors after {max_trials} trials")
+
     return _new_env_from_grid(env, new_grid)
 
 
@@ -183,9 +243,21 @@ def robustness_suite(env: GridEnvironment,
                      seed: Optional[int] = None) -> List[Tuple[str, GridEnvironment]]:
     """
     Build a standard set of perturbed environments for robustness evaluation.
+    
+    Args:
+        env: Base environment to perturb
+        jitter: Include jitter perturbation
+        dilate: Include dilation perturbation
+        erode: Include erosion perturbation
+        distractors: Include distractor perturbation
+        seed: Random seed for reproducibility
+    
+    Returns:
+        List of (name, perturbed_environment) tuples
     """
     out: List[Tuple[str, GridEnvironment]] = []
     rng = np.random.default_rng(seed)
+    
     if jitter:
         out.append(("jitter", perturb_jitter(env, max_translation=1, n_candidates=15, moat=1, seed=int(rng.integers(1e9)))))
     if dilate:
@@ -194,4 +266,5 @@ def robustness_suite(env: GridEnvironment,
         out.append(("erode", perturb_erode(env, iterations=1)))
     if distractors:
         out.append(("distractors", perturb_distractors(env, n=3, min_l1_dist_to_line=3, seed=int(rng.integers(1e9)))))
+    
     return out
